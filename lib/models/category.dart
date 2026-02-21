@@ -1,17 +1,29 @@
 import 'dart:convert';
 
 class Category {
-  final int id;
+  final int? id;
   final String name;
   final double? budgetLimit;
+  final DateTime? createdAt;
 
-  Category({required this.id, required this.name, this.budgetLimit});
+  Category({
+    required this.name,
+    this.id,
+    this.budgetLimit = 0.0,
+    this.createdAt,
+  });
 
-  Category copyWith({int? id, String? name, double? budgetLimit}) {
+  Category copyWith({
+    int? id,
+    String? name,
+    double? budgetLimit,
+    DateTime? createdAt,
+  }) {
     return Category(
       id: id ?? this.id,
       name: name ?? this.name,
       budgetLimit: budgetLimit ?? this.budgetLimit,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -20,15 +32,19 @@ class Category {
       'id': id,
       'name': name,
       'budgetLimit': budgetLimit,
+      'createdAt': (createdAt ?? DateTime.now()).toIso8601String(),
     };
   }
 
   factory Category.fromMap(Map<String, dynamic> map) {
     return Category(
-      id: map['id'] as int,
+      id: map['id'] as int?,
       name: map['name'] as String,
       budgetLimit: map['budgetLimit'] != null
           ? map['budgetLimit'] as double
+          : null,
+      createdAt: map['createdAt'] != null
+          ? DateTime.parse(map['createdAt'])
           : null,
     );
   }
@@ -40,5 +56,5 @@ class Category {
 
   @override
   String toString() =>
-      'Category(id: $id, name: $name, budgetLimit: $budgetLimit)';
+      'Category(id: $id, name: $name, budgetLimit: $budgetLimit, createdAt: $createdAt)';
 }
