@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:pocket_vault/models/tag.dart';
+
 class Transaction {
   final int? id;
   final String title;
@@ -8,7 +10,7 @@ class Transaction {
   final String? description;
   final int categoryId;
   final bool isRecurring;
-  final List<String> tags;
+  final List<Tag> tags;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -33,7 +35,7 @@ class Transaction {
     String? description,
     int? categoryId,
     bool? isRecurring,
-    List<String>? tags,
+    List<Tag>? tags,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -60,8 +62,7 @@ class Transaction {
       'description': description,
       'categoryId': categoryId,
       'isRecurring': isRecurring ? 1 : 0,
-      'tags': tags.join(','),
-      'createdAt': createdAt?.toIso8601String(),
+      'createdAt': (createdAt ?? DateTime.now()).toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
 
@@ -70,7 +71,10 @@ class Transaction {
     return map;
   }
 
-  factory Transaction.fromMap(Map<String, dynamic> map) {
+  factory Transaction.fromMap(
+    Map<String, dynamic> map, {
+    List<Tag>? tagsFromDb,
+  }) {
     return Transaction(
       id: map['id'] as int?,
       title: map['title'] as String,
@@ -79,9 +83,7 @@ class Transaction {
       description: map['description'] as String?,
       categoryId: map['categoryId'] as int,
       isRecurring: map['isRecurring'] == 1,
-      tags: (map['tags'] as String).isEmpty
-          ? []
-          : (map['tags'] as String).split(','),
+      tags: tagsFromDb ?? [],
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'])
           : null,
