@@ -2,10 +2,10 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart' hide Transaction;
 
 class DatabaseHelper {
-  static const String tableTransaction = 'transaction';
-  static const String tableCategory = 'category';
-  static const String tableTag = 'tag';
-  static const String tableTransactionTags = 'transaction_tags';
+  static const String tableTransaction = 'table_transactions';
+  static const String tableCategory = 'table_categories';
+  static const String tableTag = 'table_tags';
+  static const String tableTransactionTags = 'table_transaction_tags';
 
   static const String columnTransactionId = 'id';
   static const String columnTransactionTitle = 'title';
