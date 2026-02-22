@@ -32,7 +32,12 @@ class CategoryService {
     final db = await _dbHelper.database;
 
     db.transaction((txn) async {
-      final result = await _repoTransaction.findByCategory(id, executor: txn);
+      final result = await _repoTransaction.findWithFilters(
+        id,
+        null,
+        null,
+        executor: txn,
+      );
 
       if (result.isNotEmpty) return;
 

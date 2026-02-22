@@ -5,6 +5,8 @@ class TransactionRepository {
   final DatabaseHelper _dbHelper;
   static final table = DatabaseHelper.tableTransaction;
   static final columnId = DatabaseHelper.columnTransactionId;
+  static final columnCategoryId = DatabaseHelper.columnTransactionCategoryId;
+  static final columnDate = DatabaseHelper.columnTransactionDate;
 
   TransactionRepository(this._dbHelper);
 
@@ -35,31 +37,39 @@ class TransactionRepository {
     return result.isNotEmpty ? result.first : null;
   }
 
-  Future<List<Map<String, dynamic>>> findByDateRange(
-    String start,
-    String end,
-  ) async {
-    final db = await _dbHelper.database;
-
-    final result = await db.query(
-      table,
-      where: 'date >= ? AND date <= ?',
-      whereArgs: [start, end],
-    );
-
-    return result;
-  }
-
-  Future<List<Map<String, dynamic>>> findByCategory(
-    int categoryId, {
+  Future<List<Map<String, dynamic>>> findWithFilters(
+    int? categoryId,
+    String? start,
+    String? end, {
     DatabaseExecutor? executor,
   }) async {
     final db = executor ?? await _dbHelper.database;
 
+    String whereClause = '';
+    final List<dynamic> whereArgs = [];
+
+    if (categoryId != null) {
+      whereClause += '$columnCategoryId = ?';
+      whereArgs.add(categoryId);
+    }
+
+    if (start != null) {
+      if (whereClause.isNotEmpty) whereClause += ' AND ';
+      whereClause += '$columnDate >= ?';
+      whereArgs.add(start);
+    }
+
+    if (end != null) {
+      if (whereClause.isNotEmpty) whereClause += ' AND ';
+      whereClause += '$columnDate <= ?';
+      whereArgs.add(end);
+    }
+
     final result = await db.query(
       table,
-      where: 'categoryId = ?',
-      whereArgs: [categoryId],
+      where: whereClause.isEmpty ? null : whereClause,
+      whereArgs: whereArgs.isEmpty ? null : whereArgs,
+      orderBy: '$columnDate DESC',
     );
 
     return result;

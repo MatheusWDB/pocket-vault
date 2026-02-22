@@ -101,18 +101,11 @@ class TransactionService {
     DateTime? start,
     DateTime? end,
   }) async {
-    final List<Map<String, dynamic>> result;
-
-    if (categoryId != null) {
-      result = await _repo.findByCategory(categoryId);
-    } else if (start != null && end != null) {
-      result = await _repo.findByDateRange(
-        start.toIso8601String(),
-        end.toIso8601String(),
-      );
-    } else {
-      result = await _repo.findAll();
-    }
+    final result = await _repo.findWithFilters(
+      categoryId,
+      start?.toIso8601String(),
+      end?.toIso8601String(),
+    );
 
     final List<Transaction> transactions = [];
 
