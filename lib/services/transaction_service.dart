@@ -1,4 +1,5 @@
 import 'package:pocket_vault/data/database_helper.dart';
+import 'package:pocket_vault/mock/mock_transaction.dart';
 import 'package:pocket_vault/models/tag.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/repositories/tag_repository.dart';
@@ -15,18 +16,8 @@ class TransactionService {
 
   Future<List<Transaction>> getAllTransactions() async {
     final result = await _repo.findAll();
-    final List<Transaction> transactions = [];
 
-    for (var map in result) {
-      final tagMaps = await _repoTransactionTags.findTagsByTransactionId(
-        map['id'],
-      );
-      final tags = tagMaps.map((t) => Tag.fromMap(t)).toList();
-
-      transactions.add(Transaction.fromMap(map, tagsFromDb: tags));
-    }
-
-    return transactions;
+    return _mapTagToTransactions(result);
   }
 
   Future<Transaction?> getTransactionById(int id) async {
@@ -107,6 +98,26 @@ class TransactionService {
       end?.toIso8601String(),
     );
 
+    final List<Transaction> transactions = await _mapTagToTransactions(result);
+
+    // ---------------Remover Mock---------------
+    if (transactions.isEmpty) {
+      if (start != null && end != null) {
+        return mockTransactions
+            .where(
+              (t) => t.date.compareTo(start) >= 0 && t.date.compareTo(end) <= 0,
+            )
+            .toList();
+      }
+    }
+    // ------------------------------------------
+
+    return transactions;
+  }
+
+  Future<List<Transaction>> _mapTagToTransactions(
+    List<Map<String, dynamic>> result,
+  ) async {
     final List<Transaction> transactions = [];
 
     for (var map in result) {
@@ -115,6 +126,7 @@ class TransactionService {
       );
 
       final tags = tagMaps.map((t) => Tag.fromMap(t)).toList();
+
       transactions.add(Transaction.fromMap(map, tagsFromDb: tags));
     }
 
