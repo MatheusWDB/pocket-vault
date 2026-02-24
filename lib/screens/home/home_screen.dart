@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:pocket_vault/widgets/custom_bottom_app_bar.dart';
+import 'package:pocket_vault/screens/home/tabs/dashboard/dashboard_tab.dart';
+import 'package:pocket_vault/screens/home/widgets/custom_bottom_app_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,23 +14,29 @@ class _HomeScreenState extends State<HomeScreen> {
   int _activeMenu = 0;
 
   String _buildTitle() {
-    return _activeMenu != 3
-        ? _activeMenu != 2
-              ? _activeMenu != 1
-                    ? 'Resumo'
-                    : 'Transações'
-              : 'Orçamentos'
-        : 'Evolução';
+    switch (_activeMenu) {
+      case 1:
+        return 'Transações';
+      case 2:
+        return 'Orçamentos';
+      case 3:
+        return 'Evolução';
+      default:
+        return 'Resumo';
+    }
   }
 
   Widget _buildTap() {
-    return _activeMenu != 3
-        ? _activeMenu != 2
-              ? _activeMenu != 1
-                    ? Center(child: Text('dashboard'))
-                    : Center(child: Text('transactions'))
-              : Center(child: Text('budgets'))
-        : Center(child: Text('reports'));
+    switch (_activeMenu) {
+      case 1:
+        return Center(child: Text('transactions'));
+      case 2:
+        return Center(child: Text('budgets'));
+      case 3:
+        return Center(child: Text('reports'));
+      default:
+        return DashboardTab();
+    }
   }
 
   void _onChangeMenu(int index) {
@@ -44,10 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(_buildTitle()),
         actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(LucideIcons.settings),
-          ),
+          IconButton(onPressed: () {}, icon: Icon(LucideIcons.settings)),
         ],
         actionsPadding: const EdgeInsets.all(8.0),
       ),
