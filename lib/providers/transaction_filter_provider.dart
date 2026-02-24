@@ -12,7 +12,13 @@ typedef TransactionFilters = ({
 class TransactionFilter extends _$TransactionFilter {
   @override
   TransactionFilters build() {
-    return (categoryId: null, start: null, end: null);
+    final now = DateTime.now();
+
+    return (
+      categoryId: null,
+      start: DateTime(now.year, now.month),
+      end: DateTime(now.year, now.month + 1, 0, 23, 59, 59),
+    );
   }
 
   void setCategory(int? id) {
@@ -24,6 +30,12 @@ class TransactionFilter extends _$TransactionFilter {
   }
 
   void clear() {
-    state = (categoryId: null, start: null, end: null);
+    final now = DateTime.now();
+
+    state = (
+      categoryId: null,
+      start: DateTime(now.year, now.month),
+      end: DateTime(now.year, now.month + 1, 0, 23, 59, 59),
+    );
   }
 }
