@@ -8,7 +8,7 @@ import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/components/month_year_picker_modal.dart';
-import 'package:pocket_vault/screens/components/transacation_tile.dart';
+import 'package:pocket_vault/screens/components/transaction_tile.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
