@@ -101,3 +101,51 @@ abstract class _$TransactionList extends $AsyncNotifier<List<Transaction>> {
     element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(transactionSummary)
+final transactionSummaryProvider = TransactionSummaryProvider._();
+
+final class TransactionSummaryProvider
+    extends
+        $FunctionalProvider<
+          TransactionSummary,
+          TransactionSummary,
+          TransactionSummary
+        >
+    with $Provider<TransactionSummary> {
+  TransactionSummaryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'transactionSummaryProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$transactionSummaryHash();
+
+  @$internal
+  @override
+  $ProviderElement<TransactionSummary> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  TransactionSummary create(Ref ref) {
+    return transactionSummary(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TransactionSummary value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TransactionSummary>(value),
+    );
+  }
+}
+
+String _$transactionSummaryHash() =>
+    r'be3f91129b769d9912ed878539d1fc7c1d1a901a';

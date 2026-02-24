@@ -57,3 +57,33 @@ class TransactionList extends _$TransactionList {
     });
   }
 }
+
+typedef TransactionSummary = ({
+  double totalIncomes,
+  double totalExpenses,
+  double balance,
+});
+
+@riverpod
+TransactionSummary transactionSummary(Ref ref) {
+  final transactionsValue = ref.watch(transactionListProvider);
+
+  final transactions = transactionsValue.value ?? [];
+
+  double incomes = 0;
+  double expenses = 0;
+
+  for (final t in transactions) {
+    if (t.amount > 0) {
+      incomes += t.amount;
+    } else {
+      expenses += t.amount.abs();
+    }
+  }
+
+  return (
+    totalIncomes: incomes,
+    totalExpenses: expenses,
+    balance: incomes - expenses,
+  );
+}
