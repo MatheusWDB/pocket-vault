@@ -81,7 +81,7 @@ final class TransactionListProvider
   TransactionList create() => TransactionList();
 }
 
-String _$transactionListHash() => r'912b8d67ab2c6bf733318210b0801aa96f6b8721';
+String _$transactionListHash() => r'd77a697341f704fd99cc65a5b52686e39dd762ed';
 
 abstract class _$TransactionList extends $AsyncNotifier<List<Transaction>> {
   FutureOr<List<Transaction>> build();
@@ -149,3 +149,42 @@ final class TransactionSummaryProvider
 
 String _$transactionSummaryHash() =>
     r'be3f91129b769d9912ed878539d1fc7c1d1a901a';
+
+@ProviderFor(transactionTitles)
+final transactionTitlesProvider = TransactionTitlesProvider._();
+
+final class TransactionTitlesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<String>>,
+          List<String>,
+          FutureOr<List<String>>
+        >
+    with $FutureModifier<List<String>>, $FutureProvider<List<String>> {
+  TransactionTitlesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'transactionTitlesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$transactionTitlesHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<String>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<String>> create(Ref ref) {
+    return transactionTitles(ref);
+  }
+}
+
+String _$transactionTitlesHash() => r'b3eeb5642bb9d2259672033257ebd346b3a8fc66';

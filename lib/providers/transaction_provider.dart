@@ -17,8 +17,13 @@ class TransactionList extends _$TransactionList {
     final service = ref.watch(transactionServiceProvider);
     final filter = ref.watch(transactionFilterProvider);
 
+    final tagIds = filter.tags.map((t) => t.id!).toList();
+    final categoryIds = filter.categories.map((c) => c.id!).toList();
+
     return await service.getTransactionsByFilter(
-      categoryId: filter.categoryId,
+      titles: filter.titles,
+      tagIds: tagIds,
+      categoryIds: categoryIds,
       start: filter.start,
       end: filter.end,
     );
@@ -51,9 +56,7 @@ class TransactionList extends _$TransactionList {
     state = await AsyncValue.guard(() async {
       await service.deleteTransaction(id);
 
-      current.removeWhere((t) => t.id == id);
-
-      return current;
+      return current..removeWhere((t) => t.id == id);
     });
   }
 }
@@ -86,4 +89,11 @@ TransactionSummary transactionSummary(Ref ref) {
     totalExpenses: expenses,
     balance: incomes - expenses,
   );
+}
+
+@riverpod
+Future<List<String>> transactionTitles(Ref ref) async {
+  final service = ref.watch(transactionServiceProvider);
+
+  return await service.getAllTitles();
 }

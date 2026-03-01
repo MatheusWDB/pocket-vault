@@ -1,4 +1,5 @@
 import 'package:pocket_vault/data/database_helper.dart';
+import 'package:pocket_vault/mock/mock_tag.dart';
 import 'package:pocket_vault/models/tag.dart';
 import 'package:pocket_vault/repositories/tag_repository.dart';
 
@@ -8,6 +9,12 @@ class TagService {
   Future<List<Tag>> getAllTags() async {
     final result = await _repo.findAll();
 
+    // ---------------Remover Mock---------------
+    if (result.isEmpty) {
+      return mockTags;
+    }
+    // ------------------------------------------
+    
     return result.map((t) => Tag.fromMap(t)).toList();
   }
 

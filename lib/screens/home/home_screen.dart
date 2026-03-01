@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/screens/home/tabs/dashboard/dashboard_tab.dart';
+import 'package:pocket_vault/screens/home/tabs/transactions/transaction_tab.dart';
 import 'package:pocket_vault/screens/home/widgets/custom_bottom_app_bar.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _activeMenu = 0;
 
   String _buildTitle() {
@@ -29,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildTap() {
     switch (_activeMenu) {
       case 1:
-        return Center(child: Text('transactions'));
+        return TransactionTab();
       case 2:
         return Center(child: Text('budgets'));
       case 3:
@@ -40,9 +43,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onChangeMenu(int index) {
-    setState(() {
-      _activeMenu = index;
-    });
+    if (_activeMenu != index) {
+      final filterNotifier = ref.read(transactionFilterProvider.notifier);
+
+      (index == 0) ? filterNotifier.standardFilter() : filterNotifier.clear();
+
+      setState(() {
+        _activeMenu = index;
+      });
+    }
   }
 
   @override

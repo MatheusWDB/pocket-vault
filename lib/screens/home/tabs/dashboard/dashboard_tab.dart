@@ -1,51 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
-import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
-import 'package:pocket_vault/screens/components/month_year_picker_modal.dart';
+import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
 import 'package:pocket_vault/screens/components/transaction_tile.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
+import 'package:pocket_vault/utils/transactions_extension.dart';
 
-class DashboardTab extends ConsumerWidget {
+class DashboardTab extends ConsumerWidget with FilterActions {
   const DashboardTab({super.key});
-
-  Map<DateTime, List<Transaction>> _groupTransactions(
-    List<Transaction> transactions,
-  ) {
-    final Map<DateTime, List<Transaction>> grouped = {};
-    for (var t in transactions) {
-      final date = DateTime(t.date.year, t.date.month, t.date.day);
-
-      if (grouped[date] == null) grouped[date] = [];
-
-      grouped[date]!.add(t);
-    }
-
-    return grouped;
-  }
-
-  String _formatHeaderDate(DateTime date) {
-    if (date.isToday) return 'Hoje';
-    if (date.isYesterday) return 'Ontem';
-
-    return DateFormat('dd MMM', 'pt_BR').format(date);
-  }
-
-  void _showFilterPicker(BuildContext context) {
-    showModalBottomSheet(
-      useSafeArea: true,
-      context: context,
-      builder: (context) {
-        return MonthYearPickerModal();
-      },
-    );
-  }
 
   Widget _buildSummaryCard({
     required String label,
@@ -119,7 +86,8 @@ class DashboardTab extends ConsumerWidget {
                 ],
               ),
               IconButton(
-                onPressed: () => _showFilterPicker(context),
+                onPressed: () =>
+                    showFilterPicker(context, showAllYearsOption: false),
                 icon: Icon(LucideIcons.funnel),
               ),
             ],
@@ -165,6 +133,7 @@ class DashboardTab extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                   ],
@@ -178,7 +147,11 @@ class DashboardTab extends ConsumerWidget {
                         );
                       }
 
-                      final grouped = _groupTransactions(transactions);
+                      final groupedByYear = transactions.groupByYearAndDate();
+
+                      final grouped = {
+                        for (var yearMap in groupedByYear.values) ...yearMap,
+                      };
 
                       final sortedDates = grouped.keys.toList()
                         ..sort((a, b) => b.compareTo(a));
@@ -198,7 +171,9 @@ class DashboardTab extends ConsumerWidget {
                                   horizontal: 16.0,
                                 ),
                                 child: Text(
-                                  _formatHeaderDate(date),
+                                  date.toHeaderFormat(
+                                    preferences.currencySymbol,
+                                  ),
                                   style: TextStyle(
                                     color: Colors.grey[600],
                                     fontWeight: FontWeight.bold,
@@ -220,7 +195,8 @@ class DashboardTab extends ConsumerWidget {
                     },
                     loading: () =>
                         const Center(child: CircularProgressIndicator()),
-                    error: (err, _) => Center(child: Text('Erro: $err')),
+                    error: (error, stackTrace) =>
+                        Center(child: Text('Erro: $error')),
                   ),
                 ),
               ],

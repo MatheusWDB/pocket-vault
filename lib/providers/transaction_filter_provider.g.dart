@@ -20,7 +20,7 @@ final class TransactionFilterProvider
         argument: null,
         retry: null,
         name: r'transactionFilterProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -41,7 +41,7 @@ final class TransactionFilterProvider
   }
 }
 
-String _$transactionFilterHash() => r'9059a26db5738c577e1c1f9e49d9859f2fc3f21c';
+String _$transactionFilterHash() => r'af815cc32a7f2aab0c6eea4734b57f348c5fdb0e';
 
 abstract class _$TransactionFilter extends $Notifier<TransactionFilters> {
   TransactionFilters build();

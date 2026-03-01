@@ -32,9 +32,11 @@ class TransactionTile extends StatelessWidget {
       ),
       title: Text(
         transaction.title,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
-      subtitle: Text(transaction.categoryId.toString()),
+      subtitle: Text(transaction.category.name.toString()),
       trailing: Text(
         transaction.amount.toCurrency(currencySymbol),
         style: TextStyle(

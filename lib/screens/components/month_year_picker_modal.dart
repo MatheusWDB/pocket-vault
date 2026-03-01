@@ -7,14 +7,16 @@ import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/utils/string_extensions.dart';
 
 class MonthYearPickerModal extends ConsumerStatefulWidget {
-  const MonthYearPickerModal({super.key});
+  final bool showAllYearsOption;
+
+  const MonthYearPickerModal({super.key, this.showAllYearsOption = true});
 
   @override
   ConsumerState<MonthYearPickerModal> createState() => _FilterPickerState();
 }
 
 class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
-  late int selectedYear;
+  late int? selectedYear;
   late int? selectedMonth;
 
   @override
@@ -23,7 +25,10 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
 
     final currentFilter = ref.read(transactionFilterProvider);
 
-    selectedYear = currentFilter.start?.year ?? DateTime.now().year;
+    selectedYear = currentFilter.start?.year;
+    if (!widget.showAllYearsOption && selectedYear == null) {
+      selectedYear = DateTime.now().year;
+    }
 
     final startMonth = currentFilter.start?.month;
     final endMonth = currentFilter.end?.month;
@@ -40,7 +45,15 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
     final preferences = ref.watch(preferencesProvider);
 
     final now = DateTime.now();
-    final initialYearIndex = now.year - selectedYear;
+    final int initialYearIndex;
+    if (widget.showAllYearsOption) {
+      initialYearIndex = selectedYear == null
+          ? 0
+          : (now.year - selectedYear! + 1);
+    } else {
+      initialYearIndex = now.year - (selectedYear ?? now.year);
+    }
+
     final initialMonthIndex = selectedMonth ?? 0;
 
     return Container(
@@ -57,7 +70,7 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
             children: [
               TextButton(
                 onPressed: () {
-                  filterNotifier.clear();
+                  filterNotifier.standardFilter();
 
                   Navigator.pop(context);
                 },
@@ -65,18 +78,25 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
               ),
               TextButton(
                 onPressed: () {
-                  final startDate = DateTime(selectedYear, selectedMonth ?? 1);
+                  if (selectedYear == null) {
+                    filterNotifier.clearDateRange();
+                  } else {
+                    final startDate = DateTime(
+                      selectedYear!,
+                      selectedMonth ?? 1,
+                    );
 
-                  final endDate = DateTime(
-                    selectedYear,
-                    selectedMonth == null ? 12 : selectedMonth! + 1,
-                    selectedMonth == null ? 31 : 0,
-                    23,
-                    59,
-                    59,
-                  );
+                    final endDate = DateTime(
+                      selectedYear!,
+                      selectedMonth == null ? 12 : selectedMonth! + 1,
+                      selectedMonth == null ? 31 : 0,
+                      23,
+                      59,
+                      59,
+                    );
 
-                  filterNotifier.setDateRange(startDate, endDate);
+                    filterNotifier.setDateRange(startDate, endDate);
+                  }
 
                   Navigator.pop(context);
                 },
@@ -90,6 +110,7 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
               children: [
                 Expanded(
                   child: CupertinoPicker(
+                    key: ValueKey(selectedYear),
                     itemExtent: 40,
                     scrollController: FixedExtentScrollController(
                       initialItem: initialMonthIndex,
@@ -101,17 +122,18 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
                     },
                     children: [
                       const Center(child: Text('Todos')),
-                      ...List.generate(
-                        selectedYear < now.year ? 12 : now.month,
-                        (i) => Center(
-                          child: Text(
-                            DateFormat(
-                              'MMMM',
-                              preferences.currencySymbol.locale,
-                            ).format(DateTime(2024, i + 1)).capitalize(),
+                      if (selectedYear != null)
+                        ...List.generate(
+                          selectedYear! < now.year ? 12 : now.month,
+                          (i) => Center(
+                            child: Text(
+                              DateFormat(
+                                'MMMM',
+                                preferences.currencySymbol.locale,
+                              ).format(DateTime(2024, i + 1)).capitalize(),
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -124,7 +146,15 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
                     ),
                     onSelectedItemChanged: (index) {
                       setState(() {
-                        selectedYear = now.year - index;
+                        (widget.showAllYearsOption)
+                            ? selectedYear = index == 0
+                                  ? null
+                                  : now.year - (index - 1)
+                            : selectedYear = now.year - index;
+
+                        if (selectedYear == null) {
+                          selectedMonth = null;
+                        }
 
                         if (selectedYear == now.year &&
                             selectedMonth != null &&
@@ -134,8 +164,10 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
                       });
                     },
                     children: [
+                      if (widget.showAllYearsOption)
+                        const Center(child: Text('Todos')),
                       ...List.generate(
-                        5, // Aqui vai mudar para (now.year - ano da primeira transação)
+                        10, // Aqui vai mudar para (now.year - ano da primeira transação)
                         (i) => Center(child: Text('${now.year - i}')),
                       ),
                     ],

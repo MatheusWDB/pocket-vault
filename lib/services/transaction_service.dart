@@ -88,48 +88,76 @@ class TransactionService {
   }
 
   Future<List<Transaction>> getTransactionsByFilter({
-    int? categoryId,
+    required List<String> titles,
+    required List<int> categoryIds,
+    required List<int> tagIds,
     DateTime? start,
     DateTime? end,
   }) async {
     final result = await _repo.findWithFilters(
-      categoryId,
+      titles,
+      categoryIds,
+      tagIds,
       start?.toIso8601String(),
       end?.toIso8601String(),
     );
 
-    final List<Transaction> transactions = await _mapTagToTransactions(result);
-
     // ---------------Remover Mock---------------
-    if (transactions.isEmpty) {
-      if (start != null && end != null) {
-        return mockTransactions
-            .where(
-              (t) => t.date.compareTo(start) >= 0 && t.date.compareTo(end) <= 0,
-            )
-            .toList();
+    final List<Transaction> list = result
+        .map((t) => Transaction.fromMap(t))
+        .toList();
+    if (list.isEmpty) {
+      if (list.isEmpty) {
+        return mockTransactions.where((t) {
+          final matchTitle =
+              titles.isEmpty || titles.any((title) => t.title.contains(title));
+          final matchCategory =
+              categoryIds.isEmpty || categoryIds.contains(t.category.id!);
+          final matchTags =
+              tagIds.isEmpty || t.tags.any((tag) => tagIds.contains(tag.id));
+          final matchDate =
+              (start == null || t.date.isAfter(start)) &&
+              (end == null || t.date.isBefore(end));
+
+          return matchTitle && matchCategory && matchTags && matchDate;
+        }).toList()..sort((a, b) => b.date.compareTo(a.date));
       }
     }
-    // ------------------------------------------
+    // -------------------------------------------
 
-    return transactions;
+    return _mapTagToTransactions(result);
   }
 
-  Future<List<Transaction>> _mapTagToTransactions(
-    List<Map<String, dynamic>> result,
-  ) async {
-    final List<Transaction> transactions = [];
+  Future<List<String>> getAllTitles() async {
+    final maps = await _repo.findTitles();
 
-    for (var map in result) {
-      final tagMaps = await _repoTransactionTags.findTagsByTransactionId(
-        map['id'],
-      );
+    // ---------------Remover Mock---------------
+    final List<String> titles = maps.map((m) => m['title'] as String).toList();
+    if (titles.isEmpty) {
+      return mockTransactions.map((t) => t.title).toList();
+    }
+    // -------------------------------------------
 
-      final tags = tagMaps.map((t) => Tag.fromMap(t)).toList();
+    return maps.map((m) => m['title'] as String).toList();
+  }
 
-      transactions.add(Transaction.fromMap(map, tagsFromDb: tags));
+  List<Transaction> _mapTagToTransactions(List<Map<String, dynamic>> result) {
+    final Map<int, Transaction> transactionMap = {};
+
+    for (var row in result) {
+      final id = row['id'] as int;
+
+      if (!transactionMap.containsKey(id)) {
+        transactionMap[id] = Transaction.fromMap(row);
+      }
+
+      if (row['tag_id'] != null) {
+        transactionMap[id]!.tags.add(
+          Tag(id: row['tag_id'], name: row['tag_name']),
+        );
+      }
     }
 
-    return transactions;
+    return transactionMap.values.toList();
   }
 }
