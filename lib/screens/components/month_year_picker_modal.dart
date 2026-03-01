@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
-import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/utils/string_extensions.dart';
 
 class MonthYearPickerModal extends ConsumerStatefulWidget {
@@ -41,8 +40,8 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
 
   @override
   Widget build(BuildContext context) {
+    final myLocale = Localizations.localeOf(context);
     final filterNotifier = ref.read(transactionFilterProvider.notifier);
-    final preferences = ref.watch(preferencesProvider);
 
     final now = DateTime.now();
     final int initialYearIndex;
@@ -129,7 +128,7 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
                             child: Text(
                               DateFormat(
                                 'MMMM',
-                                preferences.currencySymbol.locale,
+                                '$myLocale',
                               ).format(DateTime(2024, i + 1)).capitalize(),
                             ),
                           ),

@@ -60,6 +60,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final myLocale = Localizations.localeOf(context);
     final preferences = ref.watch(preferencesProvider);
     final summary = ref.watch(transactionSummaryProvider);
     final transactionsAsync = ref.watch(transactionListProvider);
@@ -171,9 +172,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                                   horizontal: 16.0,
                                 ),
                                 child: Text(
-                                  date.toHeaderFormat(
-                                    preferences.currencySymbol,
-                                  ),
+                                  date.toHeaderFormat('$myLocale'),
                                   style: TextStyle(
                                     color: Colors.grey[600],
                                     fontWeight: FontWeight.bold,

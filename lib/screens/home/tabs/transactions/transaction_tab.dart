@@ -26,6 +26,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
 
   @override
   Widget build(BuildContext context) {
+    final myLocale = Localizations.localeOf(context);
     final preferences = ref.watch(preferencesProvider);
     final transactionsAsync = ref.watch(transactionListProvider);
     final titlesAsync = ref.watch(transactionTitlesProvider);
@@ -230,7 +231,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                                 ),
                                 child: Text(
                                   date.toHeaderFormat(
-                                    preferences.currencySymbol,
+                                    '$myLocale',
                                   ),
                                   style: TextStyle(
                                     color: Colors.grey[600],

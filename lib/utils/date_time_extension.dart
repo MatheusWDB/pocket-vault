@@ -1,5 +1,4 @@
 import 'package:intl/intl.dart';
-import 'package:pocket_vault/enums/currency_symbol_enum.dart';
 import 'package:pocket_vault/utils/string_extensions.dart';
 
 extension DateTimeExtensions on DateTime {
@@ -17,10 +16,10 @@ extension DateTimeExtensions on DateTime {
         day == yesterday.day;
   }
 
-  String toHeaderFormat(CurrencySymbolEnum currency) {
+  String toHeaderFormat(String locale) {
     if (isToday) return 'Hoje';
     if (isYesterday) return 'Ontem';
 
-    return DateFormat('dd MMM', currency.locale).format(this).capitalize();
+    return DateFormat('dd MMM', locale).format(this).capitalize();
   }
 }

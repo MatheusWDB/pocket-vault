@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:pocket_vault/data/database_helper.dart';
 import 'package:pocket_vault/enums/theme_mode_enum.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
+import 'package:pocket_vault/l10n/l10n.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/home/home_screen.dart';
 
@@ -24,6 +26,8 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp(
       title: 'PocketVault Personal Finance',
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: L10n.all,
       themeMode: preferences.themeMode.toThemeMode(),
       home: HomeScreen(),
     );
