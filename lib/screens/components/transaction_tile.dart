@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:pocket_vault/enums/currency_symbol_enum.dart';
 import 'package:pocket_vault/models/transaction.dart';
+import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
-class TransactionTile extends StatelessWidget {
+class TransactionTile extends ConsumerWidget {
   final Transaction transaction;
-  final CurrencySymbolEnum currencySymbol;
 
   const TransactionTile({
     required this.transaction,
-    required this.currencySymbol,
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currencySymbol = ref.watch(preferencesProvider).currencySymbol;
     final isIncome = transaction.amount > 0;
 
     return ListTile(
@@ -38,7 +38,10 @@ class TransactionTile extends StatelessWidget {
       ),
       subtitle: Text(transaction.category.name.toString()),
       trailing: Text(
-        transaction.amount.toCurrency(currencySymbol),
+        transaction.amount.toCurrency(
+          code: currencySymbol.code,
+          locale: currencySymbol.locale,
+        ),
         style: TextStyle(
           color: isIncome ? Colors.green : Colors.red,
           fontWeight: FontWeight.bold,

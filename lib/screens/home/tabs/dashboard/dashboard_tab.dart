@@ -19,7 +19,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
     required double value,
     required Color color,
     required IconData icon,
-    required CurrencySymbolEnum symbol,
+    required CurrencySymbolEnum currencySymbol,
   }) {
     return Card(
       elevation: 0,
@@ -45,7 +45,10 @@ class DashboardTab extends ConsumerWidget with FilterActions {
             ),
 
             Text(
-              value.toCurrency(symbol),
+              value.toCurrency(
+                code: currencySymbol.code,
+                locale: currencySymbol.locale,
+              ),
               style: TextStyle(
                 color: color,
                 fontWeight: FontWeight.bold,
@@ -61,148 +64,144 @@ class DashboardTab extends ConsumerWidget with FilterActions {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final myLocale = Localizations.localeOf(context);
-    final preferences = ref.watch(preferencesProvider);
+    final currencySymbol = ref.watch(preferencesProvider).currencySymbol;
     final summary = ref.watch(transactionSummaryProvider);
     final transactionsAsync = ref.watch(transactionListProvider);
     final filter = ref.watch(transactionFilterProvider);
 
     final displayYear = filter.start?.year ?? DateTime.now().year;
 
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        spacing: 16.0,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Saldo Total', style: TextStyle(color: Colors.grey)),
-                  Text(
-                    summary.balance.toCurrency(preferences.currencySymbol),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  ),
-                ],
-              ),
-              IconButton(
-                onPressed: () =>
-                    showFilterPicker(context, showAllYearsOption: false),
-                icon: Icon(LucideIcons.funnel),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Expanded(
-                child: _buildSummaryCard(
-                  label: 'Entradas',
-                  value: summary.totalIncomes,
-                  color: Colors.green,
-                  icon: LucideIcons.circleArrowUp,
-                  symbol: preferences.currencySymbol,
-                ),
-              ),
-              Expanded(
-                child: _buildSummaryCard(
-                  label: 'Saídas',
-                  value: summary.totalExpenses,
-                  color: Colors.red,
-                  icon: LucideIcons.circleArrowDown,
-                  symbol: preferences.currencySymbol,
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: Column(
+    return Column(
+      spacing: 16.0,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Histórico',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      displayYear.toString(),
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: transactionsAsync.when(
-                    data: (transactions) {
-                      if (transactions.isEmpty) {
-                        return const Center(
-                          child: Text('Nenhuma transação no período'),
-                        );
-                      }
-
-                      final groupedByYear = transactions.groupByYearAndDate();
-
-                      final grouped = {
-                        for (var yearMap in groupedByYear.values) ...yearMap,
-                      };
-
-                      final sortedDates = grouped.keys.toList()
-                        ..sort((a, b) => b.compareTo(a));
-
-                      return ListView.builder(
-                        itemCount: sortedDates.length,
-                        itemBuilder: (context, dateIndex) {
-                          final date = sortedDates[dateIndex];
-                          final dayTransactions = grouped[date]!;
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0,
-                                  horizontal: 16.0,
-                                ),
-                                child: Text(
-                                  date.toHeaderFormat('$myLocale'),
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                              ...dayTransactions.map(
-                                (t) => TransactionTile(
-                                  transaction: t,
-                                  currencySymbol: preferences.currencySymbol,
-                                ),
-                              ),
-                              const Divider(height: 1),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                    loading: () =>
-                        const Center(child: CircularProgressIndicator()),
-                    error: (error, stackTrace) =>
-                        Center(child: Text('Erro: $error')),
+                Text('Saldo Total', style: TextStyle(color: Colors.grey)),
+                Text(
+                  summary.balance.toCurrency(
+                    code: currencySymbol.code,
+                    locale: currencySymbol.locale,
                   ),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                 ),
               ],
             ),
+            IconButton(
+              onPressed: () =>
+                  showFilterPicker(context, showAllYearsOption: false),
+              icon: Icon(LucideIcons.funnel),
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: _buildSummaryCard(
+                label: 'Entradas',
+                value: summary.totalIncomes,
+                color: Colors.green,
+                icon: LucideIcons.circleArrowUp,
+                currencySymbol: currencySymbol,
+              ),
+            ),
+            Expanded(
+              child: _buildSummaryCard(
+                label: 'Saídas',
+                value: summary.totalExpenses,
+                color: Colors.red,
+                icon: LucideIcons.circleArrowDown,
+                currencySymbol: currencySymbol,
+              ),
+            ),
+          ],
+        ),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Histórico',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    displayYear.toString(),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: transactionsAsync.when(
+                  data: (transactions) {
+                    if (transactions.isEmpty) {
+                      return const Center(
+                        child: Text('Nenhuma transação no período'),
+                      );
+                    }
+
+                    final groupedByYear = transactions.groupByYearAndDate();
+
+                    final grouped = {
+                      for (var yearMap in groupedByYear.values) ...yearMap,
+                    };
+
+                    final sortedDates = grouped.keys.toList()
+                      ..sort((a, b) => b.compareTo(a));
+
+                    return ListView.builder(
+                      itemCount: sortedDates.length,
+                      itemBuilder: (context, dateIndex) {
+                        final date = sortedDates[dateIndex];
+                        final dayTransactions = grouped[date]!;
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8.0,
+                                horizontal: 16.0,
+                              ),
+                              child: Text(
+                                date.toHeaderFormat('$myLocale'),
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                            ...dayTransactions.map(
+                              (t) => TransactionTile(
+                                transaction: t
+                              ),
+                            ),
+                            const Divider(height: 1),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stackTrace) =>
+                      Center(child: Text('Erro: $error')),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
