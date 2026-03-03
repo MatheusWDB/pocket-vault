@@ -11,7 +11,13 @@ class Tag {
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{'id': id, 'name': name};
+    final Map<String, dynamic> map = {'name': name};
+
+    if (id != null) {
+      map['id'] = id;
+    }
+
+    return map;
   }
 
   factory Tag.fromMap(Map<String, dynamic> map) {

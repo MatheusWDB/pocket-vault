@@ -24,6 +24,9 @@ class CategoryList extends _$CategoryList {
 
     state = await AsyncValue.guard(() async {
       await service.saveCategory(c);
+
+      ref.invalidateSelf();
+      
       return await future;
     });
   }

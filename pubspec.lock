@@ -217,6 +217,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
+  currency_textfield:
+    dependency: "direct main"
+    description:
+      name: currency_textfield
+      sha256: "3ecfad8f3c36c3384547446d883eee8710737bb476ca97c0318484f06d49e729"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.0+1"
   dart_style:
     dependency: transitive
     description:

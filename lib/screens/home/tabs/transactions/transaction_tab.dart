@@ -246,7 +246,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                 },
               );
             },
-            error: (error, stackTrace) {
+            error: (error, _) {
               return Center(child: Text('Erro: $error'));
             },
             loading: () {

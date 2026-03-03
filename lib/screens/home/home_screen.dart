@@ -5,6 +5,7 @@ import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/screens/home/tabs/dashboard/dashboard_tab.dart';
 import 'package:pocket_vault/screens/home/tabs/transactions/transaction_tab.dart';
 import 'package:pocket_vault/screens/home/widgets/custom_bottom_app_bar.dart';
+import 'package:pocket_vault/screens/transacationForm/transaction_form_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -69,7 +70,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onDestinationSelected: _onChangeMenu,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TransactionFormScreen()),
+        ),
         backgroundColor: Colors.blueAccent,
         shape: const CircleBorder(),
         child: const Icon(
@@ -79,7 +83,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      body: SafeArea(child: _buildTap()),
+      body: SafeArea(
+        child: Padding(padding: const EdgeInsets.all(8.0), child: _buildTap()),
+      ),
     );
   }
 }

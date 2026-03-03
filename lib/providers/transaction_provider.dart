@@ -1,4 +1,6 @@
 import 'package:pocket_vault/models/transaction.dart';
+import 'package:pocket_vault/providers/category_provider.dart';
+import 'package:pocket_vault/providers/tag_provider.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/services/transaction_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -35,6 +37,11 @@ class TransactionList extends _$TransactionList {
 
     state = await AsyncValue.guard(() async {
       await service.createTransaction(t);
+
+      ref.invalidate(categoryListProvider);
+      ref.invalidate(tagListProvider);
+      ref.invalidateSelf();
+
       return await future;
     });
   }
@@ -45,6 +52,11 @@ class TransactionList extends _$TransactionList {
 
     state = await AsyncValue.guard(() async {
       await service.updateTransaction(t);
+
+      ref.invalidate(categoryListProvider);
+      ref.invalidate(tagListProvider);
+      ref.invalidateSelf();
+
       return await future;
     });
   }

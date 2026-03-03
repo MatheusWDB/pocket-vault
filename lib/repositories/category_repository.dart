@@ -5,11 +5,15 @@ class CategoryRepository {
   final DatabaseHelper _dbHelper;
   static final table = DatabaseHelper.tableCategory;
   static final columnId = DatabaseHelper.columnCategoryId;
+  static final columnName = DatabaseHelper.columnCategoryName;
 
   CategoryRepository(this._dbHelper);
 
-  Future<int> insert(Map<String, dynamic> row) async {
-    final db = await _dbHelper.database;
+  Future<int> insert(
+    Map<String, dynamic> row, {
+    DatabaseExecutor? executor,
+  }) async {
+    final db = executor ?? await _dbHelper.database;
 
     return db.insert(table, row);
   }
@@ -27,6 +31,21 @@ class CategoryRepository {
       table,
       where: '$columnId = ?',
       whereArgs: [id],
+    );
+
+    return result.isNotEmpty ? result.first : null;
+  }
+
+  Future<Map<String, dynamic>?> findByName(
+    String name, {
+    DatabaseExecutor? executor,
+  }) async {
+    final db = executor ?? await _dbHelper.database;
+
+    final result = await db.query(
+      table,
+      where: '$columnName = ?',
+      whereArgs: [name],
     );
 
     return result.isNotEmpty ? result.first : null;

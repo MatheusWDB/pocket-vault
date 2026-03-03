@@ -51,6 +51,7 @@ dependencies:
   alert_info: ^0.0.8
   flutter_localizations:
     sdk: flutter
+  currency_textfield: ^5.0.0+1
 
 dev_dependencies:
   flutter_test:

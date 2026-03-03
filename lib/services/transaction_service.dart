@@ -2,14 +2,16 @@ import 'package:pocket_vault/data/database_helper.dart';
 import 'package:pocket_vault/mock/mock_transaction.dart';
 import 'package:pocket_vault/models/tag.dart';
 import 'package:pocket_vault/models/transaction.dart';
-import 'package:pocket_vault/repositories/tag_repository.dart';
 import 'package:pocket_vault/repositories/transaction_repository.dart';
 import 'package:pocket_vault/repositories/transaction_tags_repository.dart';
+import 'package:pocket_vault/services/category_service.dart';
+import 'package:pocket_vault/services/tag_service.dart';
 
 class TransactionService {
   final _dbHelper = DatabaseHelper.instance;
   final _repo = TransactionRepository(DatabaseHelper.instance);
-  final _repoTag = TagRepository(DatabaseHelper.instance);
+  final _categoryService = CategoryService();
+  final _tagService = TagService();
   final _repoTransactionTags = TransactionTagsRepository(
     DatabaseHelper.instance,
   );
@@ -39,27 +41,28 @@ class TransactionService {
     final db = await _dbHelper.database;
 
     await db.transaction((txn) async {
-      final transactionId = await _repo.insert(
-        transaction.toMap(),
+      final category = await _categoryService.ensureCategoryExists(
+        transaction.category,
         executor: txn,
       );
 
-      for (Tag tag in transaction.tags) {
-        final existingTag = await _repoTag.findByName(tag.name, executor: txn);
+      final transactionId = await _repo.insert(
+        transaction.copyWith(category: category).toMap(),
+        executor: txn,
+      );
 
-        final int tagId = (existingTag == null)
-            ? await _repoTag.insert(tag.toMap(), executor: txn)
-            : existingTag['id'];
-
-        await _repoTransactionTags.insert(transactionId, tagId, executor: txn);
-      }
+      await _tagService.linkTagsToTransaction(
+        transactionId,
+        transaction.tags,
+        executor: txn,
+      );
     });
   }
 
   Future<void> updateTransaction(Transaction transaction) async {
     final db = await _dbHelper.database;
 
-    db.transaction((txn) async {
+   await db.transaction((txn) async {
       await _repo.update(transaction.toMap(), executor: txn);
 
       await _repoTransactionTags.deleteAllByTransaction(
@@ -67,19 +70,11 @@ class TransactionService {
         executor: txn,
       );
 
-      for (Tag tag in transaction.tags) {
-        final existingTag = await _repoTag.findByName(tag.name, executor: txn);
-
-        final int tagId = (existingTag == null)
-            ? await _repoTag.insert(tag.toMap(), executor: txn)
-            : existingTag['id'];
-
-        await _repoTransactionTags.insert(
-          transaction.id!,
-          tagId,
-          executor: txn,
-        );
-      }
+      await _tagService.linkTagsToTransaction(
+        transaction.id!,
+        transaction.tags,
+        executor: txn
+      );
     });
   }
 

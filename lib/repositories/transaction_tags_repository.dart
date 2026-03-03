@@ -6,8 +6,10 @@ class TransactionTagsRepository {
   static final table = DatabaseHelper.tableTransactionTags;
   static final tableTag = DatabaseHelper.tableTag;
   static final tableTransaction = DatabaseHelper.tableTransaction;
+
   static final columnRelTagId = DatabaseHelper.columnRelTagId;
   static final columnRelTransactionId = DatabaseHelper.columnRelTransactionId;
+
   static final columnTagId = DatabaseHelper.columnTagId;
   static final columnTransactionId = DatabaseHelper.columnTransactionId;
 

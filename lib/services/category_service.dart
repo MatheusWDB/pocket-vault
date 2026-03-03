@@ -3,6 +3,7 @@ import 'package:pocket_vault/mock/mock_category.dart';
 import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/repositories/category_repository.dart';
 import 'package:pocket_vault/repositories/transaction_repository.dart';
+import 'package:sqflite/sqflite.dart';
 
 class CategoryService {
   final _dbHelper = DatabaseHelper.instance;
@@ -29,6 +30,32 @@ class CategoryService {
     return Category.fromMap(result);
   }
 
+  Future<Category?> getCategoryByName(String name) async {
+    final result = await _repo.findByName(name);
+
+    if (result == null || result.isEmpty) return null;
+
+    return Category.fromMap(result);
+  }
+
+  Future<Category> ensureCategoryExists(
+    Category catgory, {
+    DatabaseExecutor? executor,
+  }) async {
+    final db = executor ?? await _dbHelper.database;
+
+    final result = await _repo.findByName(catgory.name, executor: db);
+
+    if (result == null || result.isEmpty) {
+      final category = Category(name: catgory.name);
+      return category.copyWith(
+        id: await _repo.insert(category.toMap(), executor: db),
+      );
+    }
+
+    return Category.fromMap(result);
+  }
+
   Future<void> saveCategory(Category category) async {
     category.id == null
         ? await _repo.insert(category.toMap())
@@ -38,7 +65,7 @@ class CategoryService {
   Future<void> deleteCategory(int id) async {
     final db = await _dbHelper.database;
 
-    db.transaction((txn) async {
+    await db.transaction((txn) async {
       final result = await _repoTransaction.findWithFilters(
         [],
         [id],

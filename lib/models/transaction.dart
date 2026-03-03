@@ -56,7 +56,6 @@ class Transaction {
 
   Map<String, dynamic> toMap() {
     final Map<String, dynamic> map = {
-      'id': id,
       'title': title,
       'amount': amount,
       'date': date.toIso8601String(),
@@ -67,7 +66,9 @@ class Transaction {
       'updatedAt': updatedAt?.toIso8601String(),
     };
 
-    if (id == null) map.remove('id');
+    if (id != null) {
+      map['id'] = id;
+    }
 
     return map;
   }

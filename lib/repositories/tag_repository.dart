@@ -5,6 +5,7 @@ class TagRepository {
   final DatabaseHelper _dbHelper;
   static final table = DatabaseHelper.tableTag;
   static final columnId = DatabaseHelper.columnTagId;
+  static final columnName = DatabaseHelper.columnTagName;
 
   TagRepository(this._dbHelper);
 
@@ -41,7 +42,7 @@ class TagRepository {
   }) async {
     final db = executor ?? await _dbHelper.database;
 
-    final result = await db.query(table, where: 'name = ?', whereArgs: [name]);
+    final result = await db.query(table, where: '$columnName = ?', whereArgs: [name]);
 
     return result.isNotEmpty ? result.first : null;
   }

@@ -10,7 +10,6 @@ class TransactionRepository {
 
   static final columnId = DatabaseHelper.columnTransactionId;
   static final columnTitle = DatabaseHelper.columnTransactionTitle;
-  static final columnTags = DatabaseHelper.columnTransactionId;
   static final columnCategoryId = DatabaseHelper.columnTransactionCategoryId;
   static final columnDate = DatabaseHelper.columnTransactionDate;
 
@@ -163,8 +162,8 @@ class TransactionRepository {
         SELECT 
           t.*,
           c.$columnCatName as category_name,
-          tg.$columnTagName as tag_name,
-          tg.$columnTagId as tag_id
+          tg.$columnTagId as tag_id,
+          tg.$columnTagName as tag_name
         FROM $table t
         INNER JOIN $tableC c ON t.$columnCategoryId = c.$columnCatId
         LEFT JOIN $tableTT tt ON t.$columnId = tt.$columnRelTransactionId
