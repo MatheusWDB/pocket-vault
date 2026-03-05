@@ -29,7 +29,7 @@ class MyApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: L10n.all,
       themeMode: preferences.themeMode.toThemeMode(),
-      home: HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }

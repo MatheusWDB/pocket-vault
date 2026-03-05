@@ -56,7 +56,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
       crossAxisAlignment: crossAxisAlignment,
       children: [
         if (label != null)
-          Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
         TextFormField(
           controller: controller,
           focusNode: focusNode,
@@ -64,7 +64,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
             hintText: hint,
             suffixIcon: sufixIcon,
-            prefixIcon: prefix ? Icon(LucideIcons.tag, size: 20) : null,
+            prefixIcon: prefix ? const Icon(LucideIcons.tag, size: 20) : null,
           ),
           keyboardType: keyboardType,
           onFieldSubmitted: onFieldSubmitted,
@@ -159,12 +159,12 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
           onPressed: () => Navigator.pop(context),
           icon: const Icon(LucideIcons.chevronLeft),
         ),
-        title: Text('Nova Transação'),
+        title: const Text('Nova Transação'),
         centerTitle: true,
         actions: [
           IconButton(
             onPressed: () => _saveTransaction(transactionNotifier),
-            icon: Icon(LucideIcons.save),
+            icon: const Icon(LucideIcons.save),
           ),
         ],
       ),
@@ -178,7 +178,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                 children: [
                   Column(
                     children: [
-                      Text(
+                      const Text(
                         'Valor',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
@@ -207,7 +207,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                                   ],
                                 ),
                         ),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 26,
                           fontWeight: FontWeight.bold,
                         ),

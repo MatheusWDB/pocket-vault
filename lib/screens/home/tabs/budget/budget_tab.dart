@@ -39,7 +39,7 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> {
                 .toList();
 
             if (budgetCategories.isEmpty) {
-              return SizedBox.shrink();
+              return const SizedBox.shrink();
             }
 
             return Flexible(
@@ -58,7 +58,7 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> {
                   final limitText = _formatCurrency(limit, currency);
 
                   return ListTile(
-                    contentPadding: EdgeInsets.all(8),
+                    contentPadding: const EdgeInsets.all(8),
                     dense: true,
                     title: Column(
                       spacing: 4,
@@ -72,7 +72,7 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> {
                             ),
                             Text(
                               '$spentText de $limitText',
-                              style: TextStyle(fontSize: 14),
+                              style: const TextStyle(fontSize: 14),
                             ),
                           ],
                         ),
@@ -93,11 +93,11 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> {
             return Center(child: Text('Erro: $error'));
           },
           loading: () {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           },
         ),
         OutlinedButton(
-          style: OutlinedButton.styleFrom(padding: EdgeInsets.all(15)),
+          style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(15)),
           onPressed: () {
             if (categoriesNoBudgetLimit.isEmpty) {
               AlertInfo.show(
@@ -111,16 +111,16 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> {
             showDialog(
               context: context,
               barrierDismissible: false,
-              builder: (_) => BudgetDialog(),
+              builder: (_) => const BudgetDialog(),
             );
           },
-          child: Row(
+          child: const Row(
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [Icon(LucideIcons.circlePlus), Text('Novo Limite')],
           ),
         ),
-        SizedBox(height: 18),
+        const SizedBox(height: 18),
       ],
     );
   }

@@ -87,7 +87,7 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
     final categories = ref.watch(categoriesAvailableForBudgetProvider);
 
     return AlertDialog(
-      title: Text('Definir Limite', textAlign: TextAlign.center),
+      title: const Text('Definir Limite', textAlign: TextAlign.center),
       actions: [
         TextButton(
           onPressed: () => _cancelDialog(),
@@ -129,7 +129,7 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
                         ],
                       ),
               ),
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               onChanged: (value) {
                 if (_budgetLimitError != null &&
                     _budgetLimitController.doubleValue > 0) {
@@ -151,7 +151,7 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Selecione a Categoria',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),

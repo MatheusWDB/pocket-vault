@@ -47,7 +47,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                       border: Border.all(color: Colors.grey.shade300),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: EdgeInsets.all(10.0),
+                    padding: const EdgeInsets.all(10.0),
                     child: Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       spacing: 10,
@@ -135,7 +135,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
             ),
             IconButton(
               onPressed: () => showFilterPicker(context),
-              icon: Icon(LucideIcons.funnel),
+              icon: const Icon(LucideIcons.funnel),
             ),
           ],
         ),
@@ -165,7 +165,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) {
-                  return SizedBox(width: 10);
+                  return const SizedBox(width: 10);
                 },
               );
             },
@@ -173,7 +173,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
               return Center(child: Text('Erro: $error'));
             },
             loading: () {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             },
           ),
         ),
@@ -250,7 +250,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
               return Center(child: Text('Erro: $error'));
             },
             loading: () {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             },
           ),
         ),

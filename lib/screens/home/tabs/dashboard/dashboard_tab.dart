@@ -80,20 +80,20 @@ class DashboardTab extends ConsumerWidget with FilterActions {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Saldo Total', style: TextStyle(color: Colors.grey)),
+                const Text('Saldo Total', style: TextStyle(color: Colors.grey)),
                 Text(
                   summary.balance.toCurrency(
                     code: currencySymbol.code,
                     locale: currencySymbol.locale,
                   ),
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                 ),
               ],
             ),
             IconButton(
               onPressed: () =>
                   showFilterPicker(context, showAllYearsOption: false),
-              icon: Icon(LucideIcons.funnel),
+              icon: const Icon(LucideIcons.funnel),
             ),
           ],
         ),
@@ -126,7 +126,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
+                  const Text(
                     'Histórico',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),

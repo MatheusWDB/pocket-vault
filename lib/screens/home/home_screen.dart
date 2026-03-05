@@ -34,13 +34,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildTap() {
     switch (_activeMenu) {
       case 1:
-        return TransactionTab();
+        return const TransactionTab();
       case 2:
-        return BudgetTab();
+        return const BudgetTab();
       case 3:
-        return Center(child: Text('reports'));
+        return const Center(child: Text('reports'));
       default:
-        return DashboardTab();
+        return const DashboardTab();
     }
   }
 
@@ -62,7 +62,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: Text(_buildTitle()),
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(LucideIcons.settings)),
+          IconButton(onPressed: () {}, icon: const Icon(LucideIcons.settings)),
         ],
         actionsPadding: const EdgeInsets.all(8.0),
       ),
@@ -73,7 +73,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TransactionFormScreen()),
+          MaterialPageRoute(builder: (context) => const TransactionFormScreen()),
         ),
         backgroundColor: Colors.blueAccent,
         shape: const CircleBorder(),
