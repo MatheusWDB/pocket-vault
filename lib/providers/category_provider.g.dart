@@ -75,7 +75,7 @@ final class CategoryListProvider
   CategoryList create() => CategoryList();
 }
 
-String _$categoryListHash() => r'aac2231ffad44b8dee2e7a2a8a9cd6c30b0a1623';
+String _$categoryListHash() => r'b4647f4724040c866b20c877fa4d9044a046d7e0';
 
 abstract class _$CategoryList extends $AsyncNotifier<List<Category>> {
   FutureOr<List<Category>> build();
@@ -94,3 +94,93 @@ abstract class _$CategoryList extends $AsyncNotifier<List<Category>> {
     element.handleCreate(ref, build);
   }
 }
+
+@ProviderFor(categoriesTotalSpent)
+final categoriesTotalSpentProvider = CategoriesTotalSpentProvider._();
+
+final class CategoriesTotalSpentProvider
+    extends
+        $FunctionalProvider<
+          Map<int, double>,
+          Map<int, double>,
+          Map<int, double>
+        >
+    with $Provider<Map<int, double>> {
+  CategoriesTotalSpentProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoriesTotalSpentProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoriesTotalSpentHash();
+
+  @$internal
+  @override
+  $ProviderElement<Map<int, double>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  Map<int, double> create(Ref ref) {
+    return categoriesTotalSpent(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(Map<int, double> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<Map<int, double>>(value),
+    );
+  }
+}
+
+String _$categoriesTotalSpentHash() =>
+    r'c8203a04435da832b7d726f69685f1fc6fab77f4';
+
+@ProviderFor(categoriesAvailableForBudget)
+final categoriesAvailableForBudgetProvider =
+    CategoriesAvailableForBudgetProvider._();
+
+final class CategoriesAvailableForBudgetProvider
+    extends $FunctionalProvider<List<Category>, List<Category>, List<Category>>
+    with $Provider<List<Category>> {
+  CategoriesAvailableForBudgetProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoriesAvailableForBudgetProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoriesAvailableForBudgetHash();
+
+  @$internal
+  @override
+  $ProviderElement<List<Category>> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  List<Category> create(Ref ref) {
+    return categoriesAvailableForBudget(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(List<Category> value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<List<Category>>(value),
+    );
+  }
+}
+
+String _$categoriesAvailableForBudgetHash() =>
+    r'fc9788b29c68d89e59dc138a34f71e1e898b75d2';

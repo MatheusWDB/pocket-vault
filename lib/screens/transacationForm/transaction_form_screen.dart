@@ -345,8 +345,8 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                                     child: CircularProgressIndicator(),
                                   ),
                                 ),
-                                error: (err, stack) => ListTile(
-                                  title: Text('Erro: $err'),
+                                error: (error, _) => ListTile(
+                                  title: Text('Erro: $error'),
                                   leading: const Icon(
                                     LucideIcons.circleAlert,
                                     color: Colors.red,

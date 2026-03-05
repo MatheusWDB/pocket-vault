@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
+import 'package:pocket_vault/screens/home/tabs/budget/budget_tab.dart';
 import 'package:pocket_vault/screens/home/tabs/dashboard/dashboard_tab.dart';
-import 'package:pocket_vault/screens/home/tabs/transactions/transaction_tab.dart';
+import 'package:pocket_vault/screens/home/tabs/transaction/transaction_tab.dart';
 import 'package:pocket_vault/screens/home/widgets/custom_bottom_app_bar.dart';
 import 'package:pocket_vault/screens/transacationForm/transaction_form_screen.dart';
 
@@ -35,7 +36,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       case 1:
         return TransactionTab();
       case 2:
-        return Center(child: Text('budgets'));
+        return BudgetTab();
       case 3:
         return Center(child: Text('reports'));
       default:

@@ -8,7 +8,7 @@ import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
 import 'package:pocket_vault/screens/components/transaction_tile.dart';
-import 'package:pocket_vault/screens/home/tabs/transactions/widgets/filter_chip_item.dart';
+import 'package:pocket_vault/screens/home/tabs/transaction/widgets/filter_chip_item.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/transactions_extension.dart';
 
