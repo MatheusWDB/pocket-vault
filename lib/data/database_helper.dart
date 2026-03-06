@@ -83,7 +83,7 @@ class DatabaseHelper {
           $columnTransactionIsRecurring INTEGER NOT NULL,          
           $columnTransactionCreatedAt TEXT NOT NULL,
           $columnTransactionUpdatedAt TEXT,
-          FOREIGN KEY ($columnTransactionCategoryId) REFERENCES $tableCategory($columnCategoryId) ON DELETE CASCADE ON UPDATE CASCADE
+          FOREIGN KEY ($columnTransactionCategoryId) REFERENCES $tableCategory($columnCategoryId) ON UPDATE CASCADE
         );
       ''';
 

@@ -1,6 +1,5 @@
 import 'package:pocket_vault/data/database_helper.dart';
 import 'package:pocket_vault/mock/mock_transaction.dart';
-import 'package:pocket_vault/models/tag.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/repositories/transaction_repository.dart';
 import 'package:pocket_vault/repositories/transaction_tags_repository.dart';
@@ -19,22 +18,17 @@ class TransactionService {
   Future<List<Transaction>> getAllTransactions() async {
     final result = await _repo.findAll();
 
-    return _mapTagToTransactions(result);
+    return _mapRowsToTransactions(result);
   }
 
   Future<Transaction?> getTransactionById(int id) async {
     final result = await _repo.findById(id);
 
-    if (result == null || result.isEmpty) return null;
+    if (result.isEmpty) return null;
 
-    final tags = await _repoTransactionTags.findTagsByTransactionId(
-      result['id'],
-    );
+    final transactionMap = _mapRowsToTransactions(result);
 
-    return Transaction.fromMap(
-      result,
-      tagsFromDb: tags.map((t) => Tag.fromMap(t)).toList(),
-    );
+    return transactionMap.first;
   }
 
   Future<void> createTransaction(Transaction transaction) async {
@@ -62,7 +56,7 @@ class TransactionService {
   Future<void> updateTransaction(Transaction transaction) async {
     final db = await _dbHelper.database;
 
-   await db.transaction((txn) async {
+    await db.transaction((txn) async {
       await _repo.update(transaction.toMap(), executor: txn);
 
       await _repoTransactionTags.deleteAllByTransaction(
@@ -73,7 +67,7 @@ class TransactionService {
       await _tagService.linkTagsToTransaction(
         transaction.id!,
         transaction.tags,
-        executor: txn
+        executor: txn,
       );
     });
   }
@@ -98,9 +92,8 @@ class TransactionService {
     );
 
     // ---------------Remover Mock---------------
-    final List<Transaction> list = result
-        .map((t) => Transaction.fromMap(t))
-        .toList();
+    final List<Transaction> list = _mapRowsToTransactions(result);
+
     if (list.isEmpty) {
       if (list.isEmpty) {
         return mockTransactions.where((t) {
@@ -120,7 +113,7 @@ class TransactionService {
     }
     // -------------------------------------------
 
-    return _mapTagToTransactions(result);
+    return _mapRowsToTransactions(result);
   }
 
   Future<List<String>> getAllTitles() async {
@@ -136,23 +129,33 @@ class TransactionService {
     return maps.map((m) => m['title'] as String).toList();
   }
 
-  List<Transaction> _mapTagToTransactions(List<Map<String, dynamic>> result) {
-    final Map<int, Transaction> transactionMap = {};
+  List<Transaction> _mapRowsToTransactions(List<Map<String, dynamic>> result) {
+    final Map<int, Map<String, dynamic>> transactions = {};
 
     for (var row in result) {
-      final id = row['id'] as int;
+      final transactionId = row['id'] as int;
 
-      if (!transactionMap.containsKey(id)) {
-        transactionMap[id] = Transaction.fromMap(row);
+      if (!transactions.containsKey(transactionId)) {
+        transactions[transactionId] = {
+          'id': transactionId,
+          'title': row['title'],
+          'amount': row['amount'],
+          'date': row['date'],
+          'description': row['description'],
+          'isRecurring': row['isRecurring'],
+          'createdAt': row['createdAt'],
+          'updatedAt': row['updatedAt'],
+          'category': {'id': row['categoryId'], 'name': row['category_name']},
+          'tags': <Map<String, dynamic>>[],
+        };
       }
 
       if (row['tag_id'] != null) {
-        transactionMap[id]!.tags.add(
-          Tag(id: row['tag_id'], name: row['tag_name']),
-        );
+        (transactions[transactionId]!['tags'] as List<Map<String, dynamic>>)
+            .add({'id': row['tag_id'], 'name': row['tag_name']});
       }
     }
 
-    return transactionMap.values.toList();
+    return transactions.values.map(((t) => Transaction.fromMap(t))).toList();
   }
 }

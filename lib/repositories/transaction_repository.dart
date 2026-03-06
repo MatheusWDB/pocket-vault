@@ -39,14 +39,14 @@ class TransactionRepository {
     return await db.rawQuery(_sql(''));
   }
 
-  Future<Map<String, dynamic>?> findById(int id) async {
+  Future<List<Map<String, dynamic>>> findById(int id) async {
     final db = await _dbHelper.database;
 
     final whereClause = '$columnId = ?';
 
     final result = await db.rawQuery(_sql(whereClause), [id]);
 
-    return result.isNotEmpty ? result.first : null;
+    return result;
   }
 
   Future<List<Map<String, dynamic>>> findTitles() async {

@@ -55,7 +55,8 @@ class Transaction {
   }
 
   Map<String, dynamic> toMap() {
-    final Map<String, dynamic> map = {
+    return <String, dynamic>{
+      'id': id,
       'title': title,
       'amount': amount,
       'date': date.toIso8601String(),
@@ -65,32 +66,27 @@ class Transaction {
       'createdAt': (createdAt ?? DateTime.now()).toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
-
-    if (id != null) {
-      map['id'] = id;
-    }
-
-    return map;
   }
 
-  factory Transaction.fromMap(
-    Map<String, dynamic> map, {
-    List<Tag>? tagsFromDb,
-  }) {
+  factory Transaction.fromMap(Map<String, dynamic> map) {
     return Transaction(
       id: map['id'] as int?,
       title: map['title'] as String,
-      amount: map['amount'] as double,
-      date: DateTime.parse(map['date']),
+      amount: (map['amount'] as num).toDouble(),
+      date: DateTime.parse(map['date'] as String),
       description: map['description'] as String?,
-      category: Category(id: map['categoryId'], name: map['category_name']),
+      category: Category.fromMap(map['category'] as Map<String, dynamic>),
       isRecurring: map['isRecurring'] == 1,
-      tags: tagsFromDb ?? [],
+      tags: List<Tag>.from(
+        (map['tags'] as List).map<Tag>(
+          (x) => Tag.fromMap(x as Map<String, dynamic>),
+        ),
+      ),
       createdAt: map['createdAt'] != null
-          ? DateTime.parse(map['createdAt'])
+          ? DateTime.parse(map['createdAt'] as String)
           : null,
       updatedAt: map['updatedAt'] != null
-          ? DateTime.parse(map['updatedAt'])
+          ? DateTime.parse(map['updatedAt'] as String)
           : null,
     );
   }
@@ -102,6 +98,6 @@ class Transaction {
 
   @override
   String toString() {
-    return 'Transaction(id: $id, title: $title, amount: $amount, date: $date, description: "${description ?? 'N/A'}", category: ${category.toString()}, isRecurring: $isRecurring, tags: $tags, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Transaction(id: $id, title: $title, amount: $amount, date: $date, description: $description, category: $category, isRecurring: $isRecurring, tags: $tags, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
