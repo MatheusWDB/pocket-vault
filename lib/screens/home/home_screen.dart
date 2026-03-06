@@ -18,31 +18,12 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _activeMenu = 0;
 
-  String _buildTitle() {
-    switch (_activeMenu) {
-      case 1:
-        return 'Transações';
-      case 2:
-        return 'Orçamentos';
-      case 3:
-        return 'Evolução';
-      default:
-        return 'Resumo';
-    }
-  }
-
-  Widget _buildTap() {
-    switch (_activeMenu) {
-      case 1:
-        return const TransactionTab();
-      case 2:
-        return const BudgetTab();
-      case 3:
-        return const Center(child: Text('reports'));
-      default:
-        return const DashboardTab();
-    }
-  }
+  final _tabs = const [
+    ('Resumo', DashboardTab()),
+    ('Transações', TransactionTab()),
+    ('Orçamentos', BudgetTab()),
+    ('Evolução', Center(child: Text('reports'))),
+  ];
 
   void _onChangeMenu(int index) {
     if (_activeMenu != index) {
@@ -58,9 +39,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final (title, tab) = _tabs[_activeMenu];
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(_buildTitle()),
+        title: Text(title),
         actions: [
           IconButton(onPressed: () {}, icon: const Icon(LucideIcons.settings)),
         ],
@@ -73,7 +56,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const TransactionFormScreen()),
+          MaterialPageRoute(
+            builder: (context) => const TransactionFormScreen(),
+          ),
         ),
         backgroundColor: Colors.blueAccent,
         shape: const CircleBorder(),
@@ -85,7 +70,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       body: SafeArea(
-        child: Padding(padding: const EdgeInsets.all(8.0), child: _buildTap()),
+        child: Padding(padding: const EdgeInsets.all(8.0), child: tab),
       ),
     );
   }
