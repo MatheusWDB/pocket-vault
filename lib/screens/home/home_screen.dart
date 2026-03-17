@@ -6,6 +6,7 @@ import 'package:pocket_vault/screens/home/tabs/budget/budget_tab.dart';
 import 'package:pocket_vault/screens/home/tabs/dashboard/dashboard_tab.dart';
 import 'package:pocket_vault/screens/home/tabs/transaction/transaction_tab.dart';
 import 'package:pocket_vault/screens/home/widgets/custom_bottom_app_bar.dart';
+import 'package:pocket_vault/screens/settings/settings_screen.dart';
 import 'package:pocket_vault/screens/transacationForm/transaction_form_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -45,7 +46,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       appBar: AppBar(
         title: Text(title),
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(LucideIcons.settings)),
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsScreen()),
+            ),
+            icon: const Icon(LucideIcons.settings),
+          ),
         ],
         actionsPadding: const EdgeInsets.all(8.0),
       ),
