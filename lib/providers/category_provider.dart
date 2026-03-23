@@ -52,8 +52,8 @@ Map<Category, double> categoriesTotalSpent(Ref ref) {
 
   final Map<Category, double> totals = {};
   for (final t in transactions) {
-    if (t.amount < 0) {
-      totals[t.category] = (totals[t.category] ?? 0) + t.amount.abs();
+    if (t.amount < 0.0) {
+      totals[t.category] = (totals[t.category] ?? 0.0) + t.amount.abs();
     }
   }
   return totals;

@@ -141,7 +141,7 @@ final class CategoriesTotalSpentProvider
 }
 
 String _$categoriesTotalSpentHash() =>
-    r'bb3320da0f3a6890f28b4abd366903a85b9b74b9';
+    r'7f1671f189a6ac185f7a8b5803fefca1a55b263b';
 
 @ProviderFor(categoriesAvailableForBudget)
 final categoriesAvailableForBudgetProvider =

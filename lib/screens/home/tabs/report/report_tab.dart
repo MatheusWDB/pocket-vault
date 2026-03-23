@@ -227,7 +227,7 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
 
             return await ReportPdfService(
               transactions: transactions,
-              totals: totalExpenses,
+              totalExpenses: totalExpenses,
               currency: currency,
               locale: myLocale,
             ).generatePdf();

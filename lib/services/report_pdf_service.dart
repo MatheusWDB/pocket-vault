@@ -13,13 +13,13 @@ enum ReportPageType { summary, charts, statement }
 
 class ReportPdfService {
   final List<Transaction> transactions;
-  final Map<Category, double> totals;
+  final Map<Category, double> totalExpenses;
   final CurrencySymbolEnum currency;
   final Locale locale;
 
   ReportPdfService({
     required this.transactions,
-    required this.totals,
+    required this.totalExpenses,
     required this.locale,
     required this.currency,
   });
@@ -192,10 +192,10 @@ class ReportPdfService {
 
     final double total = income - expense;
 
-    final budgetCategories = totals.keys
+    final budgetCategories = totalExpenses.keys
         .where((c) => c.budgetLimit != null && c.budgetLimit! > 0)
         .where((c) {
-          final spent = totals[c] ?? 0.0;
+          final spent = totalExpenses[c] ?? 0.0;
           final limit = c.budgetLimit!;
           return spent / limit >= 0.8;
         })
@@ -285,7 +285,7 @@ class ReportPdfService {
           itemBuilder: (context, index) {
             final category = budgetCategories[index];
 
-            final spent = totals[category] ?? 0.0;
+            final spent = totalExpenses[category] ?? 0.0;
             final limit = category.budgetLimit!;
 
             final progress = spent / limit;
@@ -342,7 +342,7 @@ class ReportPdfService {
   }
 
   List<pw.Widget> _buildChartsContent(pw.Context context) {
-    final budgetCategories = totals.keys
+    final budgetCategories = totalExpenses.keys
         .where((c) => c.budgetLimit != null && c.budgetLimit! > 0)
         .toList();
 
@@ -365,7 +365,7 @@ class ReportPdfService {
 
           final categoryName = category.name;
 
-          final spent = totals[category] ?? 0.0;
+          final spent = totalExpenses[category] ?? 0.0;
           final limit = category.budgetLimit!;
 
           final progress = spent / limit;

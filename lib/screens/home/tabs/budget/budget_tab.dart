@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
+import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
+import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
+import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_dialog.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_progress_bar.dart';
+import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
 class BudgetTab extends ConsumerStatefulWidget {
@@ -16,86 +20,103 @@ class BudgetTab extends ConsumerStatefulWidget {
   ConsumerState<BudgetTab> createState() => _BudgetsTabState();
 }
 
-class _BudgetsTabState extends ConsumerState<BudgetTab> {
+class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
   String _formatCurrency(double number, CurrencySymbolEnum currency) =>
       number.toCurrency(code: currency.code, locale: currency.locale);
 
+  List<Widget> _budgetListBuilder(
+    List<Category> categories,
+    Map<Category, double> totalExpenses,
+    CurrencySymbolEnum currency,
+  ) {
+    final budgetCategories = categories
+        .where((c) => c.budgetLimit != null && c.budgetLimit! > 0)
+        .toList();
+
+    if (budgetCategories.isEmpty) {
+      return const [SizedBox.shrink()];
+    }
+
+    return [
+      Flexible(
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: budgetCategories.length,
+          itemBuilder: (context, index) {
+            final category = budgetCategories[index];
+
+            final spent = totalExpenses[category] ?? 0.0;
+            final limit = category.budgetLimit!;
+
+            final progress = spent / limit;
+
+            final spentText = _formatCurrency(spent, currency);
+            final limitText = _formatCurrency(limit, currency);
+
+            return ListTile(
+              contentPadding: const EdgeInsets.all(8),
+              dense: true,
+              title: Column(
+                spacing: 4,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(category.name, overflow: TextOverflow.ellipsis),
+                      Text(
+                        '$spentText de $limitText',
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              subtitle: BudgetProgressBar(progress: progress),
+              onTap: () => showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => BudgetDialog(category: category),
+              ),
+            );
+          },
+        ),
+      ),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final myLocale = Localizations.localeOf(context);
+    final filter = ref.watch(transactionFilterProvider);
     final currency = ref.watch(preferencesProvider).currencySymbol;
-    final categoriesAsync = ref.watch(categoryListProvider);
-    final totals = ref.watch(categoriesTotalSpentProvider);
+    final totalExpenses = ref.watch(categoriesTotalSpentProvider);
     final categoriesNoBudgetLimit = ref.watch(
       categoriesAvailableForBudgetProvider,
     );
 
+    final categories = totalExpenses.keys.toList();
+
     return Column(
       spacing: 10,
       children: [
-        categoriesAsync.when(
-          data: (categories) {
-            final budgetCategories = categories
-                .where((c) => c.budgetLimit != null && c.budgetLimit! > 0)
-                .toList();
-
-            if (budgetCategories.isEmpty) {
-              return const SizedBox.shrink();
-            }
-
-            return Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: budgetCategories.length,
-                itemBuilder: (context, index) {
-                  final category = budgetCategories[index];
-
-                  final spent = totals[category] ?? 0.0;
-                  final limit = category.budgetLimit!;
-
-                  final progress = spent / limit;
-
-                  final spentText = _formatCurrency(spent, currency);
-                  final limitText = _formatCurrency(limit, currency);
-
-                  return ListTile(
-                    contentPadding: const EdgeInsets.all(8),
-                    dense: true,
-                    title: Column(
-                      spacing: 4,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              category.name,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              '$spentText de $limitText',
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    subtitle: BudgetProgressBar(progress: progress),
-                    onTap: () => showDialog(
-                      context: context,
-                      barrierDismissible: false,
-                      builder: (context) => BudgetDialog(category: category),
-                    ),
-                  );
-                },
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(filter.start!.toMonthYear(myLocale)),
+            IconButton(
+              onPressed: () => showFilterPicker(
+                context,
+                showAllYearsOption: false,
+                showAllMonthsOption: false,
               ),
-            );
-          },
-          error: (error, stackTrace) {
-            return Center(child: Text('Erro: $error'));
-          },
-          loading: () {
-            return const Center(child: CircularProgressIndicator());
-          },
+              icon: Icon(LucideIcons.funnel),
+            ),
+          ],
         ),
+
+        if (categories.isNotEmpty)
+          ..._budgetListBuilder(categories, totalExpenses, currency),
+
         OutlinedButton(
           style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(15)),
           onPressed: () {
