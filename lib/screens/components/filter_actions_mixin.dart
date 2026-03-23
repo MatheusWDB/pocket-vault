@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:pocket_vault/screens/components/month_year_picker_modal.dart';
 
 mixin FilterActions {
-  void showFilterPicker(BuildContext context, {bool showAllYearsOption = true}) {
+  void showFilterPicker(
+    BuildContext context, {
+    bool showAllYearsOption = true,
+    bool showAllMonthsOption = true,
+  }) {
     showModalBottomSheet(
       useSafeArea: true,
       context: context,
-      builder: (context) => MonthYearPickerModal(showAllYearsOption: showAllYearsOption),
+      builder: (context) => MonthYearPickerModal(
+        showAllYearsOption: showAllYearsOption,
+        showAllMonthsOption: showAllMonthsOption,
+      ),
     );
   }
 }

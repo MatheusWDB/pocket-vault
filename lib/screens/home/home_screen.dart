@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/budget_tab.dart';
 import 'package:pocket_vault/screens/home/tabs/dashboard/dashboard_tab.dart';
+import 'package:pocket_vault/screens/home/tabs/report/report_tab.dart';
 import 'package:pocket_vault/screens/home/tabs/transaction/transaction_tab.dart';
 import 'package:pocket_vault/screens/home/widgets/custom_bottom_app_bar.dart';
 import 'package:pocket_vault/screens/settings/settings_screen.dart';
@@ -23,14 +24,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ('Resumo', DashboardTab()),
     ('Transações', TransactionTab()),
     ('Orçamentos', BudgetTab()),
-    ('Evolução', Center(child: Text('reports'))),
+    ('Relatório', ReportTab()),
   ];
 
   void _onChangeMenu(int index) {
     if (_activeMenu != index) {
       final filterNotifier = ref.read(transactionFilterProvider.notifier);
 
-      (index == 0) ? filterNotifier.standardFilter() : filterNotifier.clear();
+      (index == 1) ? filterNotifier.clear(): filterNotifier.standardFilter();
 
       setState(() {
         _activeMenu = index;

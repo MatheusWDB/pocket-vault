@@ -101,11 +101,11 @@ final categoriesTotalSpentProvider = CategoriesTotalSpentProvider._();
 final class CategoriesTotalSpentProvider
     extends
         $FunctionalProvider<
-          Map<int, double>,
-          Map<int, double>,
-          Map<int, double>
+          Map<Category, double>,
+          Map<Category, double>,
+          Map<Category, double>
         >
-    with $Provider<Map<int, double>> {
+    with $Provider<Map<Category, double>> {
   CategoriesTotalSpentProvider._()
     : super(
         from: null,
@@ -122,25 +122,26 @@ final class CategoriesTotalSpentProvider
 
   @$internal
   @override
-  $ProviderElement<Map<int, double>> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
+  $ProviderElement<Map<Category, double>> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
 
   @override
-  Map<int, double> create(Ref ref) {
+  Map<Category, double> create(Ref ref) {
     return categoriesTotalSpent(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(Map<int, double> value) {
+  Override overrideWithValue(Map<Category, double> value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<Map<int, double>>(value),
+      providerOverride: $SyncValueProvider<Map<Category, double>>(value),
     );
   }
 }
 
 String _$categoriesTotalSpentHash() =>
-    r'c8203a04435da832b7d726f69685f1fc6fab77f4';
+    r'bb3320da0f3a6890f28b4abd366903a85b9b74b9';
 
 @ProviderFor(categoriesAvailableForBudget)
 final categoriesAvailableForBudgetProvider =

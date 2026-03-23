@@ -173,7 +173,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                                 horizontal: 16.0,
                               ),
                               child: Text(
-                                date.toHeaderFormat('$myLocale'),
+                                date.toShortDate(myLocale),
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontWeight: FontWeight.bold,

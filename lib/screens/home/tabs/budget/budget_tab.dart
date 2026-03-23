@@ -49,7 +49,7 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> {
                 itemBuilder: (context, index) {
                   final category = budgetCategories[index];
 
-                  final spent = totals[category.id!] ?? 0.0;
+                  final spent = totals[category] ?? 0.0;
                   final limit = category.budgetLimit!;
 
                   final progress = spent / limit;

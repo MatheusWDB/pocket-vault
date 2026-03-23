@@ -62,4 +62,15 @@ class Category {
   @override
   String toString() =>
       'Category(id: $id, name: $name, budgetLimit: $budgetLimit, createdAt: $createdAt)';
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Category &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name;
+
+  @override
+  int get hashCode => Object.hash(id, name);
 }

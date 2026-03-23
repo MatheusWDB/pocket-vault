@@ -47,13 +47,13 @@ class CategoryList extends _$CategoryList {
 }
 
 @riverpod
-Map<int, double> categoriesTotalSpent(Ref ref) {
+Map<Category, double> categoriesTotalSpent(Ref ref) {
   final transactions = ref.watch(transactionListProvider).value ?? [];
 
-  final Map<int, double> totals = {};
+  final Map<Category, double> totals = {};
   for (final t in transactions) {
     if (t.amount < 0) {
-      totals[t.category.id!] = (totals[t.category.id!] ?? 0) + t.amount.abs();
+      totals[t.category] = (totals[t.category] ?? 0) + t.amount.abs();
     }
   }
   return totals;

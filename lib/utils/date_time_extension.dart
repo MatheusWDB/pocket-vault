@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:intl/intl.dart';
 import 'package:pocket_vault/utils/string_extensions.dart';
 
@@ -16,10 +18,20 @@ extension DateTimeExtensions on DateTime {
         day == yesterday.day;
   }
 
-  String toHeaderFormat(String locale) {
-    if (isToday) return 'Hoje';
-    if (isYesterday) return 'Ontem';
+  String toShortDate(Locale locale, [bool day = true]) {
+    if (day) {
+      if (isToday) return 'Hoje';
+      if (isYesterday) return 'Ontem';
+    }
 
-    return DateFormat('dd MMM', locale).format(this).capitalize();
+    return DateFormat.MMMd(locale.toString()).format(this).capitalize();
+  }
+
+  String toMonthYear(Locale locale) {
+    return DateFormat.yMMM(locale.toString()).format(this).capitalize();
+  }
+
+  String toFullDateNumeric(Locale locale) {
+    return DateFormat.yMd(locale.toString()).format(this);
   }
 }
