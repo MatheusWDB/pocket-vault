@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
+import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/enums/theme_mode_enum.dart';
 import 'package:pocket_vault/providers/backup_provider.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
@@ -258,83 +259,91 @@ class SettingsScreen extends ConsumerWidget {
         title: Text('Configurações'),
         centerTitle: true,
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            ref
+                .read(preferencesProvider.notifier)
+                .setLastScreen(AppScreenEnum.home);
+                
+            Navigator.pop(context);
+          },
           icon: const Icon(LucideIcons.chevronLeft),
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(8),
-          child: Column(
-            spacing: 15,
-            children: [
-              Column(
-                spacing: 15,
-                children: [
-                  SettingsDropdownTile<AppThemeModeEnum>(
-                    title: 'Tema',
-                    value: prefs.themeMode,
-                    values: AppThemeModeEnum.values,
-                    label: (t) => t.name,
-                    onChanged: prefsNotifier.setTheme,
-                  ),
-
-                  SettingsDropdownTile<CurrencySymbolEnum>(
-                    title: 'Moeda',
-                    value: prefs.currencySymbol,
-                    values: CurrencySymbolEnum.values,
-                    label: (c) => c.code,
-                    onChanged: prefsNotifier.setCurrencySymbol,
-                  ),
-
-                  SettingsSwitchTile(
-                    title: 'Biometria',
-                    value: prefs.isBiometricEnabled,
-                    onChanged: prefsNotifier.setBiometricEnabled,
-                  ),
-                ],
-              ),
-              SettingsSection(
-                title: 'Segurança dos Dados',
-                children: [
-                  const Text(
-                    'O "PocketVault" guarda tudo localmente. '
-                    'Use as opções abaixo para não perder seus dados.',
-                  ),
-
-                  Card(
-                    child: Column(
-                      children: [
-                        ListTile(
-                          dense: true,
-                          leading: const Icon(LucideIcons.download),
-                          title: const Text('Baixar backup'),
-                          subtitle: const Text('Exportar seus dados'),
-                          onTap: () =>
-                              _showBackupActions(context, ref, backupService),
-                        ),
-                        const Divider(),
-                        ListTile(
-                          dense: true,
-                          leading: const Icon(LucideIcons.upload),
-                          title: const Text('Carregar backup'),
-                          subtitle: const Text('Substituir dados atuais'),
-                          onTap: () =>
-                              _showImportActions(context, ref, backupService),
-                        ),
-                      ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Column(
+              spacing: 15,
+              children: [
+                Column(
+                  spacing: 15,
+                  children: [
+                    SettingsDropdownTile<AppThemeModeEnum>(
+                      title: 'Tema',
+                      value: prefs.themeMode,
+                      values: AppThemeModeEnum.values,
+                      label: (t) => t.name,
+                      onChanged: prefsNotifier.setTheme,
                     ),
-                  ),
-
-                  Text(
-                    prefs.lastBackupAt == null
-                        ? 'Nenhum backup realizado'
-                        : 'Último backup: ${DateFormat('dd/MM/yyyy HH:mm').format(prefs.lastBackupAt!)}',
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ],
+          
+                    SettingsDropdownTile<CurrencySymbolEnum>(
+                      title: 'Moeda',
+                      value: prefs.currencySymbol,
+                      values: CurrencySymbolEnum.values,
+                      label: (c) => c.code,
+                      onChanged: prefsNotifier.setCurrencySymbol,
+                    ),
+          
+                    SettingsSwitchTile(
+                      title: 'Biometria',
+                      value: prefs.isBiometricEnabled,
+                      onChanged: prefsNotifier.setBiometricEnabled,
+                    ),
+                  ],
+                ),
+                SettingsSection(
+                  title: 'Segurança dos Dados',
+                  children: [
+                    const Text(
+                      'O "PocketVault" guarda tudo localmente. '
+                      'Use as opções abaixo para não perder seus dados.',
+                    ),
+          
+                    Card(
+                      child: Column(
+                        children: [
+                          ListTile(
+                            dense: true,
+                            leading: const Icon(LucideIcons.download),
+                            title: const Text('Baixar backup'),
+                            subtitle: const Text('Exportar seus dados'),
+                            onTap: () =>
+                                _showBackupActions(context, ref, backupService),
+                          ),
+                          const Divider(),
+                          ListTile(
+                            dense: true,
+                            leading: const Icon(LucideIcons.upload),
+                            title: const Text('Carregar backup'),
+                            subtitle: const Text('Substituir dados atuais'),
+                            onTap: () =>
+                                _showImportActions(context, ref, backupService),
+                          ),
+                        ],
+                      ),
+                    ),
+          
+                    Text(
+                      prefs.lastBackupAt == null
+                          ? 'Nenhum backup realizado'
+                          : 'Último backup: ${DateFormat('dd/MM/yyyy HH:mm').format(prefs.lastBackupAt!)}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

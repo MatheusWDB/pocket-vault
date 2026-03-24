@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
+import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/budget_tab.dart';
 import 'package:pocket_vault/screens/home/tabs/dashboard/dashboard_tab.dart';
 import 'package:pocket_vault/screens/home/tabs/report/report_tab.dart';
@@ -18,7 +20,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int _activeMenu = 0;
+  late int _activeMenu;
 
   final _tabs = const [
     ('Resumo', DashboardTab()),
@@ -29,14 +31,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   void _onChangeMenu(int index) {
     if (_activeMenu != index) {
+      ref
+          .read(preferencesProvider.notifier)
+          .setLastTab(AppTabEnum.values[index]);
+          
       final filterNotifier = ref.read(transactionFilterProvider.notifier);
 
-      (index == 1) ? filterNotifier.clear(): filterNotifier.standardFilter();
+      (index == 1) ? filterNotifier.clear() : filterNotifier.standardFilter();
 
       setState(() {
         _activeMenu = index;
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
+    final lastTab = ref.read(preferencesProvider).lastTab!;
+
+    _activeMenu = lastTab.index;
   }
 
   @override
@@ -48,10 +63,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: Text(title),
         actions: [
           IconButton(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SettingsScreen()),
-            ),
+            onPressed: () {
+              ref
+                  .read(preferencesProvider.notifier)
+                  .setLastScreen(AppScreenEnum.settings);
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsScreen()),
+              );
+            },
             icon: const Icon(LucideIcons.settings),
           ),
         ],
@@ -62,12 +83,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onDestinationSelected: _onChangeMenu,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const TransactionFormScreen(),
-          ),
-        ),
+        onPressed: () {
+          ref
+              .read(preferencesProvider.notifier)
+              .setLastScreen(AppScreenEnum.form);
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const TransactionFormScreen(),
+            ),
+          );
+        },
         backgroundColor: Colors.blueAccent,
         shape: const CircleBorder(),
         child: const Icon(

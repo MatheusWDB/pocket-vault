@@ -1,4 +1,5 @@
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
+import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/enums/theme_mode_enum.dart';
 
 class UserPreferences {
@@ -7,13 +8,17 @@ class UserPreferences {
   final CurrencySymbolEnum currencySymbol;
   final AppThemeModeEnum themeMode;
   final DateTime? lastBackupAt;
+  final AppScreenEnum lastScreen;
+  final AppTabEnum? lastTab;
 
   const UserPreferences({
+    required this.lastScreen,
     required this.themeMode,
     required this.isBiometricEnabled,
     required this.currencySymbol,
     this.userName,
     this.lastBackupAt,
+    this.lastTab,
   });
 
   UserPreferences copyWith({
@@ -22,6 +27,8 @@ class UserPreferences {
     CurrencySymbolEnum? currencySymbol,
     AppThemeModeEnum? themeMode,
     DateTime? lastBackupAt,
+    AppScreenEnum? lastScreen,
+    AppTabEnum? lastTab,
   }) {
     return UserPreferences(
       userName: userName ?? this.userName,
@@ -29,6 +36,8 @@ class UserPreferences {
       currencySymbol: currencySymbol ?? this.currencySymbol,
       themeMode: themeMode ?? this.themeMode,
       lastBackupAt: lastBackupAt ?? this.lastBackupAt,
+      lastScreen: lastScreen ?? this.lastScreen,
+      lastTab: lastTab ?? this.lastTab,
     );
   }
 
@@ -36,5 +45,7 @@ class UserPreferences {
     isBiometricEnabled: true,
     currencySymbol: CurrencySymbolEnum.brl,
     themeMode: AppThemeModeEnum.system,
+    lastScreen: AppScreenEnum.home,
+    lastTab: AppTabEnum.dashboard,
   );
 }

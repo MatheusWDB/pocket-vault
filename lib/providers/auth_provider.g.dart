@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user_preferences_provider.dart';
+part of 'auth_provider.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -9,51 +9,50 @@ part of 'user_preferences_provider.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(Preferences)
-final preferencesProvider = PreferencesProvider._();
+@ProviderFor(AuthState)
+final authStateProvider = AuthStateProvider._();
 
-final class PreferencesProvider
-    extends $NotifierProvider<Preferences, UserPreferences> {
-  PreferencesProvider._()
+final class AuthStateProvider extends $NotifierProvider<AuthState, bool> {
+  AuthStateProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'preferencesProvider',
+        name: r'authStateProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$preferencesHash();
+  String debugGetCreateSourceHash() => _$authStateHash();
 
   @$internal
   @override
-  Preferences create() => Preferences();
+  AuthState create() => AuthState();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(UserPreferences value) {
+  Override overrideWithValue(bool value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<UserPreferences>(value),
+      providerOverride: $SyncValueProvider<bool>(value),
     );
   }
 }
 
-String _$preferencesHash() => r'fcc1d835cc7f063e7e71377d443839daa8b7dcda';
+String _$authStateHash() => r'eca257a5fea106404214c47152870c63cf87a51d';
 
-abstract class _$Preferences extends $Notifier<UserPreferences> {
-  UserPreferences build();
+abstract class _$AuthState extends $Notifier<bool> {
+  bool build();
   @$mustCallSuper
   @override
   void runBuild() {
-    final ref = this.ref as $Ref<UserPreferences, UserPreferences>;
+    final ref = this.ref as $Ref<bool, bool>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<UserPreferences, UserPreferences>,
-              UserPreferences,
+              AnyNotifier<bool, bool>,
+              bool,
               Object?,
               Object?
             >;

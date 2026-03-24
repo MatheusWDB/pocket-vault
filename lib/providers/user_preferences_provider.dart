@@ -1,4 +1,5 @@
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
+import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/enums/theme_mode_enum.dart';
 import 'package:pocket_vault/models/user_preferences.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -16,6 +17,8 @@ class Preferences extends _$Preferences {
   static const _biometricEnabledKey = 'biometric_enabled';
   static const _themeModeKey = 'theme_mode';
   static const _lastBackupKey = 'last_backup_at';
+  static const _lastScreen = 'last_screen';
+  static const _lastTab = 'last_tab';
 
   @override
   UserPreferences build() {
@@ -32,6 +35,8 @@ class Preferences extends _$Preferences {
     final biometricEnabled = prefs.getBool(_biometricEnabledKey);
     final themeIndex = prefs.getInt(_themeModeKey);
     final lastBackupMillis = prefs.getInt(_lastBackupKey);
+    final lastScreenIndex = prefs.getInt(_lastScreen);
+    final lastTabIndex = prefs.getInt(_lastTab);
 
     state = state.copyWith(
       userName: userName ?? state.userName,
@@ -45,6 +50,13 @@ class Preferences extends _$Preferences {
       lastBackupAt: lastBackupMillis != null
           ? DateTime.fromMillisecondsSinceEpoch(lastBackupMillis)
           : state.lastBackupAt,
+      lastScreen: lastScreenIndex != null
+          ? AppScreenEnum.values[lastScreenIndex]
+          : state.lastScreen,
+      lastTab:
+          (lastScreenIndex == AppScreenEnum.home.index && lastTabIndex != null)
+          ? AppTabEnum.values[lastTabIndex]
+          : state.lastTab,
     );
   }
 
@@ -81,5 +93,29 @@ class Preferences extends _$Preferences {
 
     state = state.copyWith(lastBackupAt: date);
     await prefs.setInt(_lastBackupKey, date.millisecondsSinceEpoch);
+  }
+
+  Future<void> setLastScreen(AppScreenEnum? screen) async {
+    final prefs = await _prefs;
+
+    state = state.copyWith(lastScreen: screen);
+
+    if (screen != null) {
+      await prefs.setInt(_lastScreen, screen.index);
+    } else {
+      await prefs.remove(_lastScreen);
+    }
+  }
+
+  Future<void> setLastTab(AppTabEnum? tab) async {
+    final prefs = await _prefs;
+
+    state = state.copyWith(lastTab: tab);
+
+    if (tab != null) {
+      await prefs.setInt(_lastTab, tab.index);
+    } else {
+      await prefs.remove(_lastTab);
+    }
   }
 }

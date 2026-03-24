@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
+import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/models/tag.dart';
 import 'package:pocket_vault/models/transaction.dart';
@@ -156,7 +157,13 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            ref
+                .read(preferencesProvider.notifier)
+                .setLastScreen(AppScreenEnum.home);
+                
+            Navigator.pop(context);
+          },
           icon: const Icon(LucideIcons.chevronLeft),
         ),
         title: const Text('Nova Transação'),
