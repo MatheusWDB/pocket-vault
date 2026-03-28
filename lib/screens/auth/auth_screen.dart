@@ -31,7 +31,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     final canAuthenticate = await authService.checkBiometrics();
     final available = await authService.getAvailableBiometrics();
 
-    if (!canAuthenticate && available.isEmpty) {
+    if (!canAuthenticate || available.isEmpty) {
       _autheticated();
     } else {
       if (!mounted) return;
