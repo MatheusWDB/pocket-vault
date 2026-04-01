@@ -68,7 +68,7 @@ final class TransactionListProvider
         argument: null,
         retry: null,
         name: r'transactionListProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -81,7 +81,7 @@ final class TransactionListProvider
   TransactionList create() => TransactionList();
 }
 
-String _$transactionListHash() => r'30374fa81b764fbfd240f1169ce02959b198587d';
+String _$transactionListHash() => r'f207928be1770a3a6ad8915e50b58923f7edeb53';
 
 abstract class _$TransactionList extends $AsyncNotifier<List<Transaction>> {
   FutureOr<List<Transaction>> build();

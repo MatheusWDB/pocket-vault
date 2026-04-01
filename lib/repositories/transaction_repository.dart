@@ -12,6 +12,10 @@ class TransactionRepository {
   static final columnTitle = DatabaseHelper.columnTransactionTitle;
   static final columnCategoryId = DatabaseHelper.columnTransactionCategoryId;
   static final columnDate = DatabaseHelper.columnTransactionDate;
+  static final columnIsRecurring = DatabaseHelper.columnTransactionIsRecurring;
+  static final columnIsTemplate = DatabaseHelper.columnTransactionIsTemplate;
+  static final columnLastGeneratedMonth =
+      DatabaseHelper.columnTransactionLastGeneratedMonth;
 
   static final columnCatId = DatabaseHelper.columnCategoryId;
   static final columnCatName = DatabaseHelper.columnCategoryName;
@@ -36,13 +40,18 @@ class TransactionRepository {
   Future<List<Map<String, dynamic>>> findAll() async {
     final db = await _dbHelper.database;
 
-    return await db.rawQuery(_sql(''));
+    final whereClause = 'WHERE t.$columnIsTemplate = 0';
+
+    return await db.rawQuery(_sql(whereClause));
   }
 
-  Future<List<Map<String, dynamic>>> findById(int id) async {
-    final db = await _dbHelper.database;
+  Future<List<Map<String, dynamic>>> findById(
+    int id, {
+    DatabaseExecutor? executor,
+  }) async {
+    final db = executor ?? await _dbHelper.database;
 
-    final whereClause = '$columnId = ?';
+    final whereClause = 'WHERE t.$columnId = ?';
 
     final result = await db.rawQuery(_sql(whereClause), [id]);
 
@@ -78,8 +87,8 @@ class TransactionRepository {
       return await findAll();
     }
 
-    final List<String> conditions = [];
-    final List<dynamic> args = [];
+    final List<String> conditions = ['t.$columnIsTemplate = ?'];
+    final List<dynamic> args = [0];
 
     if (tagIds.isNotEmpty) {
       final String placeholders = List.filled(tagIds.length, '?').join(', ');
@@ -99,7 +108,7 @@ class TransactionRepository {
       final List<String> titleConditions = [];
 
       for (var title in titles) {
-        titleConditions.add('$columnTitle LIKE ?');
+        titleConditions.add('t.$columnTitle LIKE ?');
 
         args.add('%$title%');
       }
@@ -113,24 +122,22 @@ class TransactionRepository {
         '?',
       ).join(', ');
 
-      conditions.add('$columnCategoryId IN ($placeholders)');
+      conditions.add('t.$columnCategoryId IN ($placeholders)');
 
       args.addAll(categoryIds);
     }
 
     if (start != null) {
-      conditions.add('$columnDate >= ?');
+      conditions.add('t.$columnDate >= ?');
       args.add(start);
     }
 
     if (end != null) {
-      conditions.add('$columnDate <= ?');
+      conditions.add('t.$columnDate <= ?');
       args.add(end);
     }
 
-    final String whereClause = conditions.isNotEmpty
-        ? 'WHERE ${conditions.join(' AND ')}'
-        : '';
+    final String whereClause = 'WHERE ${conditions.join(' AND ')}';
 
     final sql = _sql(whereClause);
 
@@ -157,9 +164,29 @@ class TransactionRepository {
     return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 
-  String _sql(String whereClause) =>
-      '''
-        SELECT 
+  Future<List<Map<String, dynamic>>> findPending({
+    DatabaseExecutor? executor,
+  }) async {
+    final db = executor ?? await _dbHelper.database;
+    final now = DateTime.now();
+    final currentMonth = "${now.year}-${now.month.toString().padLeft(2, '0')}";
+
+    final whereClause =
+        'WHERE t.$columnIsRecurring = 1 AND t.$columnIsTemplate = 1 AND (t.$columnLastGeneratedMonth IS NULL OR t.$columnLastGeneratedMonth != ?)';
+    final sql = _sql(whereClause);
+
+    return await db.rawQuery(sql, [currentMonth]);
+  }
+
+  String _sql(String whereClause) {
+    final finalWhere =
+        (whereClause.isNotEmpty &&
+            !whereClause.trim().toUpperCase().startsWith('WHERE'))
+        ? 'WHERE $whereClause'
+        : whereClause;
+
+    return '''
+        SELECT
           t.*,
           c.$columnCatName as category_name,
           tg.$columnTagId as tag_id,
@@ -168,7 +195,8 @@ class TransactionRepository {
         INNER JOIN $tableC c ON t.$columnCategoryId = c.$columnCatId
         LEFT JOIN $tableTT tt ON t.$columnId = tt.$columnRelTransactionId
         LEFT JOIN $tableTg tg ON tt.$columnRelTagId = tg.$columnTagId
-        $whereClause
+        $finalWhere
         ORDER BY t.$columnDate DESC
       ''';
+  }
 }

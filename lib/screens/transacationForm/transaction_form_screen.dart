@@ -29,6 +29,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
   final _categoryController = TextEditingController();
   final List<TextEditingController> _tagsControllers = [];
   late final CurrencyTextFieldController _amountController;
+  final _installmentController = TextEditingController();
   late DateTime _selectedDate;
   bool _isRevenue = false;
   bool _isRecurring = false;
@@ -77,13 +78,14 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
     );
   }
 
-  Future<void> _saveTransaction(TransactionList notifier) async {
+  Future<void> _saveTransaction() async {
     if (!_formKey.currentState!.validate()) return;
     if (_amountError != null) return;
 
     final title = _titleController.text;
     final amount = _amountController.doubleValue;
     final descripition = _descriptionController.text;
+    final totalInstallments = int.tryParse(_installmentController.text) ?? 1;
 
     final category = Category(name: _categoryController.text.trim());
     final List<Tag> tags = _tagsControllers
@@ -96,16 +98,22 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
       amount: _isRevenue ? amount : -amount,
       date: _selectedDate,
       category: category,
+      totalInstallments: totalInstallments,
+      currentInstallment: totalInstallments > 1 ? null : 1,
       isRecurring: _isRecurring,
+      isTemplate: _isRecurring || totalInstallments > 1,
       description: descripition.isNotEmpty ? descripition : null,
       tags: tags,
     );
 
     try {
-      await notifier.addTransaction(newTrasaction);
+      final notifier = ref.read(transactionListProvider.notifier);
+
+      await notifier.saveTransaction(newTrasaction);
 
       if (!mounted) return;
 
+      ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
       Navigator.of(context).pop();
     } catch (e) {
       ScaffoldMessenger.of(
@@ -151,7 +159,6 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
   Widget build(BuildContext context) {
     final myLocale = Localizations.localeOf(context);
     final now = DateTime.now();
-    final transactionNotifier = ref.read(transactionListProvider.notifier);
     final categoriesAsync = ref.watch(categoryListProvider);
 
     return Scaffold(
@@ -161,7 +168,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
             ref
                 .read(preferencesProvider.notifier)
                 .setLastScreen(AppScreenEnum.home);
-                
+
             Navigator.pop(context);
           },
           icon: const Icon(LucideIcons.chevronLeft),
@@ -170,7 +177,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () => _saveTransaction(transactionNotifier),
+            onPressed: () => _saveTransaction(),
             icon: const Icon(LucideIcons.save),
           ),
         ],
@@ -295,7 +302,6 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                           }
                         },
                       ),
-
                       _buildInputField(
                         label: 'Descrição',
                         controller: _descriptionController,
@@ -382,7 +388,27 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                               );
                             },
                       ),
+                      _buildInputField(
+                        controller: _installmentController,
+                        label: 'Parcelas',
+                        hint: 'Ex: 12',
+                        keyboardType: TextInputType.numberWithOptions(),
+                        onChanged: (value) => setState(() {}),
+                        sufixIcon: Text('x'),
+                        validator: (value) {
+                          setState(() {
+                            value ??= '1';
+                          });
 
+                          final installment = int.tryParse(value!);
+
+                          if (installment == null) {
+                            return 'Somente números';
+                          }
+
+                          return null;
+                        },
+                      ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -436,7 +462,12 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                     title: const Text('Transação Recorrente'),
                     secondary: const Icon(LucideIcons.refreshCw),
                     value: _isRecurring,
-                    onChanged: (value) => setState(() => _isRecurring = value),
+                    onChanged:
+                        int.tryParse(_installmentController.text) == null ||
+                            int.tryParse(_installmentController.text)! <= 1 ||
+                            _installmentController.text.isEmpty
+                        ? (value) => setState(() => _isRecurring = value)
+                        : null,
                   ),
                 ],
               ),

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/tag_provider.dart';
@@ -12,7 +13,7 @@ TransactionService transactionService(Ref ref) {
   return TransactionService();
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class TransactionList extends _$TransactionList {
   @override
   Future<List<Transaction>> build() async {
@@ -31,30 +32,18 @@ class TransactionList extends _$TransactionList {
     );
   }
 
-  Future<void> addTransaction(Transaction t) async {
+  Future<void> saveTransaction(Transaction t, {bool creating = true}) async {
     final service = ref.read(transactionServiceProvider);
-    state = const AsyncLoading();
 
     state = await AsyncValue.guard(() async {
-      await service.createTransaction(t);
+      creating
+          ? await service.createTransaction(t)
+          : await service.updateTransaction(t);
 
       ref.invalidate(categoryListProvider);
+
       ref.invalidate(tagListProvider);
-      ref.invalidateSelf();
 
-      return await future;
-    });
-  }
-
-  Future<void> updateTransaction(Transaction t) async {
-    final service = ref.read(transactionServiceProvider);
-    state = const AsyncLoading();
-
-    state = await AsyncValue.guard(() async {
-      await service.updateTransaction(t);
-
-      ref.invalidate(categoryListProvider);
-      ref.invalidate(tagListProvider);
       ref.invalidateSelf();
 
       return await future;
@@ -69,6 +58,16 @@ class TransactionList extends _$TransactionList {
       await service.deleteTransaction(id);
 
       return current..removeWhere((t) => t.id == id);
+    });
+  }
+
+  Future<void> processRecurring() async {
+    final service = ref.read(transactionServiceProvider);
+
+    state = await AsyncValue.guard(() async {
+      await service.processRecurringTransactions();
+
+      return await future;
     });
   }
 }

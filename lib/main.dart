@@ -7,6 +7,7 @@ import 'package:pocket_vault/enums/theme_mode_enum.dart';
 import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/l10n/l10n.dart';
 import 'package:pocket_vault/providers/auth_provider.dart';
+import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/auth/auth_screen.dart';
 import 'package:pocket_vault/services/auth_service.dart';
@@ -34,6 +35,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
     ref.read(preferencesProvider.notifier).setLastTab(AppTabEnum.dashboard);
+    ref.read(transactionListProvider.notifier).processRecurring();
   }
 
   @override

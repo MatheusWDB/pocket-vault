@@ -10,8 +10,13 @@ class Transaction {
   final DateTime date;
   final String? description;
   final Category category;
-  final bool isRecurring;
   final List<Tag> tags;
+  final int? totalInstallments;
+  final int? currentInstallment;
+  final bool isRecurring;
+  final bool isTemplate;
+  final int? templateId;
+  final String? lastGeneratedMonth;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -21,36 +26,53 @@ class Transaction {
     required this.date,
     required this.category,
     required this.isRecurring,
+    required this.isTemplate,
     this.id,
     this.description,
     this.tags = const [],
+    this.totalInstallments,
+    this.currentInstallment,
+    this.templateId,
+    this.lastGeneratedMonth,
     this.createdAt,
     this.updatedAt,
   });
 
   Transaction copyWith({
-    int? id,
+    Nullable<int>? id,
     String? title,
     double? amount,
     DateTime? date,
     String? description,
     Category? category,
     bool? isRecurring,
+    bool? isTemplate,
+    int? templateId,
+    int? totalInstallments,
+    int? currentInstallment,
     List<Tag>? tags,
+    Nullable<String>? lastGeneratedMonth,
     DateTime? createdAt,
-    DateTime? updatedAt,
+    Nullable<DateTime>? updatedAt,
   }) {
     return Transaction(
-      id: id ?? this.id,
+      id: id != null ? id.value : this.id,
       title: title ?? this.title,
       amount: amount ?? this.amount,
       date: date ?? this.date,
       description: description ?? this.description,
       category: category ?? this.category,
       isRecurring: isRecurring ?? this.isRecurring,
+      isTemplate: isTemplate ?? this.isTemplate,
+      templateId: templateId ?? this.templateId,
+      totalInstallments: totalInstallments ?? this.totalInstallments,
+      currentInstallment: currentInstallment ?? this.currentInstallment,
       tags: tags ?? this.tags,
+      lastGeneratedMonth: lastGeneratedMonth != null
+          ? lastGeneratedMonth.value
+          : this.lastGeneratedMonth,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? DateTime.now(),
+      updatedAt: updatedAt != null ? updatedAt.value : DateTime.now(),
     );
   }
 
@@ -62,7 +84,12 @@ class Transaction {
       'date': date.toIso8601String(),
       'description': description,
       'categoryId': category.id,
+      'totalInstallments': totalInstallments,
+      'currentInstallment': currentInstallment,
       'isRecurring': isRecurring ? 1 : 0,
+      'isTemplate': isTemplate ? 1 : 0,
+      'templateId': templateId,
+      'lastGeneratedMonth': lastGeneratedMonth,
       'createdAt': (createdAt ?? DateTime.now()).toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
@@ -76,12 +103,17 @@ class Transaction {
       date: DateTime.parse(map['date'] as String),
       description: map['description'] as String?,
       category: Category.fromMap(map['category'] as Map<String, dynamic>),
-      isRecurring: map['isRecurring'] == 1,
       tags: List<Tag>.from(
         (map['tags'] as List).map<Tag>(
           (x) => Tag.fromMap(x as Map<String, dynamic>),
         ),
       ),
+      totalInstallments: map['totalInstallments'] as int?,
+      currentInstallment: map['currentInstallment'] as int?,
+      isRecurring: map['isRecurring'] == 1,
+      isTemplate: map['isTemplate'] == 1,
+      templateId: map['templateId'] as int?,
+      lastGeneratedMonth: map['lastGeneratedMonth'] as String?,
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'] as String)
           : null,
@@ -98,6 +130,11 @@ class Transaction {
 
   @override
   String toString() {
-    return 'Transaction(id: $id, title: $title, amount: $amount, date: $date, description: $description, category: $category, isRecurring: $isRecurring, tags: $tags, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Transaction(id: $id, title: $title, amount: $amount, date: $date, description: $description, category: $category, tags: $tags, totalInstallments: $totalInstallments, currentInstallment: $currentInstallment, isRecurring: $isRecurring, isTemplate: $isTemplate, lastGeneratedMonth: $lastGeneratedMonth, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
+}
+
+class Nullable<T> {
+  final T? value;
+  const Nullable(this.value);
 }

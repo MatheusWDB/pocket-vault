@@ -17,6 +17,7 @@ final List<Transaction> mockTransactions = [
     date: today,
     category: mockCategories[0],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[1], mockTags[8]],
   ),
   Transaction(
@@ -26,6 +27,7 @@ final List<Transaction> mockTransactions = [
     date: yesterday,
     category: mockCategories[1],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[3]],
   ),
   Transaction(
@@ -35,6 +37,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2026, 1, 5),
     category: mockCategories[7],
     isRecurring: true,
+    isTemplate: false,
     tags: [mockTags[6]],
   ),
   Transaction(
@@ -44,6 +47,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2026, 1, 10),
     category: mockCategories[2],
     isRecurring: true,
+    isTemplate: false,
     tags: [mockTags[0], mockTags[1]],
   ),
   Transaction(
@@ -53,6 +57,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2026, 2, 12),
     category: mockCategories[3],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[4]],
   ),
   Transaction(
@@ -62,6 +67,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2026, 2, 8),
     category: mockCategories[4],
     isRecurring: true,
+    isTemplate: false,
     tags: [mockTags[0], mockTags[9]],
   ),
   Transaction(
@@ -71,6 +77,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2026, 1, 3),
     category: mockCategories[5],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[9], mockTags[6]],
   ),
   Transaction(
@@ -80,6 +87,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2026, 1, 15),
     category: mockCategories[6],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[2]],
   ),
   Transaction(
@@ -89,6 +97,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2026, 2, 2),
     category: mockCategories[7],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[6]],
   ),
   Transaction(
@@ -98,6 +107,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2026, 1, 5),
     category: mockCategories[8],
     isRecurring: true,
+    isTemplate: false,
     tags: [mockTags[0]],
   ),
   Transaction(
@@ -107,6 +117,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2026, 2, 11),
     category: mockCategories[0],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[4], mockTags[8]],
   ),
   Transaction(
@@ -116,6 +127,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2026, 1, 18),
     category: mockCategories[4],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[8]],
   ),
   Transaction(
@@ -125,6 +137,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2026, 1, 10),
     category: mockCategories[1],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[1]],
   ),
 
@@ -138,6 +151,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 1, 8),
     category: mockCategories[0],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[1]],
   ),
   Transaction(
@@ -147,6 +161,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 1, 5),
     category: mockCategories[7],
     isRecurring: true,
+    isTemplate: false,
     tags: [mockTags[6]],
   ),
   Transaction(
@@ -156,6 +171,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 2, 10),
     category: mockCategories[2],
     isRecurring: true,
+    isTemplate: false,
     tags: [mockTags[0]],
   ),
   Transaction(
@@ -165,6 +181,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 3, 14),
     category: mockCategories[3],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[4]],
   ),
   Transaction(
@@ -174,6 +191,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 4, 20),
     category: mockCategories[4],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[8]],
   ),
   Transaction(
@@ -183,6 +201,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 5, 12),
     category: mockCategories[5],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[9]],
   ),
   Transaction(
@@ -192,6 +211,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 6, 18),
     category: mockCategories[6],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[2]],
   ),
   Transaction(
@@ -201,6 +221,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 7, 3),
     category: mockCategories[7],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[6]],
   ),
   Transaction(
@@ -210,6 +231,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 8, 6),
     category: mockCategories[8],
     isRecurring: true,
+    isTemplate: false,
     tags: [mockTags[0]],
   ),
   Transaction(
@@ -219,6 +241,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 9, 11),
     category: mockCategories[0],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[4]],
   ),
   Transaction(
@@ -228,6 +251,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 10, 22),
     category: mockCategories[1],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[1]],
   ),
   Transaction(
@@ -237,6 +261,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 11, 15),
     category: mockCategories[4],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[8]],
   ),
   Transaction(
@@ -246,6 +271,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2025, 12, 20),
     category: mockCategories[3],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[4]],
   ),
 
@@ -259,6 +285,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 1, 5),
     category: mockCategories[7],
     isRecurring: true,
+    isTemplate: false,
     tags: [mockTags[6]],
   ),
   Transaction(
@@ -268,6 +295,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 2, 9),
     category: mockCategories[0],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[1]],
   ),
   Transaction(
@@ -277,6 +305,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 3, 10),
     category: mockCategories[2],
     isRecurring: true,
+    isTemplate: false,
     tags: [mockTags[0]],
   ),
   Transaction(
@@ -286,6 +315,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 4, 12),
     category: mockCategories[3],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[4]],
   ),
   Transaction(
@@ -295,6 +325,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 5, 18),
     category: mockCategories[4],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[8]],
   ),
   Transaction(
@@ -304,6 +335,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 6, 25),
     category: mockCategories[5],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[9]],
   ),
   Transaction(
@@ -313,6 +345,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 7, 5),
     category: mockCategories[6],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[2]],
   ),
   Transaction(
@@ -322,6 +355,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 8, 14),
     category: mockCategories[7],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[6]],
   ),
   Transaction(
@@ -331,6 +365,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 9, 2),
     category: mockCategories[8],
     isRecurring: true,
+    isTemplate: false,
     tags: [mockTags[0]],
   ),
   Transaction(
@@ -340,6 +375,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 10, 11),
     category: mockCategories[0],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[4]],
   ),
   Transaction(
@@ -349,6 +385,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 11, 19),
     category: mockCategories[1],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[1]],
   ),
   Transaction(
@@ -358,6 +395,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 12, 22),
     category: mockCategories[4],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[8]],
   ),
   Transaction(
@@ -367,6 +405,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 12, 5),
     category: mockCategories[5],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[9]],
   ),
   Transaction(
@@ -376,6 +415,7 @@ final List<Transaction> mockTransactions = [
     date: DateTime(2024, 12, 5),
     category: mockCategories[5],
     isRecurring: false,
+    isTemplate: false,
     tags: [mockTags[9]],
   ),
 ];

@@ -14,6 +14,13 @@ class DatabaseHelper {
   static const String columnTransactionDescription = 'description';
   static const String columnTransactionCategoryId = 'categoryId';
   static const String columnTransactionIsRecurring = 'isRecurring';
+  static const String columnTransactionIsTemplate = 'isTemplate';
+  static const String columnTransactionTemplateId = 'templateId';
+  static const String columnTransactionTotalInstallments = 'totalInstallments';
+  static const String columnTransactionCurrentInstallment =
+      'currentInstallment';
+  static const String columnTransactionLastGeneratedMonth =
+      'lastGeneratedMonth';
   static const String columnTransactionCreatedAt = 'createdAt';
   static const String columnTransactionUpdatedAt = 'updatedAt';
 
@@ -80,7 +87,12 @@ class DatabaseHelper {
           $columnTransactionDate TEXT NOT NULL,
           $columnTransactionDescription TEXT,
           $columnTransactionCategoryId INTEGER NOT NULL,
-          $columnTransactionIsRecurring INTEGER NOT NULL,          
+          $columnTransactionTotalInstallments INTEGER,
+          $columnTransactionCurrentInstallment INTEGER,
+          $columnTransactionIsRecurring INTEGER NOT NULL,
+          $columnTransactionIsTemplate INTEGER NOT NULL,
+          $columnTransactionTemplateId INTEGER,
+          $columnTransactionLastGeneratedMonth TEXT,
           $columnTransactionCreatedAt TEXT NOT NULL,
           $columnTransactionUpdatedAt TEXT,
           FOREIGN KEY ($columnTransactionCategoryId) REFERENCES $tableCategory($columnCategoryId) ON UPDATE CASCADE
