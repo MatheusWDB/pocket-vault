@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/tag_provider.dart';
