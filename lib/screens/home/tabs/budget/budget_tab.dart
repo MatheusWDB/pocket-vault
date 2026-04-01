@@ -30,7 +30,7 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
     CurrencySymbolEnum currency,
   ) {
     final budgetCategories = categories
-        .where((c) => c.budgetLimit != null && c.budgetLimit! > 0)
+        .where((c) => (c.budgetLimit ?? 0.0) > 0.0)
         .toList();
 
     if (budgetCategories.isEmpty) {
@@ -56,18 +56,13 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
             return ListTile(
               contentPadding: const EdgeInsets.all(8),
               dense: true,
-              title: Column(
-                spacing: 4,
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(category.name, overflow: TextOverflow.ellipsis),
-                      Text(
-                        '$spentText de $limitText',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                    ],
+                  Text(category.name, overflow: TextOverflow.ellipsis),
+                  Text(
+                    '$spentText de $limitText',
+                    style: const TextStyle(fontSize: 14),
                   ),
                 ],
               ),
