@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
+import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
@@ -86,7 +87,10 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                     code: currencySymbol.code,
                     locale: currencySymbol.locale,
                   ),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
                 ),
               ],
             ),
@@ -159,10 +163,15 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                       ..sort((a, b) => b.compareTo(a));
 
                     return ListView.builder(
-                      itemCount: sortedDates.length,
+                      itemCount: sortedDates.length + 1,
                       itemBuilder: (context, dateIndex) {
-                        final date = sortedDates[dateIndex];
-                        final dayTransactions = grouped[date]!;
+                        if (dateIndex == sortedDates.length) {
+                          return const SizedBox(height: 25);
+                        }
+
+                        final DateTime date = sortedDates[dateIndex];
+                        final List<Transaction> dayTransactions =
+                            grouped[date]!;
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,9 +191,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                               ),
                             ),
                             ...dayTransactions.map(
-                              (t) => TransactionTile(
-                                transaction: t
-                              ),
+                              (t) => TransactionTile(transaction: t),
                             ),
                             const Divider(height: 1),
                           ],

@@ -8,10 +8,7 @@ import 'package:pocket_vault/utils/double_extensions.dart';
 class TransactionTile extends ConsumerWidget {
   final Transaction transaction;
 
-  const TransactionTile({
-    required this.transaction,
-    super.key,
-  });
+  const TransactionTile({required this.transaction, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -191,8 +191,12 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                 ..sort((a, b) => b.compareTo(a));
 
               return ListView.builder(
-                itemCount: sortedYears.length,
+                itemCount: sortedYears.length + 1,
                 itemBuilder: (context, yearIndex) {
+                  if (yearIndex == sortedYears.length) {
+                    return const SizedBox(height: 25);
+                  }
+
                   final year = sortedYears[yearIndex];
                   final datesInYear = groupedByYear[year]!;
                   final sortedDates = datesInYear.keys.toList()
