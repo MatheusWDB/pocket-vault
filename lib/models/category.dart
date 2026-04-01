@@ -28,17 +28,12 @@ class Category {
   }
 
   Map<String, dynamic> toMap() {
-    final Map<String, dynamic> map = {
+    return {
+      'id': id,
       'name': name,
       'budgetLimit': budgetLimit,
       'createdAt': (createdAt ?? DateTime.now()).toIso8601String(),
     };
-
-    if (id != null) {
-      map['id'] = id;
-    }
-
-    return map;
   }
 
   factory Category.fromMap(Map<String, dynamic> map) {
@@ -46,7 +41,7 @@ class Category {
       id: map['id'] as int?,
       name: map['name'] as String,
       budgetLimit: map['budgetLimit'] != null
-          ? map['budgetLimit'] as double
+          ? (map['budgetLimit'] as num).toDouble()
           : null,
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'])

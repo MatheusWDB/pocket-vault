@@ -268,7 +268,12 @@ class TransactionService {
           'lastGeneratedMonth': row['lastGeneratedMonth'],
           'createdAt': row['createdAt'],
           'updatedAt': row['updatedAt'],
-          'category': {'id': row['categoryId'], 'name': row['category_name']},
+          'category': {
+            'id': row['categoryId'],
+            'name': row['category_name'],
+            'budgetLimit': row['category_budgetLimit'],
+            'createdAt': row['category_created_at'],
+          },
           'tags': <Map<String, dynamic>>[],
         };
       }

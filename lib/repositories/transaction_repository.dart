@@ -19,6 +19,8 @@ class TransactionRepository {
 
   static final columnCatId = DatabaseHelper.columnCategoryId;
   static final columnCatName = DatabaseHelper.columnCategoryName;
+  static final columnCatBudgetLimit = DatabaseHelper.columnCategoryBudgetLimit;
+  static final columnCatCreatedAt = DatabaseHelper.columnCategoryCreatedAt;
 
   static final columnTagName = DatabaseHelper.columnTagName;
   static final columnTagId = DatabaseHelper.columnTagId;
@@ -189,6 +191,8 @@ class TransactionRepository {
         SELECT
           t.*,
           c.$columnCatName as category_name,
+          c.$columnCatBudgetLimit as category_budgetLimit,
+          c.$columnCatCreatedAt as category_created_at,
           tg.$columnTagId as tag_id,
           tg.$columnTagName as tag_name
         FROM $table t

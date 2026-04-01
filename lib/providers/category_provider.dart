@@ -21,10 +21,11 @@ class CategoryList extends _$CategoryList {
 
   Future<void> upsertCategory(Category category) async {
     final service = ref.read(categoryServiceProvider);
-    state = const AsyncLoading();
 
     state = await AsyncValue.guard(() async {
       await service.saveCategory(category);
+
+      ref.invalidate(transactionListProvider);
 
       ref.invalidateSelf();
 
@@ -56,7 +57,10 @@ Map<Category, double> categoriesTotalSpent(Ref ref) {
       totals[t.category] = (totals[t.category] ?? 0.0) + t.amount.abs();
     }
   }
-  return totals;
+  final sortedEntries = totals.entries.toList()
+    ..sort((a, b) => a.value.compareTo(b.value));
+
+  return Map.fromEntries(sortedEntries);
 }
 
 @riverpod

@@ -25,7 +25,7 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
 
   late final CurrencySymbolEnum _currency;
 
-  void _saveBudget() {
+  void _saveBudget() async {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategory == null) {
       setState(() {
@@ -36,11 +36,13 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
 
     final categoryNotifier = ref.read(categoryListProvider.notifier);
 
-    categoryNotifier.upsertCategory(
+    await categoryNotifier.upsertCategory(
       _selectedCategory!.copyWith(
         budgetLimit: _budgetLimitController.doubleValue,
       ),
     );
+
+    if (!mounted) return;
 
     Navigator.pop(context);
   }

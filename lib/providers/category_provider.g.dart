@@ -75,7 +75,7 @@ final class CategoryListProvider
   CategoryList create() => CategoryList();
 }
 
-String _$categoryListHash() => r'b4647f4724040c866b20c877fa4d9044a046d7e0';
+String _$categoryListHash() => r'db695a0e1b026a084feca6515fa688b7f3f44666';
 
 abstract class _$CategoryList extends $AsyncNotifier<List<Category>> {
   FutureOr<List<Category>> build();
@@ -141,7 +141,7 @@ final class CategoriesTotalSpentProvider
 }
 
 String _$categoriesTotalSpentHash() =>
-    r'7f1671f189a6ac185f7a8b5803fefca1a55b263b';
+    r'56f307a71f869c580c81cbc20ec20dd1233a7efc';
 
 @ProviderFor(categoriesAvailableForBudget)
 final categoriesAvailableForBudgetProvider =
