@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
+import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/budget_tab.dart';
 import 'package:pocket_vault/screens/home/tabs/dashboard/dashboard_tab.dart';
@@ -34,7 +35,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ref
           .read(preferencesProvider.notifier)
           .setLastTab(AppTabEnum.values[index]);
-          
+
       final filterNotifier = ref.read(transactionFilterProvider.notifier);
 
       (index == 1) ? filterNotifier.clear() : filterNotifier.standardFilter();
@@ -48,7 +49,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
     final lastTab = ref.read(preferencesProvider).lastTab!;
 
     _activeMenu = lastTab.index;
@@ -74,6 +74,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               );
             },
             icon: const Icon(LucideIcons.settings),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_forever, color: Colors.red),
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Resetar Banco?'),
+                  content: const Text(
+                    'Isso apagará TODAS as transações e categorias.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancelar'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text(
+                        'Resetar',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirm == true) {
+                final service = ref.read(transactionServiceProvider);
+                await service.resetDatabase();
+
+                ref.invalidate(transactionListProvider);
+
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      duration: Duration(milliseconds: 750),
+                      content: Text(
+                        'Banco de dados resetado! Reinicie o app se necessário.',
+                      ),
+                    ),
+                  );
+                }
+              }
+            },
           ),
         ],
         actionsPadding: const EdgeInsets.all(8.0),

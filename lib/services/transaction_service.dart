@@ -281,4 +281,17 @@ class TransactionService {
 
     return transactions.values.map(((t) => Transaction.fromMap(t))).toList();
   }
+
+  Future<void> resetDatabase() async {
+    final dbPath = await _dbHelper.database.then((db) => db.path);
+
+    final db = await _dbHelper.database;
+    await db.close();
+
+    final file = File(dbPath);
+    if (await file.exists()) {
+      await file.delete();
+      debugPrint('Banco de dados deletado com sucesso!');
+    }
+  }
 }
