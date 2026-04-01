@@ -396,9 +396,11 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                         onChanged: (value) => setState(() {}),
                         sufixIcon: Text('x'),
                         validator: (value) {
-                          setState(() {
-                            value ??= '1';
-                          });
+                          if (value == null || value.isEmpty) {
+                            setState(() {
+                              value = '1';
+                            });
+                          }
 
                           final installment = int.tryParse(value!);
 
