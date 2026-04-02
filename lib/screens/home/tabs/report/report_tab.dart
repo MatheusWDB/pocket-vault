@@ -189,11 +189,8 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
                   SizedBox(height: 10),
                   LayoutBuilder(
                     builder: (context, constraints) {
-                      final columns = totalExpenses.length % 2 != 0
-                          ? totalExpenses.length == 1
-                                ? 1
-                                : 3
-                          : 2;
+                      final columns = totalExpenses.length == 1 ? 1 : 2;
+
                       final itemWidth = (constraints.maxWidth / columns) - 10;
 
                       return Wrap(
@@ -220,8 +217,13 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
             ),
           ),
         ),
-        ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.all(15),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12), //
+            ),
+          ),
           onPressed: () async {
             final transactions = ref.watch(transactionListProvider).value ?? [];
 
@@ -232,8 +234,11 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
               locale: myLocale,
             ).generatePdf();
           },
-          icon: Icon(LucideIcons.save),
-          label: Text('Exportar PDF'),
+          child: Row(
+            spacing: 8,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [Icon(LucideIcons.save), Text('Exportar PDF')],
+          ),
         ),
         SizedBox(height: 18),
       ],

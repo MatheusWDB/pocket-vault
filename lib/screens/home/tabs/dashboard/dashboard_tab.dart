@@ -32,6 +32,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          spacing: 8,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -40,7 +41,11 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                 Icon(icon, color: color),
                 Text(
                   label,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -70,7 +75,9 @@ class DashboardTab extends ConsumerWidget with FilterActions {
     final transactionsAsync = ref.watch(transactionListProvider);
     final filter = ref.watch(transactionFilterProvider);
 
-    final displayYear = filter.start?.year ?? DateTime.now().year;
+    final displayYear =
+        filter.start?.toMonthYear(myLocale) ??
+        DateTime.now().toMonthYear(myLocale);
 
     return Column(
       spacing: 16.0,
@@ -93,11 +100,6 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                   ),
                 ),
               ],
-            ),
-            IconButton(
-              onPressed: () =>
-                  showFilterPicker(context, showAllYearsOption: false),
-              icon: const Icon(LucideIcons.funnel),
             ),
           ],
         ),
@@ -135,7 +137,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    displayYear.toString(),
+                    displayYear,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

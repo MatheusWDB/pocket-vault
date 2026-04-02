@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 
-enum AppThemeModeEnum { system, light, dark }
+enum AppThemeModeEnum {
+  system('Sistema'),
+  light('Claro'),
+  dark('Escuro');
+
+  final String displayName;
+  
+  const AppThemeModeEnum(this.displayName);
+}
 
 extension AppThemeModeEnumX on AppThemeModeEnum {
   ThemeMode toThemeMode() {

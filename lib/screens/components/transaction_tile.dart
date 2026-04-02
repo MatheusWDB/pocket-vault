@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
@@ -13,20 +14,22 @@ class TransactionTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currencySymbol = ref.watch(preferencesProvider).currencySymbol;
+    final currentTab = ref.read(preferencesProvider).lastTab;
     final isIncome = transaction.amount > 0;
 
     return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: (isIncome ? Colors.green : Colors.red).withValues(
-          alpha: 0.1,
-        ),
-        radius: 18.0,
-        child: Icon(
-          isIncome ? LucideIcons.arrowUp : LucideIcons.arrowDown,
-          color: isIncome ? Colors.green : Colors.red,
-          size: 18.0,
-        ),
-      ),
+      leading: currentTab == AppTabEnum.dashboard
+          ? CircleAvatar(
+              backgroundColor: (isIncome ? Colors.green : Colors.red)
+                  .withValues(alpha: 0.1),
+              radius: 18.0,
+              child: Icon(
+                isIncome ? LucideIcons.arrowUp : LucideIcons.arrowDown,
+                color: isIncome ? Colors.green : Colors.red,
+                size: 18.0,
+              ),
+            )
+          : null,
       title: Text(
         transaction.title,
         maxLines: 1,

@@ -23,7 +23,7 @@ class SettingsDropdownTile<T> extends StatelessWidget {
       title: Text(title),
       trailing: DropdownMenu<T>(
         initialSelection: value,
-        width: 130,
+        width: 140,
         onSelected: (v) {
           if (v != null && v != value) {
             onChanged(v);

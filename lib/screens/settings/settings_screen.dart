@@ -283,7 +283,7 @@ class SettingsScreen extends ConsumerWidget {
                       title: 'Tema',
                       value: prefs.themeMode,
                       values: AppThemeModeEnum.values,
-                      label: (t) => t.name,
+                      label: (t) => t.displayName,
                       onChanged: prefsNotifier.setTheme,
                     ),
           
