@@ -56,6 +56,12 @@ class TransactionList extends _$TransactionList {
     state = await AsyncValue.guard(() async {
       await service.deleteTransaction(id);
 
+      ref.invalidate(categoryListProvider);
+
+      ref.invalidate(tagListProvider);
+
+      ref.invalidateSelf();
+
       return current..removeWhere((t) => t.id == id);
     });
   }
@@ -106,4 +112,17 @@ Future<List<String>> transactionTitles(Ref ref) async {
   final service = ref.watch(transactionServiceProvider);
 
   return await service.getAllTitles();
+}
+
+@riverpod
+Future<Transaction?> transactionById(Ref ref, {int? id}) async {
+  if (id == null) return null;
+  
+  final list = ref.read(transactionListProvider).value;
+  final memoized = list?.where((t) => t.id == id).firstOrNull;
+
+  if (memoized != null) return memoized;
+
+  final service = ref.watch(transactionServiceProvider);
+  return await service.getTransactionById(id);
 }

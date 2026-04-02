@@ -34,6 +34,9 @@ extension DateTimeExtensions on DateTime {
   String toFullDateNumeric(Locale locale) {
     return DateFormat.yMd(locale.toString()).format(this);
   }
+  String toDateTime(Locale locale) {
+    return DateFormat.yMd(locale.toString()).add_Hm().format(this);
+  }
 
   DateTime addMonths(int monthsToAdd) {
     DateTime next = DateTime(year, month + monthsToAdd, day);

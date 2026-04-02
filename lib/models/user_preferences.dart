@@ -10,6 +10,7 @@ class UserPreferences {
   final DateTime? lastBackupAt;
   final AppScreenEnum lastScreen;
   final AppTabEnum? lastTab;
+  final int? lastTransactionDetailId;
 
   const UserPreferences({
     required this.lastScreen,
@@ -19,6 +20,7 @@ class UserPreferences {
     this.userName,
     this.lastBackupAt,
     this.lastTab,
+    this.lastTransactionDetailId,
   });
 
   UserPreferences copyWith({
@@ -29,6 +31,7 @@ class UserPreferences {
     DateTime? lastBackupAt,
     AppScreenEnum? lastScreen,
     AppTabEnum? lastTab,
+    int? lastTransactionDetailId,
   }) {
     return UserPreferences(
       userName: userName ?? this.userName,
@@ -38,6 +41,7 @@ class UserPreferences {
       lastBackupAt: lastBackupAt ?? this.lastBackupAt,
       lastScreen: lastScreen ?? this.lastScreen,
       lastTab: lastTab ?? this.lastTab,
+      lastTransactionDetailId: lastTransactionDetailId ?? this.lastTransactionDetailId,
     );
   }
 

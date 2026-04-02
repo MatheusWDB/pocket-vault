@@ -81,7 +81,7 @@ final class TransactionListProvider
   TransactionList create() => TransactionList();
 }
 
-String _$transactionListHash() => r'f207928be1770a3a6ad8915e50b58923f7edeb53';
+String _$transactionListHash() => r'28d2a2ac897f19bbdf8123763cb0c491bc067808';
 
 abstract class _$TransactionList extends $AsyncNotifier<List<Transaction>> {
   FutureOr<List<Transaction>> build();
@@ -188,3 +188,78 @@ final class TransactionTitlesProvider
 }
 
 String _$transactionTitlesHash() => r'b3eeb5642bb9d2259672033257ebd346b3a8fc66';
+
+@ProviderFor(transactionById)
+final transactionByIdProvider = TransactionByIdFamily._();
+
+final class TransactionByIdProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<Transaction?>,
+          Transaction?,
+          FutureOr<Transaction?>
+        >
+    with $FutureModifier<Transaction?>, $FutureProvider<Transaction?> {
+  TransactionByIdProvider._({
+    required TransactionByIdFamily super.from,
+    required int? super.argument,
+  }) : super(
+         retry: null,
+         name: r'transactionByIdProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$transactionByIdHash();
+
+  @override
+  String toString() {
+    return r'transactionByIdProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Transaction?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Transaction?> create(Ref ref) {
+    final argument = this.argument as int?;
+    return transactionById(ref, id: argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is TransactionByIdProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$transactionByIdHash() => r'efc0036c4fd17b38cc4de88978c4234afd9e5127';
+
+final class TransactionByIdFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<Transaction?>, int?> {
+  TransactionByIdFamily._()
+    : super(
+        retry: null,
+        name: r'transactionByIdProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  TransactionByIdProvider call({int? id}) =>
+      TransactionByIdProvider._(argument: id, from: this);
+
+  @override
+  String toString() => r'transactionByIdProvider';
+}

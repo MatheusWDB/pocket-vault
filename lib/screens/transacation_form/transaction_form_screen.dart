@@ -14,7 +14,8 @@ import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
-  const TransactionFormScreen({super.key});
+  final Transaction? transaction;
+  const TransactionFormScreen({this.transaction, super.key});
 
   @override
   ConsumerState<TransactionFormScreen> createState() =>
@@ -30,13 +31,12 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
   final List<TextEditingController> _tagsControllers = [];
   late final CurrencyTextFieldController _amountController;
   final _installmentController = TextEditingController();
-  late DateTime _selectedDate;
+  DateTime _selectedDate = DateTime.now();
   bool _isRevenue = false;
   bool _isRecurring = false;
 
   String? _amountError;
 
-  final now = DateTime.now();
   late final CurrencySymbolEnum _currency;
 
   Widget _buildInputField({
@@ -93,23 +93,38 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
         .map((c) => Tag(name: c.text.trim()))
         .toList();
 
-    final newTrasaction = Transaction(
-      title: title,
-      amount: _isRevenue ? amount : -amount,
-      date: _selectedDate,
-      category: category,
-      totalInstallments: totalInstallments,
-      currentInstallment: totalInstallments > 1 ? null : 1,
-      isRecurring: _isRecurring,
-      isTemplate: _isRecurring || totalInstallments > 1,
-      description: descripition.isNotEmpty ? descripition : null,
-      tags: tags,
-    );
+    final bool edit = widget.transaction != null;
+
+    final transactionToSave = edit
+        ? widget.transaction!.copyWith(
+            title: title,
+            amount: _isRevenue ? amount : -amount,
+            date: _selectedDate,
+            category: category,
+            totalInstallments: totalInstallments,
+            currentInstallment: totalInstallments > 1 ? null : 1,
+            isRecurring: _isRecurring,
+            isTemplate: _isRecurring || totalInstallments > 1,
+            description: descripition.isNotEmpty ? descripition : null,
+            tags: tags,
+          )
+        : Transaction(
+            title: title,
+            amount: _isRevenue ? amount : -amount,
+            date: _selectedDate,
+            category: category,
+            totalInstallments: totalInstallments,
+            currentInstallment: totalInstallments > 1 ? null : 1,
+            isRecurring: _isRecurring,
+            isTemplate: _isRecurring || totalInstallments > 1,
+            description: descripition.isNotEmpty ? descripition : null,
+            tags: tags,
+          );
 
     try {
       final notifier = ref.read(transactionListProvider.notifier);
 
-      await notifier.saveTransaction(newTrasaction);
+      await notifier.saveTransaction(transactionToSave, creating: !edit);
 
       if (!mounted) return;
 
@@ -126,7 +141,33 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
   void initState() {
     super.initState();
 
-    _selectedDate = now;
+    double initDoubleValue = 0.0;
+
+    if (widget.transaction != null) {
+      final transaction = widget.transaction;
+
+      initDoubleValue = transaction!.amount.abs();
+      _categoryController.text = transaction.category.name;
+      _selectedDate = transaction.date;
+      _titleController.text = transaction.title;
+      _installmentController.text = transaction.totalInstallments.toString();
+      _isRevenue = transaction.amount >= 0.0;
+      _descriptionController.text = transaction.description ?? '';
+
+      if (widget.transaction!.templateId != null) {
+        final template = ref
+            .read(transactionByIdProvider(id: widget.transaction!.templateId!))
+            .value;
+
+        if (template != null) _isRecurring = template.isRecurring;
+      }
+
+      if (transaction.tags.isNotEmpty) {
+        for (Tag tag in transaction.tags) {
+          _tagsControllers.add(TextEditingController(text: tag.name));
+        }
+      }
+    }
 
     _currency = ref.read(preferencesProvider).currencySymbol;
 
@@ -134,7 +175,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
       currencySymbol: _currency.symbol,
       decimalSymbol: _currency.locale == 'pt_BR' ? ',' : '.',
       thousandSymbol: _currency.locale == 'pt_BR' ? '.' : ',',
-      initDoubleValue: 0.0,
+      initDoubleValue: initDoubleValue,
       numberOfDecimals: _currency.decimalDigits,
       showZeroValue: true,
       minValue: 0.0,
@@ -161,19 +202,30 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
     final now = DateTime.now();
     final categoriesAsync = ref.watch(categoryListProvider);
 
+    final bool edit = widget.transaction != null;
+
+    final String title = edit ? 'Editar Transação' : 'Nova Transação';
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
             ref
                 .read(preferencesProvider.notifier)
-                .setLastScreen(AppScreenEnum.home);
+                .setLastTransactionDetailId(null);
+            edit
+                ? ref
+                      .read(preferencesProvider.notifier)
+                      .setLastScreen(AppScreenEnum.details)
+                : ref
+                      .read(preferencesProvider.notifier)
+                      .setLastScreen(AppScreenEnum.home);
 
             Navigator.pop(context);
           },
           icon: const Icon(LucideIcons.chevronLeft),
         ),
-        title: const Text('Nova Transação'),
+        title: Text(title),
         centerTitle: true,
         actions: [
           IconButton(

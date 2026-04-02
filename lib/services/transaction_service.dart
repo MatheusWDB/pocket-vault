@@ -5,7 +5,6 @@ import 'package:pocket_vault/data/database_helper.dart';
 import 'package:pocket_vault/mock/mock_transaction.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/repositories/transaction_repository.dart';
-import 'package:pocket_vault/repositories/transaction_tags_repository.dart';
 import 'package:pocket_vault/services/category_service.dart';
 import 'package:pocket_vault/services/tag_service.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
@@ -16,9 +15,6 @@ class TransactionService {
   final _repo = TransactionRepository(DatabaseHelper.instance);
   final _categoryService = CategoryService();
   final _tagService = TagService();
-  final _repoTransactionTags = TransactionTagsRepository(
-    DatabaseHelper.instance,
-  );
 
   Future<List<Transaction>> getAllTransactions() async {
     final result = await _repo.findAll();
@@ -50,9 +46,18 @@ class TransactionService {
         executor: txn,
       );
 
+      if (transaction.tags.isNotEmpty) {
+        await _tagService.linkTagsToTransaction(
+          transactionId,
+          transaction.tags,
+          executor: txn,
+        );
+      }
+
       if (transaction.isRecurring) {
         await processRecurringTransactions(executor: txn);
       }
+
       if (transaction.totalInstallments! > 1) {
         await processInstallmentsTransactions(transactionId, executor: txn);
       }
@@ -63,18 +68,23 @@ class TransactionService {
     final db = await _dbHelper.database;
 
     await db.transaction((txn) async {
-      await _repo.update(transaction.toMap(), executor: txn);
-
-      await _repoTransactionTags.deleteAllByTransaction(
-        transaction.id!,
+      final category = await _categoryService.ensureCategoryExists(
+        transaction.category,
         executor: txn,
       );
 
-      await _tagService.linkTagsToTransaction(
-        transaction.id!,
-        transaction.tags,
+      await _repo.update(
+        transaction.copyWith(category: category).toMap(),
         executor: txn,
       );
+
+      if (transaction.tags.isNotEmpty) {
+        await _tagService.linkTagsToTransaction(
+          transaction.id!,
+          transaction.tags,
+          executor: txn,
+        );
+      }
     });
   }
 

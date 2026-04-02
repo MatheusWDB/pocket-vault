@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
+import 'package:pocket_vault/screens/transaction_details/transaction_details_screen.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
 class TransactionTile extends ConsumerWidget {
@@ -48,6 +49,22 @@ class TransactionTile extends ConsumerWidget {
           fontSize: 14,
         ),
       ),
+      onTap: () {
+        ref
+            .read(preferencesProvider.notifier)
+            .setLastTransactionDetailId(transaction.id);
+        ref
+            .read(preferencesProvider.notifier)
+            .setLastScreen(AppScreenEnum.details);
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                TransactionDetailsScreen(transaction: transaction),
+          ),
+        );
+      },
     );
   }
 }

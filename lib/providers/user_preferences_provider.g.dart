@@ -20,7 +20,7 @@ final class PreferencesProvider
         argument: null,
         retry: null,
         name: r'preferencesProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -41,7 +41,7 @@ final class PreferencesProvider
   }
 }
 
-String _$preferencesHash() => r'fcc1d835cc7f063e7e71377d443839daa8b7dcda';
+String _$preferencesHash() => r'8b886d3c0b0073bff2f0cc08e0c3e640ba76336a';
 
 abstract class _$Preferences extends $Notifier<UserPreferences> {
   UserPreferences build();

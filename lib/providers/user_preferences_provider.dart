@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 part 'user_preferences_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class Preferences extends _$Preferences {
   Future<SharedPreferences> get _prefs async =>
       await SharedPreferences.getInstance();
@@ -19,6 +19,7 @@ class Preferences extends _$Preferences {
   static const _lastBackupKey = 'last_backup_at';
   static const _lastScreen = 'last_screen';
   static const _lastTab = 'last_tab';
+  static const _lastTransactionId = 'last_transaction_id';
 
   @override
   UserPreferences build() {
@@ -37,6 +38,7 @@ class Preferences extends _$Preferences {
     final lastBackupMillis = prefs.getInt(_lastBackupKey);
     final lastScreenIndex = prefs.getInt(_lastScreen);
     final lastTabIndex = prefs.getInt(_lastTab);
+    final lastTransactionId = prefs.getInt(_lastTransactionId);
 
     state = state.copyWith(
       userName: userName ?? state.userName,
@@ -57,6 +59,8 @@ class Preferences extends _$Preferences {
           (lastScreenIndex == AppScreenEnum.home.index && lastTabIndex != null)
           ? AppTabEnum.values[lastTabIndex]
           : state.lastTab,
+      lastTransactionDetailId:
+          lastTransactionId ?? state.lastTransactionDetailId,
     );
   }
 
@@ -116,6 +120,18 @@ class Preferences extends _$Preferences {
       await prefs.setInt(_lastTab, tab.index);
     } else {
       await prefs.remove(_lastTab);
+    }
+  }
+
+  Future<void> setLastTransactionDetailId(int? id) async {
+    final prefs = await _prefs;
+
+    state = state.copyWith(lastTransactionDetailId: id);
+
+    if (id != null) {
+      await prefs.setInt(_lastTransactionId, id);
+    } else {
+      await prefs.remove(_lastTransactionId);
     }
   }
 }

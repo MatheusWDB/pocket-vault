@@ -11,7 +11,7 @@ import 'package:pocket_vault/screens/home/tabs/report/report_tab.dart';
 import 'package:pocket_vault/screens/home/tabs/transaction/transaction_tab.dart';
 import 'package:pocket_vault/screens/home/widgets/custom_bottom_app_bar.dart';
 import 'package:pocket_vault/screens/settings/settings_screen.dart';
-import 'package:pocket_vault/screens/transacationForm/transaction_form_screen.dart';
+import 'package:pocket_vault/screens/transacation_form/transaction_form_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -49,7 +49,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    final lastTab = ref.read(preferencesProvider).lastTab!;
+    final lastTab = ref.read(preferencesProvider).lastTab ?? AppTabEnum.dashboard;
 
     _activeMenu = lastTab.index;
   }
@@ -129,6 +129,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
+          ref
+              .read(preferencesProvider.notifier)
+              .setLastTransactionDetailId(null);
+
           ref
               .read(preferencesProvider.notifier)
               .setLastScreen(AppScreenEnum.form);

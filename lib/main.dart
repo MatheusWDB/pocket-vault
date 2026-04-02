@@ -35,6 +35,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
     ref.read(preferencesProvider.notifier).setLastTab(AppTabEnum.dashboard);
+    ref.read(preferencesProvider.notifier).setLastTransactionDetailId(null);
     ref.read(transactionListProvider.notifier).processRecurring();
   }
 
@@ -58,13 +59,27 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
     final themeMode = ref.watch(preferencesProvider).themeMode;
     final isAuthenticated = ref.watch(authStateProvider);
     final lastScreen = ref.read(preferencesProvider).lastScreen;
+    Widget home = lastScreen.toScreen();
+
+    if (lastScreen == AppScreenEnum.details ||
+        lastScreen == AppScreenEnum.form) {
+      final lastTransactionId = ref
+          .read(preferencesProvider)
+          .lastTransactionDetailId;
+
+      final transactionDetails = ref
+          .read(transactionByIdProvider(id: lastTransactionId))
+          .value;
+
+      home = lastScreen.toScreen(transactionDetails);
+    }
 
     return MaterialApp(
       title: 'PocketVault Personal Finance',
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: L10n.all,
       themeMode: themeMode.toThemeMode(),
-      home: lastScreen.toScreen(),
+      home: home,
       builder: (context, child) {
         return Stack(
           children: [?child, if (!isAuthenticated) const AuthScreen()],
