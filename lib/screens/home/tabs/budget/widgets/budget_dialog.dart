@@ -123,10 +123,7 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
                         children: [
                           Text(
                             _budgetLimitError!,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 12,
-                            ),
+                            style: const TextStyle(fontSize: 12),
                           ),
                         ],
                       ),

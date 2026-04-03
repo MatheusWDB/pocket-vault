@@ -11,6 +11,7 @@ import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/auth/auth_screen.dart';
 import 'package:pocket_vault/services/auth_service.dart';
+import 'package:pocket_vault/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -79,6 +80,8 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: L10n.all,
       themeMode: themeMode.toThemeMode(),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       home: home,
       builder: (context, child) {
         return Stack(

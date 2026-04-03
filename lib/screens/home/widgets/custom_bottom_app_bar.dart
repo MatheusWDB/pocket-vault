@@ -11,10 +11,14 @@ class MyCustomBottomAppBar extends StatelessWidget {
     super.key,
   });
 
-  Widget _buildItem(IconData icon, int index) {
+  Widget _buildItem(IconData icon, int index, context) {
+    final theme = Theme.of(context).bottomNavigationBarTheme;
     final isSelected = activeIndex == index;
     return IconButton(
-      icon: Icon(icon, color: isSelected ? Colors.blueAccent : Colors.grey),
+      icon: Icon(
+        icon,
+        color: isSelected ? theme.selectedItemColor : theme.unselectedItemColor,
+      ),
       onPressed: () => onDestinationSelected(index),
     );
   }
@@ -32,16 +36,16 @@ class MyCustomBottomAppBar extends StatelessWidget {
           Row(
             spacing: 20.0,
             children: [
-              _buildItem(LucideIcons.layoutDashboard, 0),
-              _buildItem(LucideIcons.receiptText, 1),
+              _buildItem(LucideIcons.layoutDashboard, 0, context),
+              _buildItem(LucideIcons.receiptText, 1, context),
             ],
           ),
 
           Row(
             spacing: 20.0,
             children: [
-              _buildItem(LucideIcons.target, 2),
-              _buildItem(LucideIcons.chartPie, 3),
+              _buildItem(LucideIcons.target, 2, context),
+              _buildItem(LucideIcons.chartPie, 3, context),
             ],
           ),
         ],

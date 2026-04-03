@@ -9,6 +9,7 @@ import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
 import 'package:pocket_vault/screens/components/transaction_tile.dart';
 import 'package:pocket_vault/screens/home/tabs/transaction/widgets/filter_chip_item.dart';
+import 'package:pocket_vault/theme/app_theme.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/transactions_extension.dart';
 
@@ -26,6 +27,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
   @override
   Widget build(BuildContext context) {
     final myLocale = Localizations.localeOf(context);
+    final appColors = Theme.of(context).extension<AppColors>()!;
     final transactionsAsync = ref.watch(transactionListProvider);
     final titlesAsync = ref.watch(transactionTitlesProvider);
     final categoriesAsync = ref.watch(categoryListProvider);
@@ -44,7 +46,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                 builder: (context, controller) {
                   return Container(
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
+                      border: Border.all(color: appColors.balanceCardSurface),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.all(10.0),
@@ -54,17 +56,11 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                       children: [
                         if (filter.tags.isEmpty && filter.titles.isEmpty) ...[
                           Row(
+                            spacing: 6,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Icon(
-                                LucideIcons.search,
-                                color: Colors.grey.shade400,
-                                size: 20,
-                              ),
-                              Text(
-                                'Filtrar por nome ou tag...',
-                                style: TextStyle(color: Colors.grey.shade500),
-                              ),
+                              Icon(LucideIcons.search, size: 20),
+                              Text('Filtrar por nome ou tag...'),
                             ],
                           ),
                         ],
@@ -212,7 +208,6 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                           style: TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
                           ),
                         ),
                       ),
@@ -231,7 +226,6 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                               child: Text(
                                 date.toShortDate(myLocale),
                                 style: TextStyle(
-                                  color: Colors.grey[600],
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
                                 ),

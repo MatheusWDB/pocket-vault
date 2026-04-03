@@ -11,6 +11,7 @@ import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
+import 'package:pocket_vault/theme/app_theme.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
@@ -199,6 +200,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
   @override
   Widget build(BuildContext context) {
     final myLocale = Localizations.localeOf(context);
+    final appColors = Theme.of(context).extension<AppColors>()!;
     final now = DateTime.now();
     final categoriesAsync = ref.watch(categoryListProvider);
 
@@ -265,16 +267,13 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                                   children: [
                                     Text(
                                       _amountError!,
-                                      style: const TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 12,
-                                      ),
+                                      style: const TextStyle(fontSize: 12),
                                     ),
                                   ],
                                 ),
                         ),
                         style: const TextStyle(
-                          fontSize: 26,
+                          fontSize: 25,
                           fontWeight: FontWeight.bold,
                         ),
                         onChanged: (value) {
@@ -298,9 +297,13 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                       SegmentedButton<bool>(
                         showSelectedIcon: false,
                         style: SegmentedButton.styleFrom(
+                          selectedBackgroundColor: _isRevenue
+                              ? appColors.incomeBg
+                              : appColors.expenseBg,
+
                           selectedForegroundColor: _isRevenue
-                              ? Colors.green
-                              : Colors.red,
+                              ? appColors.income
+                              : appColors.expense,
                         ),
                         selected: {_isRevenue},
                         onSelectionChanged: (newSelection) {
@@ -412,9 +415,9 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                                 ),
                                 error: (error, _) => ListTile(
                                   title: Text('Erro: $error'),
-                                  leading: const Icon(
+                                  leading: Icon(
                                     LucideIcons.circleAlert,
-                                    color: Colors.red,
+                                    color: appColors.expense,
                                   ),
                                 ),
                               ),
@@ -475,8 +478,17 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                               () =>
                                   _tagsControllers.add(TextEditingController()),
                             ),
-                            icon: const Icon(LucideIcons.plus, size: 18),
-                            label: const Text('Add'),
+                            icon: Icon(
+                              LucideIcons.plus,
+                              size: 18,
+                              color: Theme.of(context).iconTheme.color,
+                            ),
+                            label: Text(
+                              'Add',
+                              style: TextStyle(
+                                color: Theme.of(context).iconTheme.color,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -493,9 +505,9 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                               prefix: true,
                               hint: 'Tag${index > 0 ? index + 1 : ''}...',
                               sufixIcon: IconButton(
-                                icon: const Icon(
+                                icon: Icon(
                                   LucideIcons.circleMinus,
-                                  color: Colors.red,
+                                  color: appColors.expense,
                                   size: 20,
                                 ),
                                 onPressed: () => setState(() {

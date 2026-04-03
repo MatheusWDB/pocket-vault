@@ -16,6 +16,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final myLocale = Localizations.localeOf(context);
+    final theme = Theme.of(context);
     final currencySymbol = ref.watch(preferencesProvider).currencySymbol;
 
     final String amountText = transaction.amount.toCurrency(
@@ -56,7 +57,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE3F2FD).withValues(alpha: 0.8),
+                      color: theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: const Icon(LucideIcons.receiptText, size: 50),
@@ -76,13 +77,12 @@ class TransactionDetailsScreen extends ConsumerWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blueGrey.withValues(alpha: 0.1),
+                      color: theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       categoryText,
                       style: TextStyle(
-                        color: Colors.blueGrey[700],
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
@@ -129,7 +129,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
                                 return Text(
                                   '#${tag.name}',
                                   style: TextStyle(
-                                    color: Colors.lightBlue,
+                                    color: theme.colorScheme.secondary,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 );
@@ -146,7 +146,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: theme.colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(

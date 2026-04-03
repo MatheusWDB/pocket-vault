@@ -24,8 +24,6 @@ class FilterChipItem extends StatelessWidget {
       onSelected: isSelectable ? onSelected : (bool value) {},
       onDeleted: onDeleted,
       showCheckmark: false,
-      selectedColor: Colors.blueAccent.withValues(alpha: 0.2),
-      checkmarkColor: Colors.blueAccent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
   }

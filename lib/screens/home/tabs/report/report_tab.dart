@@ -164,7 +164,6 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
                             Text(
                               'TOTAL GASTO',
                               style: TextStyle(
-                                color: Colors.grey[600],
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                                 letterSpacing: 0.5,
@@ -176,7 +175,6 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
                                 locale: currency.locale,
                               ),
                               style: const TextStyle(
-                                color: Colors.black,
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -221,7 +219,7 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.all(15),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12), //
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
           onPressed: () async {

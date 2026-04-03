@@ -8,6 +8,7 @@ import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
 import 'package:pocket_vault/screens/components/transaction_tile.dart';
+import 'package:pocket_vault/theme/app_theme.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 import 'package:pocket_vault/utils/transactions_extension.dart';
@@ -21,14 +22,11 @@ class DashboardTab extends ConsumerWidget with FilterActions {
     required Color color,
     required IconData icon,
     required CurrencySymbolEnum currencySymbol,
+    required AppColors appColors,
   }) {
     return Card(
       elevation: 0,
-      color: color.withValues(alpha: 0.05),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: color.withValues(alpha: 0.2)),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -70,6 +68,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final myLocale = Localizations.localeOf(context);
+    final appColors = Theme.of(context).extension<AppColors>()!;
     final currencySymbol = ref.watch(preferencesProvider).currencySymbol;
     final summary = ref.watch(transactionSummaryProvider);
     final transactionsAsync = ref.watch(transactionListProvider);
@@ -88,7 +87,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Saldo Total', style: TextStyle(color: Colors.grey)),
+                const Text('Saldo Total'),
                 Text(
                   summary.balance.toCurrency(
                     code: currencySymbol.code,
@@ -109,18 +108,20 @@ class DashboardTab extends ConsumerWidget with FilterActions {
               child: _buildSummaryCard(
                 label: 'Entradas',
                 value: summary.totalIncomes,
-                color: Colors.green,
+                color: appColors.income,
                 icon: LucideIcons.circleArrowUp,
                 currencySymbol: currencySymbol,
+                appColors: appColors,
               ),
             ),
             Expanded(
               child: _buildSummaryCard(
                 label: 'Saídas',
                 value: summary.totalExpenses,
-                color: Colors.red,
+                color: appColors.expense,
                 icon: LucideIcons.circleArrowDown,
                 currencySymbol: currencySymbol,
+                appColors: appColors,
               ),
             ),
           ],
@@ -138,11 +139,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                   ),
                   Text(
                     displayYear,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -186,7 +183,6 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                               child: Text(
                                 date.toShortDate(myLocale),
                                 style: TextStyle(
-                                  color: Colors.grey[600],
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
                                 ),

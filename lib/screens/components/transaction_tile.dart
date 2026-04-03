@@ -5,6 +5,7 @@ import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/transaction_details/transaction_details_screen.dart';
+import 'package:pocket_vault/theme/app_theme.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
 class TransactionTile extends ConsumerWidget {
@@ -17,16 +18,18 @@ class TransactionTile extends ConsumerWidget {
     final currencySymbol = ref.watch(preferencesProvider).currencySymbol;
     final currentTab = ref.read(preferencesProvider).lastTab;
     final isIncome = transaction.amount > 0;
+    final appColors = Theme.of(context).extension<AppColors>()!;
 
     return ListTile(
       leading: currentTab == AppTabEnum.dashboard
           ? CircleAvatar(
-              backgroundColor: (isIncome ? Colors.green : Colors.red)
-                  .withValues(alpha: 0.1),
+              backgroundColor: (isIncome
+                  ? appColors.incomeBg
+                  : appColors.expenseBg),
               radius: 18.0,
               child: Icon(
                 isIncome ? LucideIcons.arrowUp : LucideIcons.arrowDown,
-                color: isIncome ? Colors.green : Colors.red,
+                color: isIncome ? appColors.income : appColors.expense,
                 size: 18.0,
               ),
             )
@@ -44,7 +47,7 @@ class TransactionTile extends ConsumerWidget {
           locale: currencySymbol.locale,
         ),
         style: TextStyle(
-          color: isIncome ? Colors.green : Colors.red,
+          color: isIncome ? appColors.income : appColors.expense,
           fontWeight: FontWeight.bold,
           fontSize: 14,
         ),

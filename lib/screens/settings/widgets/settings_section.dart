@@ -14,7 +14,9 @@ class SettingsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).dividerColor),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.onPrimaryContainer
+        ),
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(18),
