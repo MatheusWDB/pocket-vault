@@ -29,9 +29,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
 
     final canAuthenticate = await authService.checkBiometrics();
-    final available = await authService.getAvailableBiometrics();
 
-    if (!canAuthenticate || available.isEmpty) {
+    if (!canAuthenticate) {
       _autheticated();
     } else {
       if (!mounted) return;
@@ -67,11 +66,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        LucideIcons.shieldCheck,
-                        size: 80,
-                        color: Theme.of(context).primaryColor,
-                      ),
+                      Icon(LucideIcons.shieldCheck, size: 80),
                       const SizedBox(height: 16),
                       Text(
                         'PocketVault',
@@ -82,7 +77,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ],
                   ),
                 ),
-      
+
                 ElevatedButton.icon(
                   onPressed: _canAuthenticate,
                   icon: const Icon(LucideIcons.fingerprintPattern),
