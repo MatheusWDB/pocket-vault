@@ -6,6 +6,7 @@ import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/tag_provider.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
+import 'package:pocket_vault/screens/components/build_marquee_text.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
 import 'package:pocket_vault/screens/components/transaction_tile.dart';
 import 'package:pocket_vault/screens/home/tabs/transaction/widgets/filter_chip_item.dart';
@@ -34,16 +35,12 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
     controller.closeView(null);
   }
 
-  Iterable<ListTile> _suggestionBuilderTitlesAndTags(
+  Future<Iterable<ListTile>> _suggestionBuilderTitlesAndTags(
     SearchController controller,
-  ) {
-    final filter = ref.watch(transactionFilterProvider);
-
-    final titlesAsync = ref.watch(transactionTitlesProvider);
-    final tagsAsync = ref.watch(tagListProvider);
-
-    final allTitles = titlesAsync.value ?? [];
-    final allTags = tagsAsync.value ?? [];
+  ) async {
+    final filter = ref.read(transactionFilterProvider);
+    final allTitles = await ref.read(transactionTitlesProvider.future);
+    final allTags = await ref.read(tagListProvider.future);
 
     final allSuggestions = [...allTitles, ...allTags];
 
@@ -63,10 +60,11 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
         })
         .map(
           (element) => ListTile(
-            title: Text(
-              element is Tag ? '#${element.name}' : (element as String),
+            title: BuildMarqueeText(
+              text: element is Tag ? '#${element.name}' : (element as String),
             ),
-            onTap: () => _onTapTitleOrTag,
+
+            onTap: () => _onTapTitleOrTag(element, controller),
           ),
         );
   }
