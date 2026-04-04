@@ -9,7 +9,7 @@ import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
-import 'package:pocket_vault/screens/components/build_marquee_text.dart';
+import 'package:pocket_vault/screens/home/tabs/report/Widgets/build_legend_item.dart';
 import 'package:pocket_vault/services/report_pdf_service.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
@@ -69,29 +69,6 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
       Colors.grey[400]!,
     ];
     return colors[(id ?? 0) % colors.length];
-  }
-
-  Widget _buildLegendItem(String label, Color color, double width) {
-    return SizedBox(
-      width: width,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 12,
-            height: 12,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: BuildMarqueeText(
-              text: label,
-              style: TextStyle(fontSize: 14),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Future<void> _onPressedExportPDF(
@@ -209,19 +186,21 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
                       final itemWidth = (constraints.maxWidth / columns) - 10;
 
                       return Wrap(
-                        spacing: 10,
+                        spacing: 20,
                         runSpacing: 12,
                         children: totalExpenses.entries.map((e) {
                           final category = e.key;
                           final value = e.value;
 
-                          final label =
-                              '${category.name} ${(value * 100 / total).toStringAsFixed(2)}%';
+                          final categoryName = category.name;
+                          final percentage =
+                              '${(value * 100 / total).toStringAsFixed(2)}%';
 
-                          return _buildLegendItem(
-                            label,
-                            _getCategoryColor(category.id),
-                            itemWidth,
+                          return BuildLegendItem(
+                            categoryName: categoryName,
+                            percentage: percentage,
+                            color: _getCategoryColor(category.id),
+                            width: itemWidth,
                           );
                         }).toList(),
                       );

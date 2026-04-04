@@ -4,8 +4,14 @@ import 'package:marquee/marquee.dart';
 class BuildMarqueeText extends StatelessWidget {
   final String text;
   final TextStyle? style;
+  final double velocity;
 
-  const BuildMarqueeText({required this.text, this.style, super.key});
+  const BuildMarqueeText({
+    required this.text,
+    this.style,
+    this.velocity = 50.0,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +35,7 @@ class BuildMarqueeText extends StatelessWidget {
             text: text,
             style: style,
             blankSpace: 50,
+            velocity: velocity,
             pauseAfterRound: const Duration(seconds: 2),
             startAfter: const Duration(seconds: 1),
           ),
