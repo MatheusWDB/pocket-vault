@@ -24,14 +24,59 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
     with FilterActions {
   final TextEditingController searchController = TextEditingController();
 
+  void _onTapTitleOrTag(Object element, SearchController controller) {
+    final filterNotifier = ref.read(transactionFilterProvider.notifier);
+
+    element is Tag
+        ? filterNotifier.addTag(element)
+        : filterNotifier.addTitle(element as String);
+    controller.clear();
+    controller.closeView(null);
+  }
+
+  Iterable<ListTile> _suggestionBuilderTitlesAndTags(
+    SearchController controller,
+  ) {
+    final filter = ref.watch(transactionFilterProvider);
+
+    final titlesAsync = ref.watch(transactionTitlesProvider);
+    final tagsAsync = ref.watch(tagListProvider);
+
+    final allTitles = titlesAsync.value ?? [];
+    final allTags = tagsAsync.value ?? [];
+
+    final allSuggestions = [...allTitles, ...allTags];
+
+    return allSuggestions
+        .where((element) {
+          if (element is Tag) {
+            return element.name.toLowerCase().contains(
+                  controller.text.toLowerCase(),
+                ) &&
+                !filter.tags.contains(element);
+          }
+
+          return (element as String).toLowerCase().contains(
+                controller.text.toLowerCase(),
+              ) &&
+              !filter.titles.contains(element);
+        })
+        .map(
+          (element) => ListTile(
+            title: Text(
+              element is Tag ? '#${element.name}' : (element as String),
+            ),
+            onTap: () => _onTapTitleOrTag,
+          ),
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     final myLocale = Localizations.localeOf(context);
     final appColors = Theme.of(context).extension<AppColors>()!;
     final transactionsAsync = ref.watch(transactionListProvider);
-    final titlesAsync = ref.watch(transactionTitlesProvider);
     final categoriesAsync = ref.watch(categoryListProvider);
-    final tagsAsync = ref.watch(tagListProvider);
     final filter = ref.watch(transactionFilterProvider);
 
     final filterNotifier = ref.read(transactionFilterProvider.notifier);
@@ -90,43 +135,8 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                     ),
                   );
                 },
-                suggestionsBuilder: (context, controller) {
-                  final allTitles = titlesAsync.value ?? [];
-                  final allTags = tagsAsync.value ?? [];
-
-                  final allSuggestions = [...allTitles, ...allTags];
-
-                  return allSuggestions
-                      .where((element) {
-                        if (element is Tag) {
-                          return element.name.toLowerCase().contains(
-                                controller.text.toLowerCase(),
-                              ) &&
-                              !filter.tags.contains(element);
-                        }
-
-                        return (element as String).toLowerCase().contains(
-                              controller.text.toLowerCase(),
-                            ) &&
-                            !filter.titles.contains(element);
-                      })
-                      .map(
-                        (element) => ListTile(
-                          title: Text(
-                            element is Tag
-                                ? '#${element.name}'
-                                : (element as String),
-                          ),
-                          onTap: () {
-                            element is Tag
-                                ? filterNotifier.addTag(element)
-                                : filterNotifier.addTitle(element as String);
-                            controller.clear();
-                            controller.closeView(null);
-                          },
-                        ),
-                      );
-                },
+                suggestionsBuilder: (context, controller) =>
+                    _suggestionBuilderTitlesAndTags(controller),
               ),
             ),
             IconButton(
@@ -153,11 +163,9 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                     label: category.name,
                     isSelectable: true,
                     isSelected: isSelected,
-                    onSelected: (bool selected) {
-                      (selected)
-                          ? filterNotifier.addCategory(category)
-                          : filterNotifier.removeCategory(category);
-                    },
+                    onSelected: (bool selected) => (selected)
+                        ? filterNotifier.addCategory(category)
+                        : filterNotifier.removeCategory(category),
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) {

@@ -47,6 +47,67 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  void _onPressedSettings() {
+    ref
+        .read(preferencesProvider.notifier)
+        .setLastScreen(AppScreenEnum.settings);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SettingsScreen()),
+    );
+  }
+
+  void _onPressedDeleteForever() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Resetar Banco?'),
+        content: const Text('Isso apagará TODAS as transações e categorias.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Resetar', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final service = ref.read(transactionServiceProvider);
+      await service.resetDatabase();
+
+      ref.invalidate(transactionListProvider);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            duration: Duration(milliseconds: 750),
+            content: Text(
+              'Banco de dados resetado! Reinicie o app se necessário.',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  void _onPressedTransactionForm() {
+    final preferencesNotifier = ref.read(preferencesProvider.notifier);
+
+    preferencesNotifier.setLastTransactionDetailId(null);
+    preferencesNotifier.setLastScreen(AppScreenEnum.form);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const TransactionFormScreen()),
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -66,62 +127,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: Text(title),
         actions: [
           IconButton(
-            onPressed: () {
-              ref
-                  .read(preferencesProvider.notifier)
-                  .setLastScreen(AppScreenEnum.settings);
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SettingsScreen()),
-              );
-            },
+            onPressed: () => _onPressedSettings(),
             icon: const Icon(LucideIcons.settings),
           ),
           IconButton(
             icon: Icon(Icons.delete_forever, color: appColors.warning),
-            onPressed: () async {
-              final confirm = await showDialog<bool>(
-                context: context,
-                builder: (ctx) => AlertDialog(
-                  title: const Text('Resetar Banco?'),
-                  content: const Text(
-                    'Isso apagará TODAS as transações e categorias.',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancelar'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text(
-                        'Resetar',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-
-              if (confirm == true) {
-                final service = ref.read(transactionServiceProvider);
-                await service.resetDatabase();
-
-                ref.invalidate(transactionListProvider);
-
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      duration: Duration(milliseconds: 750),
-                      content: Text(
-                        'Banco de dados resetado! Reinicie o app se necessário.',
-                      ),
-                    ),
-                  );
-                }
-              }
-            },
+            onPressed: () => _onPressedDeleteForever(),
           ),
         ],
         actionsPadding: const EdgeInsets.all(8.0),
@@ -131,23 +142,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         onDestinationSelected: _onChangeMenu,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ref
-              .read(preferencesProvider.notifier)
-              .setLastTransactionDetailId(null);
-
-          ref
-              .read(preferencesProvider.notifier)
-              .setLastScreen(AppScreenEnum.form);
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const TransactionFormScreen(),
-            ),
-          );
-        },
-
+        onPressed: () => _onPressedTransactionForm(),
         shape: const CircleBorder(),
         child: const Icon(LucideIcons.circlePlus, size: 35.0),
       ),

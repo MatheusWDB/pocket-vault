@@ -135,13 +135,6 @@ class TransactionService {
   Future<List<String>> getAllTitles() async {
     final maps = await _repo.findTitles();
 
-    // ---------------Remover Mock---------------
-    final List<String> titles = maps.map((m) => m['title'] as String).toList();
-    if (titles.isEmpty) {
-      return mockTransactions.map((t) => t.title).toList();
-    }
-    // -------------------------------------------
-
     return maps.map((m) => m['title'] as String).toList();
   }
 

@@ -2,6 +2,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:pocket_vault/enums/currency_symbol_enum.dart';
+import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
@@ -90,6 +92,21 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
         ],
       ),
     );
+  }
+
+  Future<void> _onPressedExportPDF(
+    Map<Category, double> totalExpenses,
+    CurrencySymbolEnum currency,
+    Locale myLocale,
+  ) async {
+    final transactions = ref.watch(transactionListProvider).value ?? [];
+
+    return await ReportPdfService(
+      transactions: transactions,
+      totalExpenses: totalExpenses,
+      currency: currency,
+      locale: myLocale,
+    ).generatePdf();
   }
 
   @override
@@ -222,16 +239,8 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          onPressed: () async {
-            final transactions = ref.watch(transactionListProvider).value ?? [];
-
-            return await ReportPdfService(
-              transactions: transactions,
-              totalExpenses: totalExpenses,
-              currency: currency,
-              locale: myLocale,
-            ).generatePdf();
-          },
+          onPressed: () =>
+              _onPressedExportPDF(totalExpenses, currency, myLocale),
           child: Row(
             spacing: 8,
             mainAxisAlignment: MainAxisAlignment.center,

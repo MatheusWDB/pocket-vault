@@ -16,6 +16,12 @@ class SettingsDropdownTile<T> extends StatelessWidget {
     super.key,
   });
 
+  void _onSelected(T? v) {
+    if (v != null && v != value) {
+      onChanged(v);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -24,11 +30,7 @@ class SettingsDropdownTile<T> extends StatelessWidget {
       trailing: DropdownMenu<T>(
         initialSelection: value,
         width: 140,
-        onSelected: (v) {
-          if (v != null && v != value) {
-            onChanged(v);
-          }
-        },
+        onSelected: (v) => _onSelected(v),
         dropdownMenuEntries: values
             .map((v) => DropdownMenuEntry(value: v, label: label(v)))
             .toList(),

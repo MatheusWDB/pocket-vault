@@ -71,9 +71,11 @@ class BackupService {
       allowedExtensions: ['json'],
     );
 
-    if (result == null || result.files.single.path == null) return null;
+    final filePath = result?.files.single.path;
 
-    final File file = File(result.files.single.path!);
+    if (result == null || filePath == null) return null;
+
+    final File file = File(filePath);
     final String jsonString = await file.readAsString();
 
     return BackupData.fromJson(jsonString);

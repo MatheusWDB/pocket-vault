@@ -11,12 +11,45 @@ import 'package:pocket_vault/utils/double_extensions.dart';
 
 class TransactionDetailsScreen extends ConsumerWidget {
   final Transaction transaction;
+
   const TransactionDetailsScreen({required this.transaction, super.key});
+
+  void _return(BuildContext context, WidgetRef ref) {
+    final preferencesNotifier = ref.read(preferencesProvider.notifier);
+
+    preferencesNotifier.setLastTransactionDetailId(null);
+    preferencesNotifier.setLastScreen(AppScreenEnum.home);
+
+    Navigator.pop(context);
+  }
+
+  void _onPressedEdit(BuildContext context, WidgetRef ref) {
+    final preferencesNotifier = ref.read(preferencesProvider.notifier);
+
+    preferencesNotifier.setLastTransactionDetailId(transaction.id);
+    preferencesNotifier.setLastScreen(AppScreenEnum.form);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TransactionFormScreen(transaction: transaction),
+      ),
+    );
+  }
+
+  void _onPressedDelete(BuildContext context, WidgetRef ref) {
+    ref
+        .read(transactionListProvider.notifier)
+        .removeTransaction(transaction.id!);
+
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final myLocale = Localizations.localeOf(context);
     final theme = Theme.of(context);
+    final themePrimaryContainer = theme.colorScheme.primaryContainer;
     final currencySymbol = ref.watch(preferencesProvider).currencySymbol;
 
     final String amountText = transaction.amount.toCurrency(
@@ -28,21 +61,17 @@ class TransactionDetailsScreen extends ConsumerWidget {
 
     final tags = transaction.tags;
 
+    final buttonStyle = ElevatedButton.styleFrom(
+      padding: EdgeInsets.all(15),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Detalhes'),
         centerTitle: true,
         leading: IconButton(
-          onPressed: () {
-            ref
-                .read(preferencesProvider.notifier)
-                .setLastTransactionDetailId(null);
-            ref
-                .read(preferencesProvider.notifier)
-                .setLastScreen(AppScreenEnum.home);
-
-            Navigator.pop(context);
-          },
+          onPressed: () => _return(context, ref),
           icon: const Icon(LucideIcons.chevronLeft),
         ),
       ),
@@ -57,7 +86,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
+                      color: themePrimaryContainer,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: const Icon(LucideIcons.receiptText, size: 50),
@@ -77,7 +106,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
+                      color: themePrimaryContainer,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -173,28 +202,8 @@ class TransactionDetailsScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      ref
-                          .read(preferencesProvider.notifier)
-                          .setLastTransactionDetailId(transaction.id);
-                      ref
-                          .read(preferencesProvider.notifier)
-                          .setLastScreen(AppScreenEnum.form);
-
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              TransactionFormScreen(transaction: transaction),
-                        ),
-                      );
-                    },
+                    style: buttonStyle,
+                    onPressed: () => _onPressedEdit(context, ref),
                     child: Row(
                       spacing: 8,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -203,18 +212,8 @@ class TransactionDetailsScreen extends ConsumerWidget {
                   ),
 
                   ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.all(15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      ref
-                          .read(transactionListProvider.notifier)
-                          .removeTransaction(transaction.id!);
-                      Navigator.pop(context);
-                    },
+                    style: buttonStyle,
+                    onPressed: () => _onPressedDelete(context, ref),
                     child: Row(
                       spacing: 8,
                       mainAxisAlignment: MainAxisAlignment.center,

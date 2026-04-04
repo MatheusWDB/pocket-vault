@@ -57,9 +57,11 @@ class CategoryService {
   }
 
   Future<void> saveCategory(Category category) async {
+    final categoryMap = category.toMap();
+    
     category.id == null
-        ? await _repo.insert(category.toMap())
-        : await _repo.update(category.toMap());
+        ? await _repo.insert(categoryMap)
+        : await _repo.update(categoryMap);
   }
 
   Future<void> deleteCategory(int id) async {

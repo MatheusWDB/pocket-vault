@@ -46,3 +46,6 @@ app.*.map.json
 
 # DevTools settings
 devtools_options.yaml
+
+# SonarQube
+.scannerwork

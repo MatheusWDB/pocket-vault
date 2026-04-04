@@ -23,9 +23,9 @@ class BudgetProgressBar extends StatelessWidget {
         final double displayValue = value.clamp(0.0, 1.0);
 
         final bool isOverBudget = value > 1.0;
-        final double percentage = isOverBudget
-            ? (value - 1.0) * 100
-            : value * 100;
+        final percentage = isOverBudget
+            ? ((value - 1.0) * 100).toStringAsFixed(2)
+            : (value * 100).toStringAsFixed(2);
 
         return Column(
           spacing: 4,
@@ -43,8 +43,8 @@ class BudgetProgressBar extends StatelessWidget {
             if (progress >= 0.8)
               Text(
                 !isOverBudget
-                    ? 'Atenção: ${percentage.toStringAsFixed(2)}% do teto atingido.'
-                    : 'Atenção: Teto estourado em ${percentage.toStringAsFixed(2)}%.',
+                    ? 'Atenção: $percentage% do teto atingido.'
+                    : 'Atenção: Teto estourado em $percentage%.',
                 style: TextStyle(
                   fontSize: 12,
                   color: color,

@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'tag_provider.g.dart';
 
 @riverpod
-TagService tagService(Ref ref) {
+TagService tagService(Ref _) {
   return TagService();
 }
 

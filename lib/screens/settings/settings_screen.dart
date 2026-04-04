@@ -248,6 +248,12 @@ class SettingsScreen extends ConsumerWidget {
     ]);
   }
 
+  void _return(BuildContext context, WidgetRef ref) {
+    ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
+
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prefs = ref.watch(preferencesProvider);
@@ -259,13 +265,7 @@ class SettingsScreen extends ConsumerWidget {
         title: Text('Configurações'),
         centerTitle: true,
         leading: IconButton(
-          onPressed: () {
-            ref
-                .read(preferencesProvider.notifier)
-                .setLastScreen(AppScreenEnum.home);
-                
-            Navigator.pop(context);
-          },
+          onPressed: () => _return(context, ref),
           icon: const Icon(LucideIcons.chevronLeft),
         ),
       ),
@@ -286,7 +286,7 @@ class SettingsScreen extends ConsumerWidget {
                       label: (t) => t.displayName,
                       onChanged: prefsNotifier.setTheme,
                     ),
-          
+
                     SettingsDropdownTile<CurrencySymbolEnum>(
                       title: 'Moeda',
                       value: prefs.currencySymbol,
@@ -294,7 +294,7 @@ class SettingsScreen extends ConsumerWidget {
                       label: (c) => c.code,
                       onChanged: prefsNotifier.setCurrencySymbol,
                     ),
-          
+
                     SettingsSwitchTile(
                       title: 'Biometria',
                       value: prefs.isBiometricEnabled,
@@ -309,7 +309,7 @@ class SettingsScreen extends ConsumerWidget {
                       'O "PocketVault" guarda tudo localmente. '
                       'Use as opções abaixo para não perder seus dados.',
                     ),
-          
+
                     Card(
                       child: Column(
                         children: [
@@ -333,7 +333,7 @@ class SettingsScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-          
+
                     Text(
                       prefs.lastBackupAt == null
                           ? 'Nenhum backup realizado'

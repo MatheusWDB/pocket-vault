@@ -90,7 +90,7 @@ class TransactionRepository {
     }
 
     final List<String> conditions = ['t.$columnIsTemplate = ?'];
-    final List<dynamic> args = [0];
+    final List<Object?> args = [0];
 
     if (tagIds.isNotEmpty) {
       final String placeholders = List.filled(tagIds.length, '?').join(', ');

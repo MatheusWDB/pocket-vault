@@ -6,7 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'category_provider.g.dart';
 
 @riverpod
-CategoryService categoryService(Ref ref) {
+CategoryService categoryService(Ref _) {
   return CategoryService();
 }
 

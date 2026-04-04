@@ -55,7 +55,7 @@ final class TransactionServiceProvider
 }
 
 String _$transactionServiceHash() =>
-    r'f87f7e1a3be589e59f4c854a86c30aecf97f39ac';
+    r'c2999d591e45b3535b77b48d1e22175dd24a49fd';
 
 @ProviderFor(TransactionList)
 final transactionListProvider = TransactionListProvider._();

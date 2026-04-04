@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:pocket_vault/screens/home/widgets/build_item.dart';
 
 class MyCustomBottomAppBar extends StatelessWidget {
   final int activeIndex;
@@ -10,18 +11,6 @@ class MyCustomBottomAppBar extends StatelessWidget {
     required this.onDestinationSelected,
     super.key,
   });
-
-  Widget _buildItem(IconData icon, int index, context) {
-    final theme = Theme.of(context).bottomNavigationBarTheme;
-    final isSelected = activeIndex == index;
-    return IconButton(
-      icon: Icon(
-        icon,
-        color: isSelected ? theme.selectedItemColor : theme.unselectedItemColor,
-      ),
-      onPressed: () => onDestinationSelected(index),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,16 +25,40 @@ class MyCustomBottomAppBar extends StatelessWidget {
           Row(
             spacing: 20.0,
             children: [
-              _buildItem(LucideIcons.layoutDashboard, 0, context),
-              _buildItem(LucideIcons.receiptText, 1, context),
+              BuildItem(
+                activeIndex: activeIndex,
+                onDestinationSelected: onDestinationSelected,
+                icon: LucideIcons.layoutDashboard,
+                index: 0,
+                context: context,
+              ),
+              BuildItem(
+                activeIndex: activeIndex,
+                onDestinationSelected: onDestinationSelected,
+                icon: LucideIcons.receiptText,
+                index: 1,
+                context: context,
+              ),
             ],
           ),
 
           Row(
             spacing: 20.0,
             children: [
-              _buildItem(LucideIcons.target, 2, context),
-              _buildItem(LucideIcons.chartPie, 3, context),
+              BuildItem(
+                activeIndex: activeIndex,
+                onDestinationSelected: onDestinationSelected,
+                icon: LucideIcons.target,
+                index: 2,
+                context: context,
+              ),
+              BuildItem(
+                activeIndex: activeIndex,
+                onDestinationSelected: onDestinationSelected,
+                icon: LucideIcons.chartPie,
+                index: 3,
+                context: context,
+              ),
             ],
           ),
         ],

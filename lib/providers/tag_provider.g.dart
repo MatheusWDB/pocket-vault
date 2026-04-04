@@ -48,7 +48,7 @@ final class TagServiceProvider
   }
 }
 
-String _$tagServiceHash() => r'07a6f29f6d45e310c647f1cdf8e138e8f14ed497';
+String _$tagServiceHash() => r'993799c5ed639d5f7b28480351c1d58721c17735';
 
 @ProviderFor(TagList)
 final tagListProvider = TagListProvider._();

@@ -2,16 +2,13 @@ import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:pocket_vault/enums/currency_symbol_enum.dart';
-import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_dialog.dart';
-import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_progress_bar.dart';
+import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_list_builder.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
-import 'package:pocket_vault/utils/double_extensions.dart';
 
 class BudgetTab extends ConsumerStatefulWidget {
   const BudgetTab({super.key});
@@ -21,62 +18,21 @@ class BudgetTab extends ConsumerStatefulWidget {
 }
 
 class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
-  String _formatCurrency(double number, CurrencySymbolEnum currency) =>
-      number.toCurrency(code: currency.code, locale: currency.locale);
-
-  List<Widget> _budgetListBuilder(
-    List<Category> categories,
-    Map<Category, double> totalExpenses,
-    CurrencySymbolEnum currency,
-  ) {
-    final budgetCategories = categories
-        .where((c) => (c.budgetLimit ?? 0.0) > 0.0)
-        .toList();
-
-    if (budgetCategories.isEmpty) {
-      return const [SizedBox.shrink()];
+  void _budgetLimitDialog(bool noBudgetLimit) {
+    if (noBudgetLimit) {
+      AlertInfo.show(
+        context: context,
+        text: 'Todas as categorias já possuem limite',
+        typeInfo: TypeInfo.warning,
+      );
+      return;
     }
 
-    return [
-      Flexible(
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: budgetCategories.length,
-          itemBuilder: (context, index) {
-            final category = budgetCategories[index];
-
-            final spent = totalExpenses[category] ?? 0.0;
-            final limit = category.budgetLimit!;
-
-            final progress = spent / limit;
-
-            final spentText = _formatCurrency(spent, currency);
-            final limitText = _formatCurrency(limit, currency);
-
-            return ListTile(
-              contentPadding: const EdgeInsets.all(8),
-              dense: true,
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(category.name, overflow: TextOverflow.ellipsis),
-                  Text(
-                    '$spentText de $limitText',
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                ],
-              ),
-              subtitle: BudgetProgressBar(progress: progress),
-              onTap: () => showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => BudgetDialog(category: category),
-              ),
-            );
-          },
-        ),
-      ),
-    ];
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const BudgetDialog(),
+    );
   }
 
   @override
@@ -110,26 +66,15 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
         ),
 
         if (categories.isNotEmpty)
-          ..._budgetListBuilder(categories, totalExpenses, currency),
+          BudgetListBuilder(
+            categories: categories,
+            totalExpenses: totalExpenses,
+            currency: currency,
+          ),
 
         OutlinedButton(
           style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(15)),
-          onPressed: () {
-            if (categoriesNoBudgetLimit.isEmpty) {
-              AlertInfo.show(
-                context: context,
-                text: 'Todas as categorias já possuem limite',
-                typeInfo: TypeInfo.warning,
-              );
-              return;
-            }
-
-            showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (_) => const BudgetDialog(),
-            );
-          },
+          onPressed: () => _budgetLimitDialog(categoriesNoBudgetLimit.isEmpty),
           child: const Row(
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.center,

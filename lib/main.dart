@@ -34,9 +34,11 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
-    ref.read(preferencesProvider.notifier).setLastTab(AppTabEnum.dashboard);
-    ref.read(preferencesProvider.notifier).setLastTransactionDetailId(null);
+    final preferencesNotifier = ref.read(preferencesProvider.notifier);
+
+    preferencesNotifier.setLastScreen(AppScreenEnum.home);
+    preferencesNotifier.setLastTab(AppTabEnum.dashboard);
+    preferencesNotifier.setLastTransactionDetailId(null);
     ref.read(transactionListProvider.notifier).processRecurring();
   }
 
@@ -59,14 +61,14 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final themeMode = ref.watch(preferencesProvider).themeMode;
     final isAuthenticated = ref.watch(authStateProvider);
-    final lastScreen = ref.read(preferencesProvider).lastScreen;
+    final readPreferences = ref.read(preferencesProvider);
+
+    final lastScreen = readPreferences.lastScreen;
     Widget home = lastScreen.toScreen();
 
     if (lastScreen == AppScreenEnum.details ||
         lastScreen == AppScreenEnum.form) {
-      final lastTransactionId = ref
-          .read(preferencesProvider)
-          .lastTransactionDetailId;
+      final lastTransactionId = readPreferences.lastTransactionDetailId;
 
       final transactionDetails = ref
           .read(transactionByIdProvider(id: lastTransactionId))

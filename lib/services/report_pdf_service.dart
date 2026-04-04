@@ -73,11 +73,7 @@ class ReportPdfService {
     );
   }
 
-  pw.Widget _buildHeader(
-    pw.Context context,
-    ReportPageType type, [
-    String? title,
-  ]) {
+  pw.Widget _buildHeader(pw.Context _, ReportPageType type, [String? title]) {
     return pw.Container(
       child: pw.Column(
         children: [
@@ -182,7 +178,7 @@ class ReportPdfService {
     );
   }
 
-  List<pw.Widget> _buildSummaryContent(pw.Context context) {
+  List<pw.Widget> _buildSummaryContent(pw.Context _) {
     double expense = 0.0;
     double income = 0.0;
 
@@ -341,7 +337,7 @@ class ReportPdfService {
     ];
   }
 
-  List<pw.Widget> _buildChartsContent(pw.Context context) {
+  List<pw.Widget> _buildChartsContent(pw.Context _) {
     final budgetCategories = totalExpenses.keys
         .where((c) => c.budgetLimit != null && c.budgetLimit! > 0)
         .toList();
@@ -380,9 +376,11 @@ class ReportPdfService {
           );
 
           final bool isOverBudget = progress > 1.0;
-          final double percentage = isOverBudget
-              ? (progress - 1.0) * 100
-              : progress * 100;
+          final String percentage = isOverBudget
+              ? ((progress - 1.0) * 100).toStringAsFixed(2)
+              : (progress * 100).toStringAsFixed(2);
+
+          final color = _getStatusColor(progress);
 
           return pw.Column(
             children: [
@@ -392,10 +390,7 @@ class ReportPdfService {
                   pw.Text(categoryName, overflow: pw.TextOverflow.span),
                   pw.Text(
                     '$spentText de $limitText',
-                    style: pw.TextStyle(
-                      fontSize: 14,
-                      color: _getStatusColor(progress),
-                    ),
+                    style: pw.TextStyle(fontSize: 14, color: color),
                   ),
                 ],
               ),
@@ -405,15 +400,15 @@ class ReportPdfService {
                   pw.LinearProgressIndicator(
                     minHeight: 6,
                     value: progress,
-                    valueColor: _getStatusColor(progress),
+                    valueColor: color,
                     backgroundColor: PdfColors.grey,
                   ),
                   if (progress >= 0.8) ...[
                     pw.SizedBox(height: 4),
                     pw.Text(
                       !isOverBudget
-                          ? 'Atenção: ${percentage.toStringAsFixed(2)}% do teto atingido.'
-                          : 'Atenção: Teto estourado em ${percentage.toStringAsFixed(2)}%.',
+                          ? 'Atenção: $percentage% do teto atingido.'
+                          : 'Atenção: Teto estourado em $percentage%.',
                       style: pw.TextStyle(
                         fontSize: 12,
                         color: _getStatusColor(progress),
@@ -430,7 +425,7 @@ class ReportPdfService {
     ];
   }
 
-  List<pw.Widget> _buildStatementContent(pw.Context context) {
+  List<pw.Widget> _buildStatementContent(pw.Context _) {
     return [
       pw.Text('Extrato Detalhado'),
       pw.Divider(),

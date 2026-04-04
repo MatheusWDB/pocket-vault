@@ -9,6 +9,25 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+dcm:
+  rules:
+    - avoid-dynamic
+    - avoid-unused-parameters
+    - prefer-conditional-expressions
+    
+    # Foco em evitar Duplicidade e Erros de Lógica
+    - no-equal-then-else
+    - avoid-self-compare
+    - avoid-self-assignment
+    - prefer-moving-to-variable
+    
+    # Foco em Flutter (Organização e Performance)
+    - avoid-returning-widgets
+    - prefer-extracting-callbacks
+    - prefer-single-widget-per-file
+    - avoid-unnecessary-setstate
+    - use-setstate-synchronously
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

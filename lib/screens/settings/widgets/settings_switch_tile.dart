@@ -12,19 +12,18 @@ class SettingsSwitchTile extends StatelessWidget {
     super.key,
   });
 
+  void _onChanged(bool v) {
+    if (v != value) {
+      onChanged(v);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
       dense: true,
       title: Text(title),
-      trailing: Switch(
-        value: value,
-        onChanged: (v) {
-          if (v != value) {
-            onChanged(v);
-          }
-        },
-      ),
+      trailing: Switch(value: value, onChanged: (v) => _onChanged(v)),
     );
   }
 }

@@ -11,6 +11,7 @@ import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
+import 'package:pocket_vault/screens/transacation_form/widgets/build_input_field.dart';
 import 'package:pocket_vault/theme/app_theme.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
@@ -35,48 +36,55 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
   DateTime _selectedDate = DateTime.now();
   bool _isRevenue = false;
   bool _isRecurring = false;
-
   String? _amountError;
-
   late final CurrencySymbolEnum _currency;
 
-  Widget _buildInputField({
-    required TextEditingController controller,
-    String? label,
-    String? hint,
-    TextInputType keyboardType = TextInputType.text,
-    Widget? sufixIcon,
-    CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.start,
-    bool prefix = false,
-    Function(String)? onChanged,
-    Function()? onTap,
-    String? Function(String?)? validator,
-    FocusNode? focusNode,
-    Function(String)? onFieldSubmitted,
-  }) {
-    return Column(
-      spacing: 6,
-      crossAxisAlignment: crossAxisAlignment,
-      children: [
-        if (label != null)
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-        TextFormField(
-          controller: controller,
-          focusNode: focusNode,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-            hintText: hint,
-            suffixIcon: sufixIcon,
-            prefixIcon: prefix ? const Icon(LucideIcons.tag, size: 20) : null,
-          ),
-          keyboardType: keyboardType,
-          onFieldSubmitted: onFieldSubmitted,
-          onChanged: onChanged,
-          onTap: onTap,
-          validator: validator,
-        ),
-      ],
+  void _return(bool edit) {
+    final preferencesNotifier = ref.read(preferencesProvider.notifier);
+
+    preferencesNotifier.setLastTransactionDetailId(null);
+    edit
+        ? preferencesNotifier.setLastScreen(AppScreenEnum.details)
+        : preferencesNotifier.setLastScreen(AppScreenEnum.home);
+
+    Navigator.pop(context);
+  }
+
+  void _onChangedAmount() {
+    if (_amountError != null && _amountController.doubleValue > 0) {
+      setState(() => _amountError = null);
+    }
+  }
+
+  Null _validatorAmount() {
+    setState(() {
+      _amountError = (_amountController.doubleValue <= 0)
+          ? 'O valor deve ser maior que zero'
+          : null;
+    });
+
+    return null;
+  }
+
+  String? _validatorTitle(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Insira um título';
+    }
+    return null;
+  }
+
+  Future<void> _onTapSelectedDate(DateTime now, Locale myLocale) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: now,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(now.year, now.month + 1, 0),
+      initialEntryMode: DatePickerEntryMode.calendarOnly,
+      locale: myLocale,
     );
+    if (picked != null && mounted) {
+      setState(() => _selectedDate = picked);
+    }
   }
 
   Future<void> _saveTransaction() async {
@@ -138,6 +146,54 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
     }
   }
 
+  Iterable<Category> _optionsBuilderCategory(
+    TextEditingValue textEditingValue,
+    AsyncValue<List<Category>> categoriesAsync,
+  ) {
+    if (textEditingValue.text.isEmpty) {
+      return const Iterable<Category>.empty();
+    }
+
+    final categories = categoriesAsync.value ?? [];
+
+    return categories.where(
+      (c) => c.name.toLowerCase().contains(textEditingValue.text.toLowerCase()),
+    );
+  }
+
+  String? _validatorCategory(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Defina uma categoria';
+    }
+    return null;
+  }
+
+  String? _validatorInstallment(String? value) {
+    if (value == null || value.isEmpty) {
+      setState(() {
+        value = '1';
+      });
+    }
+
+    final installment = int.tryParse(value!);
+
+    if (installment == null) {
+      return 'Somente números';
+    }
+
+    return null;
+  }
+
+  void _onChangedRecurring(bool value) {
+    final tryParse = int.tryParse(_installmentController.text);
+
+    return tryParse == null ||
+            tryParse <= 1 ||
+            _installmentController.text.isEmpty
+        ? setState(() => _isRecurring = value)
+        : null;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -155,9 +211,11 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
       _isRevenue = transaction.amount >= 0.0;
       _descriptionController.text = transaction.description ?? '';
 
-      if (widget.transaction!.templateId != null) {
+      final templateId = widget.transaction!.templateId;
+
+      if (templateId != null) {
         final template = ref
-            .read(transactionByIdProvider(id: widget.transaction!.templateId!))
+            .read(transactionByIdProvider(id: templateId))
             .value;
 
         if (template != null) _isRecurring = template.isRecurring;
@@ -208,23 +266,12 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
 
     final String title = edit ? 'Editar Transação' : 'Nova Transação';
 
+    final iconThemeColor = Theme.of(context).iconTheme.color;
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () {
-            ref
-                .read(preferencesProvider.notifier)
-                .setLastTransactionDetailId(null);
-            edit
-                ? ref
-                      .read(preferencesProvider.notifier)
-                      .setLastScreen(AppScreenEnum.details)
-                : ref
-                      .read(preferencesProvider.notifier)
-                      .setLastScreen(AppScreenEnum.home);
-
-            Navigator.pop(context);
-          },
+          onPressed: () => _return(edit),
           icon: const Icon(LucideIcons.chevronLeft),
         ),
         title: Text(title),
@@ -276,23 +323,8 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                           fontSize: 25,
                           fontWeight: FontWeight.bold,
                         ),
-                        onChanged: (value) {
-                          if (_amountError != null &&
-                              _amountController.doubleValue > 0) {
-                            setState(() => _amountError = null);
-                          }
-                        },
-                        validator: (_) {
-                          setState(() {
-                            if (_amountController.doubleValue <= 0) {
-                              _amountError = 'O valor deve ser maior que zero';
-                            } else {
-                              _amountError = null;
-                            }
-                          });
-
-                          return null;
-                        },
+                        onChanged: (_) => _onChangedAmount(),
+                        validator: (_) => _validatorAmount(),
                       ),
                       SegmentedButton<bool>(
                         showSelectedIcon: false,
@@ -306,9 +338,8 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                               : appColors.expense,
                         ),
                         selected: {_isRevenue},
-                        onSelectionChanged: (newSelection) {
-                          setState(() => _isRevenue = newSelection.first);
-                        },
+                        onSelectionChanged: (newSelection) =>
+                            setState(() => _isRevenue = newSelection.first),
                         segments: const [
                           ButtonSegment(value: false, label: Text('Despesa')),
                           ButtonSegment(value: true, label: Text('Receita')),
@@ -322,17 +353,13 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                   Column(
                     spacing: 8,
                     children: [
-                      _buildInputField(
+                      BuildInputField(
                         label: 'Título',
                         controller: _titleController,
                         hint: 'Ex: Compras 01/01/2026',
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Insira um título';
-                          }
-                          return null;
-                        },
+                        validator: (value) => _validatorTitle(value),
                       ),
+
                       ListTile(
                         contentPadding: EdgeInsets.zero,
                         leading: const Icon(LucideIcons.calendar),
@@ -343,42 +370,23 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                           ).format(_selectedDate),
                         ),
                         trailing: const Icon(LucideIcons.pencil, size: 20),
-                        onTap: () async {
-                          final picked = await showDatePicker(
-                            context: context,
-                            initialDate: now,
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(now.year, now.month + 1, 0),
-                            initialEntryMode: DatePickerEntryMode.calendarOnly,
-                            locale: myLocale,
-                          );
-                          if (picked != null) {
-                            setState(() => _selectedDate = picked);
-                          }
-                        },
+                        onTap: () => _onTapSelectedDate(now, myLocale),
                       ),
-                      _buildInputField(
+                      BuildInputField(
                         label: 'Descrição',
                         controller: _descriptionController,
                         hint: 'Ex: Compras do mês pago no cartão',
                       ),
+
                       Autocomplete<Category>(
                         textEditingController: _categoryController,
                         focusNode: _categoryFocus,
                         displayStringForOption: (option) => option.name,
-                        optionsBuilder: (TextEditingValue textEditingValue) {
-                          if (textEditingValue.text.isEmpty) {
-                            return const Iterable<Category>.empty();
-                          }
-
-                          final categories = categoriesAsync.value ?? [];
-
-                          return categories.where(
-                            (c) => c.name.toLowerCase().contains(
-                              textEditingValue.text.toLowerCase(),
+                        optionsBuilder: (TextEditingValue textEditingValue) =>
+                            _optionsBuilderCategory(
+                              textEditingValue,
+                              categoriesAsync,
                             ),
-                          );
-                        },
                         optionsViewBuilder: (context, onSelected, options) {
                           return Material(
                             elevation: 4.0,
@@ -426,46 +434,27 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                         },
                         fieldViewBuilder:
                             (context, controller, focusNode, onFieldSubmitted) {
-                              return _buildInputField(
+                              return BuildInputField(
                                 controller: controller,
                                 focusNode: focusNode,
                                 label: 'Categoria',
                                 hint: 'Ex: Mercado',
-                                onFieldSubmitted: (value) {
-                                  focusNode.unfocus();
-                                },
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return 'Defina uma categoria';
-                                  }
-                                  return null;
-                                },
+                                onFieldSubmitted: (value) =>
+                                    focusNode.unfocus(),
+                                validator: (value) => _validatorCategory(value),
                               );
                             },
                       ),
-                      _buildInputField(
+                      BuildInputField(
                         controller: _installmentController,
                         label: 'Parcelas',
                         hint: 'Ex: 12',
                         keyboardType: TextInputType.numberWithOptions(),
                         onChanged: (value) => setState(() {}),
                         sufixIcon: Text('x'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            setState(() {
-                              value = '1';
-                            });
-                          }
-
-                          final installment = int.tryParse(value!);
-
-                          if (installment == null) {
-                            return 'Somente números';
-                          }
-
-                          return null;
-                        },
+                        validator: (value) => _validatorInstallment(value),
                       ),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -481,13 +470,11 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                             icon: Icon(
                               LucideIcons.plus,
                               size: 18,
-                              color: Theme.of(context).iconTheme.color,
+                              color: iconThemeColor,
                             ),
                             label: Text(
                               'Add',
-                              style: TextStyle(
-                                color: Theme.of(context).iconTheme.color,
-                              ),
+                              style: TextStyle(color: iconThemeColor),
                             ),
                           ),
                         ],
@@ -500,7 +487,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                             itemCount: _tagsControllers.length,
                             separatorBuilder: (_, _) =>
                                 const SizedBox(height: 8),
-                            itemBuilder: (context, index) => _buildInputField(
+                            itemBuilder: (context, index) => BuildInputField(
                               controller: _tagsControllers[index],
                               prefix: true,
                               hint: 'Tag${index > 0 ? index + 1 : ''}...',
@@ -528,12 +515,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                     title: const Text('Transação Recorrente'),
                     secondary: const Icon(LucideIcons.refreshCw),
                     value: _isRecurring,
-                    onChanged:
-                        int.tryParse(_installmentController.text) == null ||
-                            int.tryParse(_installmentController.text)! <= 1 ||
-                            _installmentController.text.isEmpty
-                        ? (value) => setState(() => _isRecurring = value)
-                        : null,
+                    onChanged: (value) => _onChangedRecurring(value),
                   ),
                 ],
               ),

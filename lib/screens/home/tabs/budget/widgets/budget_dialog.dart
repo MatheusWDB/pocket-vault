@@ -56,6 +56,29 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
     Navigator.pop(context);
   }
 
+  void _onChangedBudgetLimit() {
+    if (_budgetLimitError != null && _budgetLimitController.doubleValue > 0) {
+      setState(() => _budgetLimitError = null);
+    }
+  }
+
+  Null _validatorBudgetLimit() {
+    setState(() {
+      _budgetLimitError = (_budgetLimitController.doubleValue <= 0)
+          ? 'O valor deve ser maior que zero'
+          : null;
+    });
+
+    return null;
+  }
+
+  void _onSelectedCategory(Category? value) {
+    setState(() {
+      _selectedCategory = value;
+      _categoryError = null;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -129,23 +152,8 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
                       ),
               ),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              onChanged: (value) {
-                if (_budgetLimitError != null &&
-                    _budgetLimitController.doubleValue > 0) {
-                  setState(() => _budgetLimitError = null);
-                }
-              },
-              validator: (_) {
-                setState(() {
-                  if (_budgetLimitController.doubleValue <= 0) {
-                    _budgetLimitError = 'O valor deve ser maior que zero';
-                  } else {
-                    _budgetLimitError = null;
-                  }
-                });
-
-                return null;
-              },
+              onChanged: (_) => _onChangedBudgetLimit(),
+              validator: (_) => _validatorBudgetLimit(),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,12 +171,7 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
                     requestFocusOnTap: true,
                     menuHeight: MediaQuery.heightOf(context) * .32,
                     errorText: _categoryError,
-                    onSelected: (Category? value) {
-                      setState(() {
-                        _selectedCategory = value;
-                        _categoryError = null;
-                      });
-                    },
+                    onSelected: (Category? value) => _onSelectedCategory(value),
                     dropdownMenuEntries: widget.category != null
                         ? [
                             DropdownMenuEntry<Category>(

@@ -13,6 +13,21 @@ class TransactionTile extends ConsumerWidget {
 
   const TransactionTile({required this.transaction, super.key});
 
+  void _onTapTransaction(BuildContext context, WidgetRef ref) {
+    final preferencesNotifier = ref.read(preferencesProvider.notifier);
+
+    preferencesNotifier.setLastTransactionDetailId(transaction.id);
+    preferencesNotifier.setLastScreen(AppScreenEnum.details);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            TransactionDetailsScreen(transaction: transaction),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currencySymbol = ref.watch(preferencesProvider).currencySymbol;
@@ -52,22 +67,7 @@ class TransactionTile extends ConsumerWidget {
           fontSize: 14,
         ),
       ),
-      onTap: () {
-        ref
-            .read(preferencesProvider.notifier)
-            .setLastTransactionDetailId(transaction.id);
-        ref
-            .read(preferencesProvider.notifier)
-            .setLastScreen(AppScreenEnum.details);
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                TransactionDetailsScreen(transaction: transaction),
-          ),
-        );
-      },
+      onTap: () => _onTapTransaction(context, ref),
     );
   }
 }

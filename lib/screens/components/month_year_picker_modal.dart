@@ -23,6 +23,55 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
   late int? selectedYear;
   late int? selectedMonth;
 
+  void _onPressedClear() {
+    final filterNotifier = ref.read(transactionFilterProvider.notifier);
+    filterNotifier.standardFilter();
+
+    Navigator.pop(context);
+  }
+
+  void _onPressedConfirm() {
+    final filterNotifier = ref.read(transactionFilterProvider.notifier);
+    if (selectedYear == null) {
+      filterNotifier.clearDateRange();
+    } else {
+      final int month = selectedMonth ?? 1;
+      final startDate = DateTime(selectedYear!, month);
+
+      final endDate = selectedMonth == null
+          ? DateTime(selectedYear!, 12, 31, 23, 59, 59)
+          : DateTime(selectedYear!, month + 1, 0, 23, 59, 59);
+
+      filterNotifier.setDateRange(startDate, endDate);
+    }
+
+    Navigator.pop(context);
+  }
+
+  void _onSelectedItemChangedMonth(int index) {
+    setState(() {
+      (widget.showAllMonthsOption)
+          ? selectedMonth = index == 0 ? null : index
+          : selectedMonth = index + 1;
+    });
+  }
+
+  void _onSelectedItemChangedYear(int index, DateTime now) {
+    setState(() {
+      (widget.showAllYearsOption)
+          ? selectedYear = index == 0 ? null : now.year - (index - 1)
+          : selectedYear = now.year - index;
+
+      if (selectedYear == null) selectedMonth = null;
+
+      if (selectedYear == now.year &&
+          selectedMonth != null &&
+          selectedMonth! > now.month) {
+        selectedMonth = now.month;
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -51,17 +100,13 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
   @override
   Widget build(BuildContext context) {
     final myLocale = Localizations.localeOf(context);
-    final filterNotifier = ref.read(transactionFilterProvider.notifier);
 
     final now = DateTime.now();
-    final int initialYearIndex;
-    if (widget.showAllYearsOption) {
-      initialYearIndex = selectedYear == null
-          ? 0
-          : (now.year - selectedYear! + 1);
-    } else {
-      initialYearIndex = now.year - (selectedYear ?? now.year);
-    }
+    final int initialYearIndex = (widget.showAllYearsOption)
+        ? selectedYear == null
+              ? 0
+              : (now.year - selectedYear! + 1)
+        : now.year - (selectedYear ?? now.year);
 
     final int initialMonthIndex = (widget.showAllMonthsOption)
         ? selectedMonth ?? 0
@@ -103,30 +148,11 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton(
-                onPressed: () {
-                  filterNotifier.standardFilter();
-
-                  Navigator.pop(context);
-                },
+                onPressed: () => _onPressedClear(),
                 child: const Text('Limpar Filtro'),
               ),
               TextButton(
-                onPressed: () {
-                  if (selectedYear == null) {
-                    filterNotifier.clearDateRange();
-                  } else {
-                    final int month = selectedMonth ?? 1;
-                    final startDate = DateTime(selectedYear!, month);
-
-                    final endDate = selectedMonth == null
-                        ? DateTime(selectedYear!, 12, 31, 23, 59, 59)
-                        : DateTime(selectedYear!, month + 1, 0, 23, 59, 59);
-
-                    filterNotifier.setDateRange(startDate, endDate);
-                  }
-
-                  Navigator.pop(context);
-                },
+                onPressed: () => _onPressedConfirm(),
                 child: const Text('Confirmar'),
               ),
             ],
@@ -142,13 +168,8 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
                     scrollController: FixedExtentScrollController(
                       initialItem: initialMonthIndex,
                     ),
-                    onSelectedItemChanged: (index) {
-                      setState(() {
-                        (widget.showAllMonthsOption)
-                            ? selectedMonth = index == 0 ? null : index
-                            : selectedMonth = index + 1;
-                      });
-                    },
+                    onSelectedItemChanged: (index) =>
+                        _onSelectedItemChangedMonth(index),
                     children: monthWidgets,
                   ),
                 ),
@@ -159,23 +180,8 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
                     scrollController: FixedExtentScrollController(
                       initialItem: initialYearIndex,
                     ),
-                    onSelectedItemChanged: (index) {
-                      setState(() {
-                        (widget.showAllYearsOption)
-                            ? selectedYear = index == 0
-                                  ? null
-                                  : now.year - (index - 1)
-                            : selectedYear = now.year - index;
-
-                        if (selectedYear == null) selectedMonth = null;
-
-                        if (selectedYear == now.year &&
-                            selectedMonth != null &&
-                            selectedMonth! > now.month) {
-                          selectedMonth = now.month;
-                        }
-                      });
-                    },
+                    onSelectedItemChanged: (index) =>
+                        _onSelectedItemChangedYear(index, now),
                     children: [
                       if (widget.showAllYearsOption)
                         const Center(child: Text('Todos')),

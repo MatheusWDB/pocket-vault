@@ -9,7 +9,7 @@ class AppTheme {
   static const _incomeBg = Color(0xFFDCFCE7);
   static const _expense = Color(0xFFDC2626);
   static const _expenseBg = Color(0xFFFEE2E2);
-  static const _warning = Color(0xFFF59E0B);
+  //static const _warning = Color(0xFFF59E0B);
 
   static final light = ThemeData(
     useMaterial3: true,
@@ -17,7 +17,7 @@ class AppTheme {
 
     colorScheme: const ColorScheme.light(
       primary: _primary,
-      onPrimary: Colors.white,
+      //onPrimary: Colors.white,
       primaryContainer: Color(0xFFD0E4FF),
       onPrimaryContainer: Color(0xFF0A1F38),
 
@@ -32,7 +32,7 @@ class AppTheme {
       onTertiaryContainer: Color(0xFF5C0A0A),
 
       error: _expense,
-      surface: Colors.white,
+      //surface: Colors.white,
       onSurface: Color(0xFF0F172A),
       onSurfaceVariant: Color(0xFF64748B),
 
