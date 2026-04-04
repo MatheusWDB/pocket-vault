@@ -30,6 +30,9 @@ class MyApp extends ConsumerStatefulWidget {
 }
 
 class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
+  DateTime? _pausedAt;
+  static const _lockTimeout = Duration(minutes: 1);
+
   @override
   void initState() {
     super.initState();
@@ -51,9 +54,22 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused) {
-      ref.read(authStateProvider.notifier).logout();
-
+      _pausedAt = DateTime.now();
       AuthService().cancelAuthentication();
+    }
+
+    if (state == AppLifecycleState.resumed) {
+      final pausedAt = _pausedAt;
+
+      if (pausedAt != null) {
+        final elapsed = DateTime.now().difference(pausedAt);
+
+        if (elapsed > _lockTimeout) {
+          ref.read(authStateProvider.notifier).logout();
+        }
+      }
+
+      _pausedAt = null;
     }
   }
 
