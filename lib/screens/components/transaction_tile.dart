@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
+import 'package:pocket_vault/screens/components/build_marquee_text.dart';
 import 'package:pocket_vault/screens/transaction_details/transaction_details_screen.dart';
 import 'package:pocket_vault/theme/app_theme.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
@@ -49,11 +50,9 @@ class TransactionTile extends ConsumerWidget {
               ),
             )
           : null,
-      title: Text(
-        transaction.title,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontWeight: FontWeight.bold),
+      title: BuildMarqueeText(
+        text: transaction.title,
+        style: TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Text(transaction.category.name.toString()),
       trailing: Text(

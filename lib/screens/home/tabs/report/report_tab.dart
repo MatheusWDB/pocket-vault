@@ -9,6 +9,7 @@ import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
+import 'package:pocket_vault/screens/components/build_marquee_text.dart';
 import 'package:pocket_vault/services/report_pdf_service.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
@@ -83,10 +84,9 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
           ),
           const SizedBox(width: 8),
           Flexible(
-            child: Text(
-              label,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 14),
+            child: BuildMarqueeText(
+              text: label,
+              style: TextStyle(fontSize: 14),
             ),
           ),
         ],
