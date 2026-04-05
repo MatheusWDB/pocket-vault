@@ -17,6 +17,16 @@ class ReportPdfService {
   final CurrencySymbolEnum currency;
   final Locale locale;
 
+  // ── Paleta ────────────────────────────────────────────────
+  static const _primary = PdfColor.fromInt(0xFF1E3A5F);
+  static const _income = PdfColor.fromInt(0xFF16A34A);
+  static const _expense = PdfColor.fromInt(0xFFDC2626);
+  static const _surface = PdfColor.fromInt(0xFFF8FAFC);
+  static const _border = PdfColor.fromInt(0xFFE2E8F0);
+  static const _textPrimary = PdfColor.fromInt(0xFF0F172A);
+  static const _textMuted = PdfColor.fromInt(0xFF64748B);
+  static const _white = PdfColors.white;
+
   ReportPdfService({
     required this.transactions,
     required this.totalExpenses,
@@ -27,13 +37,16 @@ class ReportPdfService {
   Future<void> generatePdf() async {
     final pdf = pw.Document();
 
-    //final fontData = await rootBundle.load('assets/fonts/lucide.ttf');
-    //final lucideFont = pw.Font.ttf(fontData);
+    final robotoRegular = await PdfGoogleFonts.robotoRegular();
+    final robotoBold = await PdfGoogleFonts.robotoBold();
+
+    final theme = pw.ThemeData.withFont(base: robotoRegular, bold: robotoBold);
 
     pdf.addPage(
       index: 0,
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
+        theme: theme,
         header: (context) => _buildHeader(context, ReportPageType.summary),
         footer: (context) => _buildFooter(context),
         build: (context) => _buildSummaryContent(context),
@@ -44,6 +57,7 @@ class ReportPdfService {
       index: 1,
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
+        theme: theme,
         header: (context) => _buildHeader(
           context,
           ReportPageType.charts,
@@ -58,6 +72,7 @@ class ReportPdfService {
       index: 2,
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
+        theme: theme,
         header: (context) => _buildHeader(
           context,
           ReportPageType.statement,
@@ -73,433 +88,554 @@ class ReportPdfService {
     );
   }
 
+  // ── Header ────────────────────────────────────────────────
   pw.Widget _buildHeader(pw.Context _, ReportPageType type, [String? title]) {
-    return pw.Container(
-      child: pw.Column(
-        children: [
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              if (type == ReportPageType.summary) ...[
+    final now = DateTime.now();
+    final monthYear = now.toMonthYear(locale).toUpperCase();
+
+    final fontWeitgh = pw.FontWeight.bold;
+    final spacing = pw.SizedBox(height: 8);
+
+    return pw.Column(
+      children: [
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Row(
+              children: [
+                pw.Container(
+                  width: 6,
+                  height: 32,
+                  decoration: pw.BoxDecoration(
+                    color: _primary,
+                    borderRadius: pw.BorderRadius.circular(3),
+                  ),
+                ),
+                pw.SizedBox(width: 10),
                 pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
                       'PocketVault',
                       style: pw.TextStyle(
-                        fontWeight: pw.FontWeight.bold,
-                        fontSize: 26,
+                        fontWeight: fontWeitgh,
+                        fontSize: type == ReportPageType.summary ? 22 : 16,
+                        color: _primary,
                       ),
                     ),
                     pw.Text(
-                      'SOBERANIA FINACEIRA PESSOAL',
-                      style: pw.TextStyle(fontSize: 10),
+                      'Soberania Financeira Pessoal',
+                      style: pw.TextStyle(fontSize: 9, color: _textMuted),
                     ),
                   ],
-                ),
-                pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.end,
-                  children: [
-                    pw.Text(
-                      'RELATÓRIO MENSAL',
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                    ),
-                    pw.Text('MAR/2026', style: pw.TextStyle(fontSize: 20)),
-                  ],
-                ),
-              ] else ...[
-                pw.Text(
-                  'PocketVault',
-                  style: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: 20,
-                  ),
-                ),
-                pw.Text(
-                  title!,
-                  style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                 ),
               ],
-            ],
-          ),
-          pw.Divider(),
-        ],
-      ),
+            ),
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Text(
+                  type == ReportPageType.summary
+                      ? 'RELATÓRIO MENSAL'
+                      : title!.toUpperCase(),
+                  style: pw.TextStyle(
+                    fontSize: 9,
+                    fontWeight: fontWeitgh,
+                    color: _textMuted,
+                    letterSpacing: 1,
+                  ),
+                ),
+                pw.Text(
+                  monthYear,
+                  style: pw.TextStyle(
+                    fontSize: type == ReportPageType.summary ? 18 : 13,
+                    fontWeight: fontWeitgh,
+                    color: _textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        spacing,
+        pw.Divider(color: _border, thickness: 1),
+        spacing,
+      ],
     );
   }
 
+  // ── Footer ────────────────────────────────────────────────
   pw.Widget _buildFooter(pw.Context context) {
-    return pw.Container(
-      child: pw.Column(
-        children: [
-          pw.Divider(),
-          pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              /**
-                  pw.Row(
-                  children: [
-                  pw.Icon(
-                  pw.IconData(0xe900),
-                  //font: lucideFont,
-                  size: 20,
-                  color: PdfColors.blue,
+    final style = pw.TextStyle(fontSize: 8, color: _textMuted);
+
+    return pw.Column(
+      children: [
+        pw.Divider(color: _border, thickness: 1),
+        pw.SizedBox(height: 6),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Row(
+              children: [
+                pw.Container(
+                  width: 6,
+                  height: 6,
+                  decoration: pw.BoxDecoration(
+                    color: _income,
+                    shape: pw.BoxShape.circle,
                   ),
-                  ],
-                  ),
-               */
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text('Privacidade Total'),
-                  pw.Text('Processamento 100% Offline.'),
-                ],
-              ),
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.end,
-                children: [
-                  pw.Text(
-                    'Página ${context.pageNumber} de ${context.pagesCount}',
-                    //style: pw.TextStyle(fontSize: 12),
-                  ),
-                  pw.Text(
-                    'PocketVault - ${DateTime.now().toFullDateNumeric(locale)}',
-                    style: pw.TextStyle(
-                      fontSize: 10,
-                      //fontWeight: pw.FontWeight.bold
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      ),
+                ),
+                pw.SizedBox(width: 4),
+                pw.Text('Dados processados 100% offline', style: style),
+              ],
+            ),
+            pw.Text(
+              'Página ${context.pageNumber} de ${context.pagesCount}  •  PocketVault  •  ${DateTime.now().toFullDateNumeric(locale)}',
+              style: style,
+            ),
+          ],
+        ),
+      ],
     );
   }
 
+  // ── Página 1: Resumo ──────────────────────────────────────
   List<pw.Widget> _buildSummaryContent(pw.Context _) {
     double expense = 0.0;
     double income = 0.0;
-
-    for (Transaction t in transactions) {
+    for (final t in transactions) {
       t.amount < 0 ? expense += t.amount.abs() : income += t.amount.abs();
     }
-
-    final double total = income - expense;
+    final double balance = income - expense;
 
     final budgetCategories = totalExpenses.keys
         .where((c) => c.budgetLimit != null && c.budgetLimit! > 0)
-        .where((c) {
-          final spent = totalExpenses[c] ?? 0.0;
-          final limit = c.budgetLimit!;
-          return spent / limit >= 0.8;
-        })
+        .where((c) => (totalExpenses[c] ?? 0.0) / c.budgetLimit! >= 0.8)
         .toList();
 
-    final highlights = budgetCategories.isNotEmpty;
+    String fmt(double v) =>
+        v.toCurrency(code: currency.code, locale: currency.locale);
+
+    final color = _white.flatten();
 
     return [
+      // Cards de entradas / saídas
       pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceEvenly,
         children: [
-          pw.Container(
-            color: PdfColors.grey300,
-            child: pw.Column(
-              children: [
-                pw.Row(
-                  children: [
-                    pw.Container(width: 3, height: 25, color: PdfColors.green),
-                    pw.SizedBox(width: 8),
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text('TOTAL ENTRADAS'),
-                        pw.Text(
-                          '+ ${income.toCurrency(code: currency.code, locale: currency.locale)}',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+          pw.Expanded(
+            child: _summaryCard(
+              'ENTRADAS',
+              fmt(income),
+              _income,
+              isIncome: true,
             ),
           ),
-
-          pw.SizedBox(width: 15),
-
-          pw.Container(
-            color: PdfColors.grey300,
-            child: pw.Column(
-              children: [
-                pw.Row(
-                  children: [
-                    pw.Container(width: 3, height: 25, color: PdfColors.red),
-                    pw.SizedBox(width: 8),
-                    pw.Column(
-                      crossAxisAlignment: pw.CrossAxisAlignment.start,
-                      children: [
-                        pw.Text('TOTAL SAÍDAS'),
-                        pw.Text(
-                          '- ${expense.toCurrency(code: currency.code, locale: currency.locale)}',
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+          pw.SizedBox(width: 12),
+          pw.Expanded(
+            child: _summaryCard(
+              'SAÍDAS',
+              fmt(expense),
+              _expense,
+              isIncome: false,
             ),
           ),
         ],
       ),
 
-      pw.SizedBox(height: 16),
+      pw.SizedBox(height: 12),
 
+      // Card de saldo
       pw.Container(
-        padding: pw.EdgeInsets.all(20),
         width: double.infinity,
+        padding: const pw.EdgeInsets.symmetric(vertical: 20, horizontal: 24),
         decoration: pw.BoxDecoration(
-          color: PdfColors.blue,
+          color: _primary,
           borderRadius: pw.BorderRadius.circular(12),
         ),
         child: pw.Column(
           children: [
-            pw.Text('SALDO FINAL'),
             pw.Text(
-              total.toCurrency(code: currency.code, locale: currency.locale),
+              'SALDO DO MÊS',
+              style: pw.TextStyle(fontSize: 10, color: color, letterSpacing: 1),
+            ),
+            pw.SizedBox(height: 6),
+            pw.Text(
+              fmt(balance),
+              style: pw.TextStyle(
+                fontSize: 28,
+                fontWeight: pw.FontWeight.bold,
+                color: color,
+              ),
             ),
           ],
         ),
       ),
 
-      if (highlights) ...[
-        pw.Text('Destaques do Período'),
-        pw.Divider(),
+      pw.SizedBox(height: 24),
 
-        pw.ListView.builder(
-          itemCount: budgetCategories.length,
-          itemBuilder: (context, index) {
-            final category = budgetCategories[index];
+      // Destaques
+      if (budgetCategories.isNotEmpty) ...[
+        _sectionTitle('Alertas de Orçamento'),
+        pw.SizedBox(height: 8),
+        ...budgetCategories.map((category) {
+          final spent = totalExpenses[category] ?? 0.0;
+          final limit = category.budgetLimit!;
+          final progress = spent / limit;
+          final isOver = progress > 1.0;
+          final pct = isOver
+              ? '${((progress - 1.0) * 100).toStringAsFixed(2)}%'
+              : '${(progress * 100).toStringAsFixed(2)}%';
 
-            final spent = totalExpenses[category] ?? 0.0;
-            final limit = category.budgetLimit!;
+          final alertText = isOver
+              ? 'Limite excedido em $pct'
+              : progress == 1.0
+              ? 'Limite atingido'
+              : '$pct do limite atingido';
 
-            final progress = spent / limit;
+          final color = _getStatusColor(progress);
 
-            late final String alertText;
-            late final String descriptionText;
-
-            final categoryName = category.name;
-
-            final bool isOverBudget = progress > 1.0;
-            final percentage = isOverBudget
-                ? '${((progress - 1.0) * 100).toStringAsFixed(2)}%'
-                : '${(progress * 100).toStringAsFixed(2)}%';
-
-            if (progress > 1.0) {
-              alertText = 'Limite Excedido em \'$categoryName\'';
-              descriptionText =
-                  'Você superou o limite orçamentário em $percentage.';
-            } else if (progress == 1.0) {
-              alertText = 'Limite Atingido em \'$categoryName\'';
-              descriptionText = 'Você atingiu o limite orçamentário.';
-            } else {
-              alertText = 'Limite Próximo em \'$categoryName\'';
-              descriptionText =
-                  'Você atingiu $percentage do limite orçamentário.';
-            }
-
-            return pw.Container(
+          return pw.Container(
+            margin: const pw.EdgeInsets.only(bottom: 8),
+            decoration: pw.BoxDecoration(
+              color: _surface,
+              borderRadius: pw.BorderRadius.circular(6),
+              border: pw.Border.all(color: _border),
+            ),
+            child: pw.ClipRRect(
+              horizontalRadius: 6,
+              verticalRadius: 6,
               child: pw.Row(
                 children: [
-                  pw.Container(
-                    color: _getStatusColor(progress),
-                    height: 20,
-                    width: 5,
-                  ),
-                  pw.SizedBox(width: 16),
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(alertText, overflow: pw.TextOverflow.clip),
-                      pw.Text(
-                        descriptionText,
-                        style: const pw.TextStyle(fontSize: 14),
+                  pw.Expanded(
+                    child: pw.Padding(
+                      padding: const pw.EdgeInsets.all(12),
+                      child: pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                        children: [
+                          pw.Expanded(
+                            child: pw.Column(
+                              crossAxisAlignment: pw.CrossAxisAlignment.start,
+                              children: [
+                                pw.Text(
+                                  category.name,
+                                  style: pw.TextStyle(
+                                    fontSize: 12,
+                                    color: _textPrimary,
+                                  ),
+                                ),
+                                pw.Text(
+                                  alertText,
+                                  style: pw.TextStyle(
+                                    fontSize: 11,
+                                    color: color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          pw.Text(
+                            '${fmt(spent)} / ${fmt(limit)}',
+                            style: pw.TextStyle(
+                              fontSize: 11,
+                              color: color,
+                              fontWeight: pw.FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-            );
-          },
-        ),
+            ),
+          );
+        }),
       ],
     ];
   }
 
+  // ── Página 2: Gráficos / Orçamentos ──────────────────────
   List<pw.Widget> _buildChartsContent(pw.Context _) {
     final budgetCategories = totalExpenses.keys
         .where((c) => c.budgetLimit != null && c.budgetLimit! > 0)
         .toList();
 
+    String fmt(double v) =>
+        v.toCurrency(code: currency.code, locale: currency.locale);
+
     return [
-      pw.SizedBox(height: 16),
+      _sectionTitle('Controle de Orçamentos'),
+      pw.SizedBox(height: 12),
 
-      pw.Text(
-        'Controle de Orçamentos',
-        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-      ),
-      pw.Divider(),
+      if (budgetCategories.isEmpty)
+        pw.Center(
+          child: pw.Text(
+            'Nenhum orçamento configurado.',
+            style: pw.TextStyle(color: _textMuted),
+          ),
+        )
+      else
+        pw.ListView.builder(
+          itemCount: budgetCategories.length,
+          spacing: 12,
+          itemBuilder: (context, index) {
+            final category = budgetCategories[index];
+            final spent = totalExpenses[category] ?? 0.0;
+            final limit = category.budgetLimit!;
+            final progress = spent / limit;
+            final color = _getStatusColor(progress);
+            final isOver = progress > 1.0;
+            final pct = isOver
+                ? ((progress - 1.0) * 100).toStringAsFixed(1)
+                : (progress * 100).toStringAsFixed(1);
+            final fontWeight = pw.FontWeight.bold;
 
-      pw.SizedBox(height: 8),
-
-      pw.ListView.builder(
-        itemCount: budgetCategories.length,
-        spacing: 10,
-        itemBuilder: (context, index) {
-          final category = budgetCategories[index];
-
-          final categoryName = category.name;
-
-          final spent = totalExpenses[category] ?? 0.0;
-          final limit = category.budgetLimit!;
-
-          final progress = spent / limit;
-
-          final spentText = spent.toCurrency(
-            code: currency.code,
-            locale: currency.locale,
-          );
-          final limitText = limit.toCurrency(
-            code: currency.code,
-            locale: currency.locale,
-          );
-
-          final bool isOverBudget = progress > 1.0;
-          final String percentage = isOverBudget
-              ? ((progress - 1.0) * 100).toStringAsFixed(2)
-              : (progress * 100).toStringAsFixed(2);
-
-          final color = _getStatusColor(progress);
-
-          return pw.Column(
-            children: [
-              pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-                children: [
-                  pw.Text(categoryName, overflow: pw.TextOverflow.span),
-                  pw.Text(
-                    '$spentText de $limitText',
-                    style: pw.TextStyle(fontSize: 14, color: color),
-                  ),
-                ],
+            return pw.Container(
+              padding: const pw.EdgeInsets.all(14),
+              decoration: pw.BoxDecoration(
+                color: _surface,
+                borderRadius: pw.BorderRadius.circular(8),
+                border: pw.Border.all(color: _border),
               ),
-              pw.Column(
+              child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                    children: [
+                      pw.Text(
+                        category.name,
+                        style: pw.TextStyle(
+                          fontWeight: fontWeight,
+                          fontSize: 12,
+                          color: _textPrimary,
+                        ),
+                      ),
+                      pw.Text(
+                        '${fmt(spent)} de ${fmt(limit)}',
+                        style: pw.TextStyle(fontSize: 11, color: color),
+                      ),
+                    ],
+                  ),
+                  pw.SizedBox(height: 8),
                   pw.LinearProgressIndicator(
-                    minHeight: 6,
-                    value: progress,
+                    minHeight: 8,
+                    value: progress.clamp(0.0, 1.0),
                     valueColor: color,
-                    backgroundColor: PdfColors.grey,
+                    backgroundColor: _border,
                   ),
                   if (progress >= 0.8) ...[
-                    pw.SizedBox(height: 4),
+                    pw.SizedBox(height: 6),
                     pw.Text(
-                      !isOverBudget
-                          ? 'Atenção: $percentage% do teto atingido.'
-                          : 'Atenção: Teto estourado em $percentage%.',
+                      isOver
+                          ? 'Teto estourado em $pct%.'
+                          : 'Atenção: $pct% do teto atingido.',
                       style: pw.TextStyle(
-                        fontSize: 12,
-                        color: _getStatusColor(progress),
-                        fontWeight: pw.FontWeight.bold,
+                        fontSize: 10,
+                        color: color,
+                        fontWeight: fontWeight,
                       ),
                     ),
                   ],
                 ],
               ),
-            ],
+            );
+          },
+        ),
+    ];
+  }
+
+  // ── Página 3: Extrato ─────────────────────────────────────
+  List<pw.Widget> _buildStatementContent(pw.Context _) {
+    final style = pw.TextStyle(
+      fontSize: 9,
+      fontWeight: pw.FontWeight.bold,
+      color: _white.flatten(),
+      letterSpacing: 0.5,
+    );
+
+    return [
+      _sectionTitle('Extrato Detalhado'),
+      pw.SizedBox(height: 12),
+
+      // Cabeçalho da tabela
+      pw.Container(
+        padding: const pw.EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        decoration: pw.BoxDecoration(
+          color: _primary,
+          borderRadius: pw.BorderRadius.circular(6),
+        ),
+        child: pw.Row(
+          children: [
+            pw.SizedBox(width: 55, child: pw.Text('DATA', style: style)),
+            pw.Expanded(flex: 3, child: pw.Text('TÍTULO', style: style)),
+            pw.Expanded(
+              flex: 2,
+              child: pw.Text(
+                'CATEGORIA',
+                textAlign: pw.TextAlign.center,
+                style: style,
+              ),
+            ),
+            pw.Expanded(
+              child: pw.Text(
+                'VALOR',
+                textAlign: pw.TextAlign.right,
+                style: style,
+              ),
+            ),
+          ],
+        ),
+      ),
+
+      pw.SizedBox(height: 4),
+
+      pw.ListView.builder(
+        itemCount: transactions.length,
+        itemBuilder: (context, index) {
+          final t = transactions[index];
+          final isIncome = t.amount > 0;
+          final isEven = index % 2 == 0;
+          final style = pw.TextStyle(fontSize: 10, color: _textMuted);
+          final fontWeight = pw.FontWeight.bold;
+
+          return pw.Container(
+            padding: const pw.EdgeInsets.symmetric(vertical: 7, horizontal: 12),
+            decoration: pw.BoxDecoration(
+              color: isEven ? _white.flatten() : _surface,
+              border: pw.Border(
+                bottom: pw.BorderSide(color: _border, width: 0.5),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.SizedBox(
+                  width: 55,
+                  child: pw.Text(
+                    t.date.toShortDate(locale, false),
+                    style: style,
+                  ),
+                ),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Text(
+                    t.title,
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      color: _textPrimary,
+                      fontWeight: fontWeight,
+                    ),
+                    overflow: pw.TextOverflow.clip,
+                  ),
+                ),
+                pw.Expanded(
+                  flex: 2,
+                  child: pw.Text(
+                    t.category.name,
+                    textAlign: pw.TextAlign.center,
+                    style: style,
+                  ),
+                ),
+                pw.Expanded(
+                  child: pw.Text(
+                    t.amount.toCurrency(
+                      code: currency.code,
+                      locale: currency.locale,
+                    ),
+                    textAlign: pw.TextAlign.right,
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontWeight: fontWeight,
+                      color: isIncome ? _income : _expense,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),
     ];
   }
 
-  List<pw.Widget> _buildStatementContent(pw.Context _) {
-    return [
-      pw.Text('Extrato Detalhado'),
-      pw.Divider(),
-
-      pw.SizedBox(height: 16),
-
-      pw.Row(
-        //mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.SizedBox(width: 50, child: pw.Text('DATA')),
-          pw.Expanded(child: pw.Text('TÍTULO', textAlign: pw.TextAlign.start)),
-          pw.Expanded(
-            child: pw.Text('CATEGORIA', textAlign: pw.TextAlign.center),
-          ),
-          pw.Expanded(child: pw.Text('VALOR', textAlign: pw.TextAlign.end)),
-        ],
+  pw.Widget _summaryCard(
+    String label,
+    String value,
+    PdfColor color, {
+    required bool isIncome,
+  }) {
+    return pw.Container(
+      decoration: pw.BoxDecoration(
+        color: _surface,
+        borderRadius: pw.BorderRadius.circular(10),
+        border: pw.Border.all(color: _border),
       ),
-
-      pw.SizedBox(height: 4),
-      pw.Divider(height: 2, color: PdfColors.grey),
-      pw.SizedBox(height: 4),
-
-      pw.ListView.separated(
-        itemCount: transactions.length,
-        separatorBuilder: (context, index) => pw.Column(
+      child: pw.ClipRRect(
+        horizontalRadius: 10,
+        verticalRadius: 10,
+        child: pw.Row(
           children: [
-            pw.SizedBox(height: 4),
-            pw.Divider(height: 2, color: PdfColors.grey),
-            pw.SizedBox(height: 4),
+            pw.Expanded(
+              child: pw.Padding(
+                padding: const pw.EdgeInsets.all(16),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      label,
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        color: _textMuted,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    pw.SizedBox(height: 4),
+                    pw.Text(
+                      '${isIncome ? '+' : '-'} $value',
+                      style: pw.TextStyle(
+                        fontSize: 15,
+                        fontWeight: pw.FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
-        itemBuilder: (context, index) {
-          final transaction = transactions[index];
-
-          return pw.Row(
-            //mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              pw.SizedBox(
-                width: 50,
-                child: pw.Text(transaction.date.toShortDate(locale, false)),
-              ),
-              pw.Expanded(
-                child: pw.Text(
-                  transaction.title,
-                  textAlign: pw.TextAlign.start,
-                ),
-              ),
-              pw.Expanded(
-                child: pw.Text(
-                  transaction.category.name,
-                  textAlign: pw.TextAlign.center,
-                ),
-              ),
-              pw.Expanded(
-                child: pw.Text(
-                  transaction.amount.toCurrency(
-                    code: currency.code,
-                    locale: currency.locale,
-                  ),
-                  textAlign: pw.TextAlign.end,
-                ),
-              ),
-            ],
-          );
-        },
       ),
-    ];
+    );
+  }
+
+  pw.Widget _sectionTitle(String text) {
+    return pw.Row(
+      children: [
+        pw.Container(
+          width: 4,
+          height: 16,
+          decoration: pw.BoxDecoration(
+            color: _primary,
+            borderRadius: pw.BorderRadius.circular(2),
+          ),
+        ),
+        pw.SizedBox(width: 8),
+        pw.Text(
+          text,
+          style: pw.TextStyle(
+            fontSize: 13,
+            fontWeight: pw.FontWeight.bold,
+            color: _primary,
+          ),
+        ),
+      ],
+    );
   }
 
   PdfColor _getStatusColor(double val) {
     if (val > 1.0) return PdfColors.red700;
     if (val == 1.0) return PdfColors.orange700;
     if (val >= 0.8) return PdfColors.amber600;
-
     return PdfColors.green600;
   }
 }
