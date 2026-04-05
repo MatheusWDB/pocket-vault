@@ -66,6 +66,10 @@ class TransactionDetailsScreen extends ConsumerWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
 
+    final borderRadius = BorderRadius.circular(16);
+
+    final spacing = SizedBox(height: 20);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Detalhes'),
@@ -87,7 +91,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: themePrimaryContainer,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: borderRadius,
                     ),
                     child: const Icon(LucideIcons.receiptText, size: 50),
                   ),
@@ -120,7 +124,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: 20),
+              spacing,
 
               Row(
                 spacing: 16,
@@ -133,7 +137,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
                 ],
               ),
 
-              SizedBox(height: 20),
+              spacing,
 
               if (tags.isNotEmpty)
                 Row(
@@ -176,7 +180,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: borderRadius,
                   ),
                   child: Column(
                     spacing: 8,
@@ -207,7 +211,10 @@ class TransactionDetailsScreen extends ConsumerWidget {
                     child: Row(
                       spacing: 8,
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [Icon(LucideIcons.pencil), Text('Editar')],
+                      children: const [
+                        Icon(LucideIcons.pencil),
+                        Text('Editar'),
+                      ],
                     ),
                   ),
 
@@ -217,7 +224,10 @@ class TransactionDetailsScreen extends ConsumerWidget {
                     child: Row(
                       spacing: 8,
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [Icon(LucideIcons.trash2), Text('Excluir')],
+                      children: const [
+                        Icon(LucideIcons.trash2),
+                        Text('Excluir'),
+                      ],
                     ),
                   ),
                 ],

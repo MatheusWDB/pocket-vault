@@ -267,6 +267,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
     final String title = edit ? 'Editar Transação' : 'Nova Transação';
 
     final iconThemeColor = Theme.of(context).iconTheme.color;
+    final style = TextStyle(fontWeight: FontWeight.bold);
 
     return Scaffold(
       appBar: AppBar(
@@ -293,10 +294,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                 children: [
                   Column(
                     children: [
-                      const Text(
-                        'Valor',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      Text('Valor', style: style),
                       TextFormField(
                         controller: _amountController,
                         keyboardType: TextInputType.number,
@@ -458,10 +456,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Tags',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
+                          Text('Tags', style: style),
                           TextButton.icon(
                             onPressed: () => setState(
                               () =>

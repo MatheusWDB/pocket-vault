@@ -14,13 +14,13 @@ dcm:
     - avoid-dynamic
     - avoid-unused-parameters
     - prefer-conditional-expressions
-    
+
     # Foco em evitar Duplicidade e Erros de Lógica
     - no-equal-then-else
     - avoid-self-compare
     - avoid-self-assignment
     - prefer-moving-to-variable
-    
+
     # Foco em Flutter (Organização e Performance)
     - avoid-returning-widgets
     - prefer-extracting-callbacks
@@ -49,7 +49,7 @@ linter:
     avoid_unnecessary_containers: true
     use_key_in_widget_constructors: true
     #prefer_const_constructors: true
-    #prefer_const_literals_to_create_immutables: true
+    prefer_const_literals_to_create_immutables: true
     prefer_final_fields: true
     prefer_final_locals: true
     unnecessary_this: true

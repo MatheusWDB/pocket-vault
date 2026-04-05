@@ -29,6 +29,8 @@ class DashboardTab extends ConsumerWidget with FilterActions {
         filter.start?.toMonthYear(myLocale) ??
         DateTime.now().toMonthYear(myLocale);
 
+    final style = TextStyle(fontSize: 18, fontWeight: FontWeight.bold);
+
     return Column(
       spacing: 16.0,
       children: [
@@ -78,14 +80,8 @@ class DashboardTab extends ConsumerWidget with FilterActions {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Histórico',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    displayYear,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
+                  Text('Histórico', style: style),
+                  Text(displayYear, style: style),
                 ],
               ),
               Expanded(

@@ -223,7 +223,7 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
           child: Row(
             spacing: 8,
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [Icon(LucideIcons.save), Text('Exportar PDF')],
+            children: const [Icon(LucideIcons.save), Text('Exportar PDF')],
           ),
         ),
         SizedBox(height: 18),

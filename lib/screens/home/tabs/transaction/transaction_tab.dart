@@ -101,7 +101,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                           Row(
                             spacing: 6,
                             crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
+                            children: const [
                               Icon(LucideIcons.search, size: 20),
                               Text('Filtrar por nome ou tag...'),
                             ],
