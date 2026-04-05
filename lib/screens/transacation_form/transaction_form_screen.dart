@@ -8,6 +8,7 @@ import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/models/tag.dart';
 import 'package:pocket_vault/models/transaction.dart';
+import 'package:pocket_vault/navigation/route_observer.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
@@ -24,7 +25,8 @@ class TransactionFormScreen extends ConsumerStatefulWidget {
       _TransactionformscreenState();
 }
 
-class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
+class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
+    with RouteAware {
   final _formKey = GlobalKey<FormState>();
   final _categoryFocus = FocusNode();
   final _titleController = TextEditingController();
@@ -38,15 +40,9 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
   bool _isRecurring = false;
   String? _amountError;
   late final CurrencySymbolEnum _currency;
+  late final bool edit;
 
-  void _return(bool edit) {
-    final preferencesNotifier = ref.read(preferencesProvider.notifier);
-
-    preferencesNotifier.setLastTransactionDetailId(null);
-    edit
-        ? preferencesNotifier.setLastScreen(AppScreenEnum.details)
-        : preferencesNotifier.setLastScreen(AppScreenEnum.home);
-
+  void _return() {
     Navigator.pop(context);
   }
 
@@ -102,8 +98,6 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
         .map((c) => Tag(name: c.text.trim()))
         .toList();
 
-    final bool edit = widget.transaction != null;
-
     final transactionToSave = edit
         ? widget.transaction!.copyWith(
             title: title,
@@ -137,7 +131,6 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
 
       if (!mounted) return;
 
-      ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
       Navigator.of(context).pop();
     } catch (e) {
       ScaffoldMessenger.of(
@@ -198,6 +191,8 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
   void initState() {
     super.initState();
 
+    edit = widget.transaction != null;
+
     double initDoubleValue = 0.0;
 
     if (widget.transaction != null) {
@@ -251,8 +246,47 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
       c.dispose();
     }
     _amountController.dispose();
-
+    appRouteObserver.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    appRouteObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void didPopNext() {
+    final notifier = ref.read(preferencesProvider.notifier);
+
+    notifier.setLastScreen(AppScreenEnum.form);
+
+    if (edit) {
+      notifier.setLastTransactionDetailId(widget.transaction!.id!);
+    }
+  }
+
+  @override
+  void didPush() {
+    final notifier = ref.read(preferencesProvider.notifier);
+
+    notifier.setLastScreen(AppScreenEnum.form);
+
+    if (edit) {
+      notifier.setLastTransactionDetailId(widget.transaction!.id!);
+    }
+  }
+
+  @override
+  void didPop() {
+    final notifier = ref.read(preferencesProvider.notifier);
+
+    notifier.setLastScreen(AppScreenEnum.home);
+
+    if (edit) {
+      notifier.setLastTransactionDetailId(null);
+    }
   }
 
   @override
@@ -272,7 +306,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          onPressed: () => _return(edit),
+          onPressed: () => _return(),
           icon: const Icon(LucideIcons.chevronLeft),
         ),
         title: Text(title),
@@ -443,6 +477,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen> {
                               );
                             },
                       ),
+
                       BuildInputField(
                         controller: _installmentController,
                         label: 'Parcelas',

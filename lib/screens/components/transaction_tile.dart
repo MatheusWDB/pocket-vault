@@ -15,10 +15,9 @@ class TransactionTile extends ConsumerWidget {
   const TransactionTile({required this.transaction, super.key});
 
   void _onTapTransaction(BuildContext context, WidgetRef ref) {
-    final preferencesNotifier = ref.read(preferencesProvider.notifier);
-
-    preferencesNotifier.setLastTransactionDetailId(transaction.id);
-    preferencesNotifier.setLastScreen(AppScreenEnum.details);
+    ref
+        .read(preferencesProvider.notifier)
+        .setLastTransactionDetailId(transaction.id);
 
     Navigator.push(
       context,

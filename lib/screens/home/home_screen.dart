@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
+import 'package:pocket_vault/navigation/route_observer.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
@@ -21,7 +22,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
   late int _activeMenu;
 
   final _tabs = const [
@@ -48,10 +49,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _onPressedSettings() {
-    ref
-        .read(preferencesProvider.notifier)
-        .setLastScreen(AppScreenEnum.settings);
-
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => SettingsScreen()),
@@ -97,10 +94,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   void _onPressedTransactionForm() {
-    final preferencesNotifier = ref.read(preferencesProvider.notifier);
-
-    preferencesNotifier.setLastTransactionDetailId(null);
-    preferencesNotifier.setLastScreen(AppScreenEnum.form);
+    ref.read(preferencesProvider.notifier).setLastTransactionDetailId(null);
 
     Navigator.push(
       context,
@@ -115,6 +109,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ref.read(preferencesProvider).lastTab ?? AppTabEnum.dashboard;
 
     _activeMenu = lastTab.index;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    appRouteObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    appRouteObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
+  }
+
+  @override
+  void didPush() {
+    ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
   }
 
   @override

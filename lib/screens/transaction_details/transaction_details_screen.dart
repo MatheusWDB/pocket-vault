@@ -3,32 +3,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/models/transaction.dart';
+import 'package:pocket_vault/navigation/route_observer.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/transacation_form/transaction_form_screen.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
-class TransactionDetailsScreen extends ConsumerWidget {
+class TransactionDetailsScreen extends ConsumerStatefulWidget {
   final Transaction transaction;
 
   const TransactionDetailsScreen({required this.transaction, super.key});
 
-  void _return(BuildContext context, WidgetRef ref) {
-    final preferencesNotifier = ref.read(preferencesProvider.notifier);
+  @override
+  ConsumerState<TransactionDetailsScreen> createState() =>
+      _TransactionDetailsScreenState();
+}
 
-    preferencesNotifier.setLastTransactionDetailId(null);
-    preferencesNotifier.setLastScreen(AppScreenEnum.home);
+class _TransactionDetailsScreenState
+    extends ConsumerState<TransactionDetailsScreen>
+    with RouteAware {
+  late final Transaction transaction;
+
+  void _return(BuildContext context, WidgetRef ref) {
+    ref.read(preferencesProvider.notifier).setLastTransactionDetailId(null);
 
     Navigator.pop(context);
   }
 
-  void _onPressedEdit(BuildContext context, WidgetRef ref) {
-    final preferencesNotifier = ref.read(preferencesProvider.notifier);
-
-    preferencesNotifier.setLastTransactionDetailId(transaction.id);
-    preferencesNotifier.setLastScreen(AppScreenEnum.form);
-
+  void _onPressedEdit(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -46,7 +49,49 @@ class TransactionDetailsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    transaction = widget.transaction;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    appRouteObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    appRouteObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    final notifier = ref.read(preferencesProvider.notifier);
+
+    notifier.setLastScreen(AppScreenEnum.details);
+    notifier.setLastTransactionDetailId(transaction.id!);
+  }
+
+  @override
+  void didPush() {
+    final notifier = ref.read(preferencesProvider.notifier);
+
+    notifier.setLastScreen(AppScreenEnum.details);
+    notifier.setLastTransactionDetailId(transaction.id!);
+  }
+
+  @override
+  void didPop() {
+    final notifier = ref.read(preferencesProvider.notifier);
+
+    notifier.setLastScreen(AppScreenEnum.home);
+    notifier.setLastTransactionDetailId(null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final myLocale = Localizations.localeOf(context);
     final theme = Theme.of(context);
     final themePrimaryContainer = theme.colorScheme.primaryContainer;
@@ -207,7 +252,7 @@ class TransactionDetailsScreen extends ConsumerWidget {
                 children: [
                   ElevatedButton(
                     style: buttonStyle,
-                    onPressed: () => _onPressedEdit(context, ref),
+                    onPressed: () => _onPressedEdit(context),
                     child: Row(
                       spacing: 8,
                       mainAxisAlignment: MainAxisAlignment.center,

@@ -6,6 +6,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/enums/theme_mode_enum.dart';
+import 'package:pocket_vault/navigation/route_observer.dart';
 import 'package:pocket_vault/providers/backup_provider.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/tag_provider.dart';
@@ -30,9 +31,15 @@ class BottomSheetAction {
   });
 }
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen>
+    with RouteAware {
   Future<bool?> _showConfirmImportDialog(BuildContext context) =>
       showDialog<bool>(
         context: context,
@@ -248,14 +255,43 @@ class SettingsScreen extends ConsumerWidget {
     ]);
   }
 
-  void _return(BuildContext context, WidgetRef ref) {
-    ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
-
+  void _return(BuildContext context) {
     Navigator.pop(context);
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    appRouteObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    appRouteObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    ref
+        .read(preferencesProvider.notifier)
+        .setLastScreen(AppScreenEnum.settings);
+  }
+
+  @override
+  void didPush() {
+    ref
+        .read(preferencesProvider.notifier)
+        .setLastScreen(AppScreenEnum.settings);
+  }
+
+  @override
+  void didPop() {
+    ref.read(preferencesProvider.notifier).setLastScreen(AppScreenEnum.home);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final prefs = ref.watch(preferencesProvider);
     final prefsNotifier = ref.read(preferencesProvider.notifier);
     final backupService = ref.read(backupServiceProvider);
@@ -265,7 +301,7 @@ class SettingsScreen extends ConsumerWidget {
         title: Text('Configurações'),
         centerTitle: true,
         leading: IconButton(
-          onPressed: () => _return(context, ref),
+          onPressed: () => _return(context),
           icon: const Icon(LucideIcons.chevronLeft),
         ),
       ),

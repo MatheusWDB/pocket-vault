@@ -6,6 +6,7 @@ import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/enums/theme_mode_enum.dart';
 import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/l10n/l10n.dart';
+import 'package:pocket_vault/navigation/route_observer.dart';
 import 'package:pocket_vault/providers/auth_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
@@ -100,6 +101,7 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
       themeMode: themeMode.toThemeMode(),
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      navigatorObservers: [appRouteObserver],
       home: home,
       builder: (context, child) {
         return Stack(
