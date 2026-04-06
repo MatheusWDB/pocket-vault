@@ -140,10 +140,16 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
                               final category = e.key;
                               final value = e.value;
 
+                              final categoryColor = category.color;
+
                               return PieChartSectionData(
                                 value: value,
                                 showTitle: false,
-                                color: _getCategoryColor(category.id),
+                                color: categoryColor == null
+                                    ? _getCategoryColor(category.id)
+                                    : Color(
+                                        int.parse(categoryColor, radix: 16),
+                                      ),
                                 radius: 20,
                                 borderSide: BorderSide(width: 0.5),
                               );
@@ -193,13 +199,17 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
                           final value = e.value;
 
                           final categoryName = category.name;
+                          final categoryColor = category.color;
+                          debugPrint(categoryColor);
                           final percentage =
                               '${(value * 100 / total).toStringAsFixed(2)}%';
 
                           return BuildLegendItem(
                             categoryName: categoryName,
                             percentage: percentage,
-                            color: _getCategoryColor(category.id),
+                            color: categoryColor == null
+                                ? _getCategoryColor(category.id)
+                                : Color(int.parse(categoryColor, radix: 16)),
                             width: itemWidth,
                           );
                         }).toList(),

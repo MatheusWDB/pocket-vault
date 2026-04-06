@@ -40,10 +40,10 @@ class CategoryService {
     final result = await _repo.findByName(catgory.name, executor: db);
 
     if (result == null || result.isEmpty) {
-      final category = Category(name: catgory.name);
-      return category.copyWith(
-        id: await _repo.insert(category.toMap(), executor: db),
-      );
+      final category = Category(name: catgory.name, color: catgory.color);
+      final categoryId = await _repo.insert(category.toMap(), executor: db);
+
+      return category.copyWith(id: categoryId);
     }
 
     return Category.fromMap(result);

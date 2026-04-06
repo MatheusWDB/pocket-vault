@@ -15,6 +15,7 @@ import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/transacation_form/widgets/build_input_field.dart';
 import 'package:pocket_vault/theme/app_theme.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class TransactionFormScreen extends ConsumerStatefulWidget {
   final Transaction? transaction;
@@ -39,6 +40,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
   bool _isRevenue = false;
   bool _isRecurring = false;
   String? _amountError;
+  Color? _selectedColor;
   late final CurrencySymbolEnum _currency;
   late final bool edit;
 
@@ -83,6 +85,44 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
     }
   }
 
+  Future<void> _onTapSelectedColor() async {
+    Color currentColor = Colors.red[50]!;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Escolher cor'),
+        contentPadding: const EdgeInsets.all(0),
+        content: SingleChildScrollView(
+          child: MaterialPicker(
+            pickerColor: _selectedColor ?? currentColor,
+            onColorChanged: (color) => setState(() => currentColor = color),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => _onResetSelectedColor(),
+            child: const Text('Redefinir'),
+          ),
+          TextButton(
+            onPressed: () => _onConfirmSelectedColor(currentColor),
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onConfirmSelectedColor(Color? currentColor) {
+    setState(() => _selectedColor = currentColor);
+    Navigator.pop(context);
+  }
+
+  void _onResetSelectedColor() {
+    setState(() => _selectedColor = null);
+    Navigator.pop(context);
+  }
+
   Future<void> _saveTransaction() async {
     if (!_formKey.currentState!.validate()) return;
     if (_amountError != null) return;
@@ -92,7 +132,11 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
     final descripition = _descriptionController.text;
     final totalInstallments = int.tryParse(_installmentController.text) ?? 1;
 
-    final category = Category(name: _categoryController.text.trim());
+    final category = Category(
+      name: _categoryController.text.trim(),
+      color: _selectedColor?.toHexString(),
+    );
+
     final List<Tag> tags = _tagsControllers
         .where((c) => c.text.trim().isNotEmpty)
         .map((c) => Tag(name: c.text.trim()))
@@ -394,14 +438,13 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
 
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        leading: const Icon(LucideIcons.calendar),
                         title: const Text('Data da Transação'),
                         subtitle: Text(
                           DateFormat.yMd(
                             myLocale.toString(),
                           ).format(_selectedDate),
                         ),
-                        trailing: const Icon(LucideIcons.pencil, size: 20),
+                        trailing: const Icon(LucideIcons.calendar),
                         onTap: () => _onTapSelectedDate(now, myLocale),
                       ),
                       BuildInputField(
@@ -476,6 +519,19 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
                                 validator: (value) => _validatorCategory(value),
                               );
                             },
+                      ),
+
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text('Cor de Categoria'),
+                        subtitle: _selectedColor != null
+                            ? Text(_selectedColor!.toHexString())
+                            : null,
+                        trailing: Icon(
+                          LucideIcons.palette,
+                          color: _selectedColor,
+                        ),
+                        onTap: () => _onTapSelectedColor(),
                       ),
 
                       BuildInputField(

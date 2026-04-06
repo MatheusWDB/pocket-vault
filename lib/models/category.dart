@@ -4,12 +4,14 @@ class Category {
   final int? id;
   final String name;
   final double? budgetLimit;
+  final String? color;
   final DateTime? createdAt;
 
   Category({
     required this.name,
     this.id,
     this.budgetLimit = 0.0,
+    this.color,
     this.createdAt,
   });
 
@@ -17,12 +19,14 @@ class Category {
     int? id,
     String? name,
     double? budgetLimit,
+    String? color,
     DateTime? createdAt,
   }) {
     return Category(
       id: id ?? this.id,
       name: name ?? this.name,
       budgetLimit: budgetLimit ?? this.budgetLimit,
+      color: color ?? this.color,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -32,6 +36,7 @@ class Category {
       'id': id,
       'name': name,
       'budgetLimit': budgetLimit,
+      'color': color,
       'createdAt': (createdAt ?? DateTime.now()).toIso8601String(),
     };
   }
@@ -43,6 +48,7 @@ class Category {
       budgetLimit: map['budgetLimit'] != null
           ? (map['budgetLimit'] as num).toDouble()
           : null,
+      color: map['color'] as String?,
       createdAt: map['createdAt'] != null
           ? DateTime.parse(map['createdAt'])
           : null,
@@ -56,7 +62,7 @@ class Category {
 
   @override
   String toString() =>
-      'Category(id: $id, name: $name, budgetLimit: $budgetLimit, createdAt: $createdAt)';
+      'Category(id: $id, name: $name, budgetLimit: $budgetLimit, color: $color, createdAt: $createdAt)';
 
   @override
   bool operator ==(Object other) =>

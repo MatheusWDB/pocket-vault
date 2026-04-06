@@ -20,6 +20,7 @@ class TransactionRepository {
   static final columnCatId = DatabaseHelper.columnCategoryId;
   static final columnCatName = DatabaseHelper.columnCategoryName;
   static final columnCatBudgetLimit = DatabaseHelper.columnCategoryBudgetLimit;
+  static final columnCatColor = DatabaseHelper.columnCategoryColor;
   static final columnCatCreatedAt = DatabaseHelper.columnCategoryCreatedAt;
 
   static final columnTagName = DatabaseHelper.columnTagName;
@@ -192,6 +193,7 @@ class TransactionRepository {
           t.*,
           c.$columnCatName as category_name,
           c.$columnCatBudgetLimit as category_budgetLimit,
+          c.$columnCatColor as category_color,
           c.$columnCatCreatedAt as category_created_at,
           tg.$columnTagId as tag_id,
           tg.$columnTagName as tag_name

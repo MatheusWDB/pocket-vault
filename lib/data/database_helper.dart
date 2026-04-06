@@ -27,6 +27,7 @@ class DatabaseHelper {
   static const String columnCategoryId = 'id';
   static const String columnCategoryName = 'name';
   static const String columnCategoryBudgetLimit = 'budgetLimit';
+  static const String columnCategoryColor = 'color';
   static const String columnCategoryCreatedAt = 'createdAt';
 
   static const String columnTagId = 'id';
@@ -74,6 +75,7 @@ class DatabaseHelper {
           $columnCategoryId INTEGER PRIMARY KEY AUTOINCREMENT,
           $columnCategoryName TEXT NOT NULL,
           $columnCategoryBudgetLimit REAL,
+          $columnCategoryColor TEXT,
           $columnCategoryCreatedAt TEXT NOT NULL
         );
       ''';
