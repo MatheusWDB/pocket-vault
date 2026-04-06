@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:pocket_vault/data/database_helper.dart';
-import 'package:pocket_vault/mock/mock_transaction.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/repositories/transaction_repository.dart';
 import 'package:pocket_vault/services/category_service.dart';
@@ -106,28 +105,6 @@ class TransactionService {
       start?.toIso8601String(),
       end?.toIso8601String(),
     );
-
-    // ---------------Remover Mock---------------
-    final List<Transaction> list = _mapRowsToTransactions(result);
-
-    if (list.isEmpty) {
-      if (list.isEmpty) {
-        return mockTransactions.where((t) {
-          final matchTitle =
-              titles.isEmpty || titles.any((title) => t.title.contains(title));
-          final matchCategory =
-              categoryIds.isEmpty || categoryIds.contains(t.category.id!);
-          final matchTags =
-              tagIds.isEmpty || t.tags.any((tag) => tagIds.contains(tag.id));
-          final matchDate =
-              (start == null || t.date.isAfter(start)) &&
-              (end == null || t.date.isBefore(end));
-
-          return matchTitle && matchCategory && matchTags && matchDate;
-        }).toList()..sort((a, b) => b.date.compareTo(a.date));
-      }
-    }
-    // -------------------------------------------
 
     return _mapRowsToTransactions(result);
   }
@@ -275,6 +252,7 @@ class TransactionService {
             'id': row['categoryId'],
             'name': row['category_name'],
             'budgetLimit': row['category_budgetLimit'],
+            'color': row['category_color'],
             'createdAt': row['category_created_at'],
           },
           'tags': <Map<String, dynamic>>[],
