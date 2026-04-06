@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:file_saver/file_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pocket_vault/data/database_helper.dart';
 import 'package:pocket_vault/dto/backup_data.dart';
@@ -46,29 +47,43 @@ class BackupService {
     final String jsonString = backup.toJson();
 
     final now = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final file = File('${dir.path}/pocket_vault_backup_$now.json');
+    final file = File('${dir.path}/pocket_vault_backup_$now.dat');
 
     await file.writeAsString(jsonString);
 
     return file;
   }
 
-  Future<void> shareBackup() async {
-    final Directory dir = await getTemporaryDirectory();
+  Future<void> shareBackup([Directory? directory]) async {
+    final Directory dir = directory ?? await getTemporaryDirectory();
     final File file = await _generateBackupFile(dir);
 
-    await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+    await SharePlus.instance.share(
+      ShareParams(files: [XFile(file.path)], text: 'Backup PocketVault'),
+    );
   }
 
-  Future<void> saveBackupToAppFolder() async {
-    final Directory dir = await getApplicationDocumentsDirectory();
-    await _generateBackupFile(dir);
+  Future<bool> saveBackupToAppFolder() async {
+    final dir = await getTemporaryDirectory();
+    final file = await _generateBackupFile(dir);
+
+    final bytes = await file.readAsBytes();
+    final now = DateTime.now().toIso8601String().replaceAll(':', '-');
+
+    final path = await FileSaver.instance.saveAs(
+      name: 'pocket_vault_backup_$now',
+      bytes: bytes,
+      fileExtension: 'dat',
+      mimeType: MimeType.other,
+    );
+
+    return path != null && path.isNotEmpty;
   }
 
   Future<BackupData?> importBackup() async {
     final FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['json'],
+      allowedExtensions: ['dat'],
     );
 
     final filePath = result?.files.single.path;
@@ -88,7 +103,7 @@ class BackupService {
         .whereType<File>()
         .where(
           (f) =>
-              f.path.endsWith('.json') &&
+              f.path.endsWith('.dat') &&
               f.path.contains('pocket_vault_backup_'),
         )
         .toList();

@@ -45,9 +45,19 @@ class BackupData {
         ),
       ),
       transactions: List<Transaction>.from(
-        (map['transactions'] as List).map<Transaction>(
-          (x) => Transaction.fromMap(x as Map<String, dynamic>),
-        ),
+        (map['transactions'] as List).map<Transaction>((x) {
+          final transactionMap = Map<String, dynamic>.from(x as Map);
+          
+          transactionMap.putIfAbsent('tags', () => <Object?>[]);
+          transactionMap.putIfAbsent(
+            'category',
+            () => <String, dynamic>{
+              'id': transactionMap['categoryId'],
+              'name': '',
+            },
+          );
+          return Transaction.fromMap(transactionMap);
+        }),
       ),
       tags: List<Tag>.from(
         (map['tags'] as List).map<Tag>(

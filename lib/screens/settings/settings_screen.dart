@@ -40,24 +40,27 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen>
     with RouteAware {
-  Future<bool?> _showConfirmImportDialog(BuildContext context) =>
-      showDialog<bool>(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('t.confirmImport'),
-          content: Text('t.confirmImportMessage'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text('t.cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text('t.confirm'),
-            ),
-          ],
+  Future<bool?> _showConfirmImportDialog(
+    BuildContext context,
+  ) => showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Confirmar importação'),
+      content: Text(
+        'Isso substituirá todos os dados atuais pelo backup selecionado. Essa ação não pode ser desfeita.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text('Cancelar'),
         ),
-      );
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text('Confirmar'),
+        ),
+      ],
+    ),
+  );
 
   Future<void> _runAction({
     required BuildContext context,
@@ -91,19 +94,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     }
   }
 
-  void _saveToFolder(
-    BuildContext context,
-    WidgetRef ref,
-    BackupService backupService,
-  ) {
+  void _save(BuildContext context, WidgetRef ref, BackupService backupService) {
     _runAction(
       context: context,
       action: () async {
-        await backupService.saveBackupToAppFolder();
-        ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
+        final saved = await backupService.saveBackupToAppFolder();
+        if (saved) {
+          ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
+        }
       },
-      successMessage: 't.backupDownloaded',
-      errorMessage: 't.backupDownloadError',
+      successMessage: 'Backup salvo com sucesso',
+      errorMessage: 'Erro ao baixar backup',
     );
   }
 
@@ -118,8 +119,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         await backupService.shareBackup();
         ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
       },
-      successMessage: 't.backupShared',
-      errorMessage: 't.backupShareError',
+      successMessage: 'Backup compartilhado com sucesso',
+      errorMessage: 'Erro ao compartilhar backup',
     );
   }
 
@@ -135,7 +136,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     if (backup == null) {
       AlertInfo.show(
         context: context,
-        text: 't.backupLocalNotFound',
+        text: 'Nenhum backup encontrado localmente',
         typeInfo: TypeInfo.warning,
       );
       return;
@@ -154,8 +155,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         ref.invalidate(transactionListProvider);
         ref.invalidate(tagListProvider);
       },
-      successMessage: 't.backupRestored',
-      errorMessage: 't.backupImportError',
+      successMessage: 'Backup restaurado com sucesso',
+      errorMessage: 'Erro ao restaurar backup',
     );
   }
 
@@ -182,8 +183,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         ref.invalidate(transactionListProvider);
         ref.invalidate(tagListProvider);
       },
-      successMessage: 't.backupImported',
-      errorMessage: 't.fileImportError',
+      successMessage: 'Backup importado com sucesso',
+      errorMessage: 'Erro ao importar arquivo',
     );
   }
 
@@ -223,12 +224,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     _modalBottomSheet(context, [
       BottomSheetAction(
         icon: LucideIcons.folderDown,
-        title: 't.appBackupUsage',
-        onTap: () => _saveToFolder(context, ref, backupService),
+        title: 'Baixar',
+        onTap: () => _save(context, ref, backupService),
       ),
       BottomSheetAction(
         icon: LucideIcons.share2,
-        title: 't.share',
+        title: 'Compartilhar',
         onTap: () => _share(context, ref, backupService),
       ),
     ]);
@@ -240,16 +241,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     BackupService backupService,
   ) {
     _modalBottomSheet(context, [
+      /** 
       BottomSheetAction(
         icon: LucideIcons.folderOpen,
-        title: 't.appBackupUsage',
-        subtitle: 't.archiveSavedLocally',
+        title: 'Backup local',
+        subtitle: 'Usar o último backup salvo no dispositivo',
         onTap: () => _savedLocally(context, ref, backupService),
-      ),
+      ),*/
       BottomSheetAction(
         icon: LucideIcons.search,
-        title: 't.chooseFile',
-        subtitle: 't.searchInAnotherFolder',
+        title: 'Escolher arquivo',
+        subtitle: 'Pesquisar pasta',
         onTap: () => _searchFolder(context, ref, backupService),
       ),
     ]);
