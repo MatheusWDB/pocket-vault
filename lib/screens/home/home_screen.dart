@@ -14,6 +14,7 @@ import 'package:pocket_vault/screens/home/widgets/custom_bottom_app_bar.dart';
 import 'package:pocket_vault/screens/settings/settings_screen.dart';
 import 'package:pocket_vault/screens/transacation_form/transaction_form_screen.dart';
 import 'package:pocket_vault/theme/app_theme.dart';
+import 'package:pocket_vault/utils/app_alerts.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -76,19 +77,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
 
     if (confirm == true) {
       final service = ref.read(transactionServiceProvider);
-      await service.resetDatabase();
-
-      ref.invalidate(transactionListProvider);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            duration: Duration(milliseconds: 750),
-            content: Text(
-              'Banco de dados resetado! Reinicie o app se necessário.',
-            ),
-          ),
+      // DEPOIS
+      try {
+        await service.resetDatabase();
+        ref.invalidate(transactionListProvider);
+        if (!mounted) return;
+        AppAlerts.success(
+          context,
+          'Banco de dados resetado! Reinicie o app se necessário.',
         );
+      } catch (_) {
+        if (!mounted) return;
+        AppAlerts.error(context, 'Erro ao resetar o banco de dados');
       }
     }
   }

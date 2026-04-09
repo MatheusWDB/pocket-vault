@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
+import 'package:pocket_vault/exceptions/transaction_exception.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/navigation/route_observer.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/transacation_form/transaction_form_screen.dart';
+import 'package:pocket_vault/utils/app_alerts.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
@@ -40,12 +42,25 @@ class _TransactionDetailsScreenState
     );
   }
 
-  void _onPressedDelete(BuildContext context, WidgetRef ref) {
-    ref
-        .read(transactionListProvider.notifier)
-        .removeTransaction(transaction.id!);
+  Future<void> _onPressedDelete(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref
+          .read(transactionListProvider.notifier)
+          .removeTransaction(transaction.id!);
 
-    Navigator.pop(context);
+      if (!context.mounted) return;
+      Navigator.pop(context);
+    } on TransactionException catch (e) {
+      if (!context.mounted) return;
+      switch (e) {
+        case TransactionNotFoundException():
+          AppAlerts.error(context, e.message);
+        case TransactionSaveException():
+        case TransactionDeleteException():
+          AppAlerts.error(context, e.message);
+        case TransactionInvalidException():
+      }
+    }
   }
 
   @override

@@ -1,8 +1,10 @@
 import 'package:pocket_vault/data/database_helper.dart';
+import 'package:pocket_vault/exceptions/database_exception.dart';
+import 'package:pocket_vault/exceptions/tag_exception.dart';
 import 'package:pocket_vault/models/tag.dart';
 import 'package:pocket_vault/repositories/tag_repository.dart';
 import 'package:pocket_vault/repositories/transaction_tags_repository.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class TagService {
   final _dbHelper = DatabaseHelper.instance;
@@ -13,28 +15,30 @@ class TagService {
 
   Future<List<Tag>> getAllTags() async {
     final result = await _repo.findAll();
-
     return result.map((t) => Tag.fromMap(t)).toList();
   }
 
-  Future<Tag?> getTagByName(String name) async {
+  Future<Tag> getTagByName(String name) async {
     final result = await _repo.findByName(name);
-
-    if (result == null || result.isEmpty) return null;
-
+    if (result == null) throw const TagNotFoundException();
     return Tag.fromMap(result);
   }
 
   Future<Tag> ensureTagExists(String name, {DatabaseExecutor? executor}) async {
-    final db = executor ?? await _dbHelper.database;
-    final result = await _repo.findByName(name, executor: db);
+    try {
+      final db = executor ?? await _dbHelper.database;
+      final result = await _repo.findByName(name, executor: db);
 
-    if (result == null || result.isEmpty) {
-      final tag = Tag(name: name);
-      return tag.copyWith(id: await _repo.insert(tag.toMap(), executor: db));
+      if (result == null) {
+        final tag = Tag(name: name);
+        final id = await _repo.insert(tag.toMap(), executor: db);
+        return tag.copyWith(id: id);
+      }
+
+      return Tag.fromMap(result);
+    } on DatabaseException catch (e) {
+      throw TagSaveException(e.message);
     }
-
-    return Tag.fromMap(result);
   }
 
   Future<void> linkTagsToTransaction(
@@ -42,16 +46,19 @@ class TagService {
     List<Tag> tags, {
     DatabaseExecutor? executor,
   }) async {
-    final db = executor ?? await _dbHelper.database;
+    try {
+      final db = executor ?? await _dbHelper.database;
 
-    for (Tag tag in tags) {
-      final existingTag = await _repo.findByName(tag.name, executor: db);
+      for (final tag in tags) {
+        final existing = await _repo.findByName(tag.name, executor: db);
+        final tagId = existing != null
+            ? existing['id'] as int
+            : await _repo.insert(tag.toMap(), executor: db);
 
-      final int tagId = (existingTag == null)
-          ? await _repo.insert(tag.toMap(), executor: db)
-          : existingTag['id'];
-
-      await _repoTransactionTags.insert(transactionId, tagId, executor: db);
+        await _repoTransactionTags.insert(transactionId, tagId, executor: db);
+      }
+    } on DatabaseException catch (e) {
+      throw TagSaveException(e.message);
     }
   }
 }

@@ -2,9 +2,11 @@ import 'package:currency_textfield/currency_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
+import 'package:pocket_vault/exceptions/category_exception.dart';
 import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
+import 'package:pocket_vault/utils/app_alerts.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
 class BudgetDialog extends ConsumerStatefulWidget {
@@ -41,6 +43,17 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
         budgetLimit: _budgetLimitController.doubleValue,
       ),
     );
+
+    
+    final categoryState = ref.read(categoryListProvider);
+    if (categoryState.hasError) {
+      if (!mounted) return;
+      final error = categoryState.error;
+      if (error is CategoryException) {
+        AppAlerts.error(context, error.message);
+      }
+      return;
+    }
 
     if (!mounted) return;
 

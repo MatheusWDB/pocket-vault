@@ -1,4 +1,3 @@
-import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -6,6 +5,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/enums/theme_mode_enum.dart';
+import 'package:pocket_vault/exceptions/backup_exception.dart';
 import 'package:pocket_vault/navigation/route_observer.dart';
 import 'package:pocket_vault/providers/backup_provider.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
@@ -16,6 +16,7 @@ import 'package:pocket_vault/screens/settings/widgets/settings_dropdown_tile.dar
 import 'package:pocket_vault/screens/settings/widgets/settings_section.dart';
 import 'package:pocket_vault/screens/settings/widgets/settings_switch_tile.dart';
 import 'package:pocket_vault/services/backup_service.dart';
+import 'package:pocket_vault/utils/app_alerts.dart';
 
 class BottomSheetAction {
   final IconData icon;
@@ -45,119 +46,85 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   ) => showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text('Confirmar importação'),
-      content: Text(
+      title: const Text('Confirmar importação'),
+      content: const Text(
         'Isso substituirá todos os dados atuais pelo backup selecionado. Essa ação não pode ser desfeita.',
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: Text('Cancelar'),
+          child: const Text('Cancelar'),
         ),
         ElevatedButton(
           onPressed: () => Navigator.pop(context, true),
-          child: Text('Confirmar'),
+          child: const Text('Confirmar'),
         ),
       ],
     ),
   );
 
-  Future<void> _runAction({
-    required BuildContext context,
-    required Future<void> Function() action,
-    required String successMessage,
-    required String errorMessage,
-    bool closeModal = true,
-  }) async {
-    try {
-      await action();
-
-      if (!context.mounted) return;
-
-      AlertInfo.show(
-        context: context,
-        text: successMessage,
-        typeInfo: TypeInfo.success,
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-
-      AlertInfo.show(
-        context: context,
-        text: errorMessage,
-        typeInfo: TypeInfo.error,
-      );
-    }
-
-    if (closeModal && context.mounted) {
-      Navigator.of(context).maybePop();
-    }
+  void _closeBottomSheet() {
+    if (mounted) Navigator.of(context).maybePop();
   }
 
-  void _save(BuildContext context, WidgetRef ref, BackupService backupService) {
-    _runAction(
-      context: context,
-      action: () async {
-        final saved = await backupService.saveBackupToAppFolder();
-        if (saved) {
-          ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
-        }
-      },
-      successMessage: 'Backup salvo com sucesso',
-      errorMessage: 'Erro ao baixar backup',
-    );
+  void _save(
+    BuildContext context,
+    WidgetRef ref,
+    BackupService backupService,
+  ) async {
+    _closeBottomSheet();
+
+    try {
+      await backupService.saveBackup();
+
+      if (!context.mounted) return;
+      ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
+      AppAlerts.success(context, 'Backup salvo com sucesso');
+    } on BackupException catch (e) {
+      if (!context.mounted) return;
+      switch (e) {
+        case BackupCancelledException():
+          return;
+        case BackupSaveException():
+          AppAlerts.error(context, e.message);
+        case BackupGenerationException():
+          AppAlerts.error(context, e.message);
+        case BackupShareException():
+        case BackupInvalidException():
+        case BackupImportException():
+        case BackupRestoreException():
+      }
+    }
   }
 
   void _share(
     BuildContext context,
     WidgetRef ref,
     BackupService backupService,
-  ) {
-    _runAction(
-      context: context,
-      action: () async {
-        await backupService.shareBackup();
-        ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
-      },
-      successMessage: 'Backup compartilhado com sucesso',
-      errorMessage: 'Erro ao compartilhar backup',
-    );
-  }
-
-  void _savedLocally(
-    BuildContext context,
-    WidgetRef ref,
-    BackupService backupService,
   ) async {
-    final backup = await backupService.importFromAppFolder();
+    _closeBottomSheet();
 
-    if (!context.mounted) return;
+    try {
+      await backupService.shareBackup();
 
-    if (backup == null) {
-      AlertInfo.show(
-        context: context,
-        text: 'Nenhum backup encontrado localmente',
-        typeInfo: TypeInfo.warning,
-      );
-      return;
+      if (!context.mounted) return;
+      ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
+      AppAlerts.success(context, 'Backup compartilhado com sucesso');
+    } on BackupException catch (e) {
+      if (!context.mounted) return;
+      switch (e) {
+        case BackupCancelledException():
+          return;
+        case BackupSaveException():
+        case BackupGenerationException():
+          AppAlerts.error(context, e.message);
+        case BackupShareException():
+          AppAlerts.error(context, e.message);
+        case BackupInvalidException():
+        case BackupImportException():
+        case BackupRestoreException():
+      }
     }
-
-    final confirm = await _showConfirmImportDialog(context);
-    if (confirm != true) return;
-
-    if (!context.mounted) return;
-    await _runAction(
-      context: context,
-      action: () async {
-        await backupService.replaceAll(backup);
-
-        ref.invalidate(categoryListProvider);
-        ref.invalidate(transactionListProvider);
-        ref.invalidate(tagListProvider);
-      },
-      successMessage: 'Backup restaurado com sucesso',
-      errorMessage: 'Erro ao restaurar backup',
-    );
   }
 
   void _searchFolder(
@@ -165,27 +132,38 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     WidgetRef ref,
     BackupService backupService,
   ) async {
-    final backup = await backupService.importBackup();
-    if (backup == null) return;
+    _closeBottomSheet();
 
-    if (!context.mounted) return;
+    try {
+      final backup = await backupService.importBackup();
 
-    final confirm = await _showConfirmImportDialog(context);
-    if (confirm != true) return;
+      if (!context.mounted) return;
+      final confirm = await _showConfirmImportDialog(context);
+      if (confirm != true) return;
 
-    if (!context.mounted) return;
-    await _runAction(
-      context: context,
-      action: () async {
-        await backupService.replaceAll(backup);
+      if (!context.mounted) return;
+      await backupService.replaceAll(backup);
 
-        ref.invalidate(categoryListProvider);
-        ref.invalidate(transactionListProvider);
-        ref.invalidate(tagListProvider);
-      },
-      successMessage: 'Backup importado com sucesso',
-      errorMessage: 'Erro ao importar arquivo',
-    );
+      ref.invalidate(categoryListProvider);
+      ref.invalidate(transactionListProvider);
+      ref.invalidate(tagListProvider);
+
+      if (!context.mounted) return;
+      AppAlerts.success(context, 'Backup importado com sucesso');
+    } on BackupException catch (e) {
+      if (!context.mounted) return;
+      switch (e) {
+        case BackupCancelledException():
+          return;
+        case BackupSaveException():
+        case BackupGenerationException():
+        case BackupShareException():
+        case BackupInvalidException():
+        case BackupImportException():
+          AppAlerts.error(context, e.message);
+        case BackupRestoreException():
+      }
+    }
   }
 
   void _modalBottomSheet(
@@ -195,24 +173,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
-      builder: (_) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (final action in actions)
-                ListTile(
-                  leading: Icon(action.icon),
-                  title: Text(action.title),
-                  subtitle: action.subtitle != null
-                      ? Text(action.subtitle!)
-                      : null,
-                  onTap: action.onTap,
-                ),
-            ],
-          ),
-        );
-      },
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (final action in actions)
+              ListTile(
+                leading: Icon(action.icon),
+                title: Text(action.title),
+                subtitle: action.subtitle != null
+                    ? Text(action.subtitle!)
+                    : null,
+                onTap: action.onTap,
+              ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -241,13 +217,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     BackupService backupService,
   ) {
     _modalBottomSheet(context, [
-      /** 
-      BottomSheetAction(
-        icon: LucideIcons.folderOpen,
-        title: 'Backup local',
-        subtitle: 'Usar o último backup salvo no dispositivo',
-        onTap: () => _savedLocally(context, ref, backupService),
-      ),*/
       BottomSheetAction(
         icon: LucideIcons.search,
         title: 'Escolher arquivo',

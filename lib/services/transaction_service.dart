@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:pocket_vault/data/database_helper.dart';
+import 'package:pocket_vault/exceptions/database_exception.dart';
+import 'package:pocket_vault/exceptions/transaction_exception.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/repositories/transaction_repository.dart';
 import 'package:pocket_vault/services/category_service.dart';
@@ -17,78 +19,80 @@ class TransactionService {
 
   Future<List<Transaction>> getAllTransactions() async {
     final result = await _repo.findAll();
-
     return _mapRowsToTransactions(result);
   }
 
-  Future<Transaction?> getTransactionById(int id) async {
+  Future<Transaction> getTransactionById(int id) async {
     final result = await _repo.findById(id);
-
-    if (result.isEmpty) return null;
-
-    final transactionMap = _mapRowsToTransactions(result);
-
-    return transactionMap.first;
+    return _mapRowsToTransactions(result).first;
   }
 
   Future<void> createTransaction(Transaction transaction) async {
-    final db = await _dbHelper.database;
-
-    await db.transaction((txn) async {
-      final category = await _categoryService.ensureCategoryExists(
-        transaction.category,
-        executor: txn,
-      );
-
-      final transactionId = await _repo.insert(
-        transaction.copyWith(category: category).toMap(),
-        executor: txn,
-      );
-
-      if (transaction.tags.isNotEmpty) {
-        await _tagService.linkTagsToTransaction(
-          transactionId,
-          transaction.tags,
+    try {
+      final db = await _dbHelper.database;
+      await db.transaction((txn) async {
+        final category = await _categoryService.ensureCategoryExists(
+          transaction.category,
           executor: txn,
         );
-      }
-
-      if (transaction.isRecurring) {
-        await processRecurringTransactions(executor: txn);
-      }
-
-      if (transaction.totalInstallments! > 1) {
-        await processInstallmentsTransactions(transactionId, executor: txn);
-      }
-    });
+        final transactionId = await _repo.insert(
+          transaction.copyWith(category: category).toMap(),
+          executor: txn,
+        );
+        if (transaction.tags.isNotEmpty) {
+          await _tagService.linkTagsToTransaction(
+            transactionId,
+            transaction.tags,
+            executor: txn,
+          );
+        }
+        if (transaction.isRecurring) {
+          await processRecurringTransactions(executor: txn);
+        }
+        if (transaction.totalInstallments! > 1) {
+          await processInstallmentsTransactions(transactionId, executor: txn);
+        }
+      });
+    } on TransactionException {
+      rethrow;
+    } on DatabaseException catch (e) {
+      throw TransactionSaveException(e.message);
+    }
   }
 
   Future<void> updateTransaction(Transaction transaction) async {
-    final db = await _dbHelper.database;
-
-    await db.transaction((txn) async {
-      final category = await _categoryService.ensureCategoryExists(
-        transaction.category,
-        executor: txn,
-      );
-
-      await _repo.update(
-        transaction.copyWith(category: category).toMap(),
-        executor: txn,
-      );
-
-      if (transaction.tags.isNotEmpty) {
-        await _tagService.linkTagsToTransaction(
-          transaction.id!,
-          transaction.tags,
+    try {
+      final db = await _dbHelper.database;
+      await db.transaction((txn) async {
+        final category = await _categoryService.ensureCategoryExists(
+          transaction.category,
           executor: txn,
         );
-      }
-    });
+        await _repo.update(
+          transaction.copyWith(category: category).toMap(),
+          executor: txn,
+        );
+        if (transaction.tags.isNotEmpty) {
+          await _tagService.linkTagsToTransaction(
+            transaction.id!,
+            transaction.tags,
+            executor: txn,
+          );
+        }
+      });
+    } on TransactionException {
+      rethrow;
+    } on DatabaseException catch (e) {
+      throw TransactionSaveException(e.message);
+    }
   }
 
   Future<void> deleteTransaction(int id) async {
-    await _repo.delete(id);
+    try {
+      await _repo.delete(id);
+    } on DatabaseException catch (e) {
+      throw TransactionDeleteException(e.message);
+    }
   }
 
   Future<List<Transaction>> getTransactionsByFilter({
@@ -98,20 +102,22 @@ class TransactionService {
     DateTime? start,
     DateTime? end,
   }) async {
-    final result = await _repo.findWithFilters(
-      titles,
-      categoryIds,
-      tagIds,
-      start?.toIso8601String(),
-      end?.toIso8601String(),
-    );
-
-    return _mapRowsToTransactions(result);
+    try {
+      final result = await _repo.findWithFilters(
+        titles,
+        categoryIds,
+        tagIds,
+        start?.toIso8601String(),
+        end?.toIso8601String(),
+      );
+      return _mapRowsToTransactions(result);
+    } on DatabaseException catch (e) {
+      throw TransactionInvalidException(e.message);
+    }
   }
 
   Future<List<String>> getAllTitles() async {
     final maps = await _repo.findTitles();
-
     return maps.map((m) => m['title'] as String).toList();
   }
 

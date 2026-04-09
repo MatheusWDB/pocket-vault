@@ -5,6 +5,7 @@ import 'package:file_saver/file_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pocket_vault/data/database_helper.dart';
 import 'package:pocket_vault/dto/backup_data.dart';
+import 'package:pocket_vault/exceptions/backup_exception.dart';
 import 'package:pocket_vault/services/category_service.dart';
 import 'package:pocket_vault/services/tag_service.dart';
 import 'package:pocket_vault/services/transaction_service.dart';
@@ -34,66 +35,91 @@ class BackupService {
   static final columnRelTagId = DatabaseHelper.columnRelTagId;
 
   Future<File> _generateBackupFile(Directory dir) async {
-    final categories = await categoryService.getAllCategories();
-    final transactions = await transactionService.getAllTransactions();
-    final tags = await tagService.getAllTags();
+    try {
+      final categories = await categoryService.getAllCategories();
+      final transactions = await transactionService.getAllTransactions();
+      final tags = await tagService.getAllTags();
 
-    final backup = BackupData(
-      categories: categories,
-      transactions: transactions,
-      tags: tags,
-    );
+      final backup = BackupData(
+        categories: categories,
+        transactions: transactions,
+        tags: tags,
+      );
 
-    final String jsonString = backup.toJson();
+      final now = DateTime.now().toIso8601String().replaceAll(':', '-');
+      final file = File('${dir.path}/pocket_vault_backup_$now.dat');
+      await file.writeAsString(backup.toJson());
 
-    final now = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final file = File('${dir.path}/pocket_vault_backup_$now.dat');
-
-    await file.writeAsString(jsonString);
-
-    return file;
+      return file;
+    } catch (_) {
+      throw const BackupGenerationException();
+    }
   }
 
   Future<void> shareBackup([Directory? directory]) async {
-    final Directory dir = directory ?? await getTemporaryDirectory();
-    final File file = await _generateBackupFile(dir);
+    try {
+      final Directory dir = directory ?? await getTemporaryDirectory();
+      final File file = await _generateBackupFile(dir);
 
-    await SharePlus.instance.share(
-      ShareParams(files: [XFile(file.path)], text: 'Backup PocketVault'),
-    );
+      final result = await SharePlus.instance.share(
+        ShareParams(files: [XFile(file.path)], text: 'Backup PocketVault'),
+      );
+
+      if (result.status == ShareResultStatus.dismissed) {
+        throw const BackupCancelledException();
+      }
+    } on BackupException {
+      rethrow;
+    } catch (_) {
+      throw const BackupShareException();
+    }
   }
 
-  Future<bool> saveBackupToAppFolder() async {
-    final dir = await getTemporaryDirectory();
-    final file = await _generateBackupFile(dir);
+  Future<void> saveBackup() async {
+    try {
+      final dir = await getTemporaryDirectory();
+      final file = await _generateBackupFile(dir);
 
-    final bytes = await file.readAsBytes();
-    final now = DateTime.now().toIso8601String().replaceAll(':', '-');
+      final bytes = await file.readAsBytes();
+      final now = DateTime.now().toIso8601String().replaceAll(':', '-');
 
-    final path = await FileSaver.instance.saveAs(
-      name: 'pocket_vault_backup_$now',
-      bytes: bytes,
-      fileExtension: 'dat',
-      mimeType: MimeType.other,
-    );
+      final path = await FileSaver.instance.saveAs(
+        name: 'pocket_vault_backup_$now',
+        bytes: bytes,
+        fileExtension: 'dat',
+        mimeType: MimeType.other,
+      );
 
-    return path != null && path.isNotEmpty;
+      if (path == null || path.isEmpty) {
+        throw const BackupCancelledException();
+      }
+    } on BackupException {
+      rethrow;
+    } catch (_) {
+      throw const BackupSaveException();
+    }
   }
 
-  Future<BackupData?> importBackup() async {
-    final FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['dat'],
-    );
+  Future<BackupData> importBackup() async {
+    try {
+      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['dat'],
+      );
 
-    final filePath = result?.files.single.path;
+      final filePath = result?.files.single.path;
 
-    if (result == null || filePath == null) return null;
+      if (result == null || filePath == null) {
+        throw const BackupCancelledException();
+      }
 
-    final File file = File(filePath);
-    final String jsonString = await file.readAsString();
-
-    return BackupData.fromJson(jsonString);
+      final jsonString = await File(filePath).readAsString();
+      return BackupData.fromJson(jsonString);
+    } on BackupException {
+      rethrow;
+    } catch (_) {
+      throw const BackupImportException();
+    }
   }
 
   Future<BackupData?> importFromAppFolder() async {
@@ -121,49 +147,49 @@ class BackupService {
 
   Future<void> replaceAll(BackupData backup) async {
     if (backup.categories.isEmpty) {
-      throw Exception('Backup inválido: sem categorias');
+      throw const BackupInvalidException('Backup inválido: sem categorias');
     }
-
     if (backup.transactions.isEmpty) {
-      throw Exception('Backup inválido: sem transações');
+      throw const BackupInvalidException('Backup inválido: sem transações');
     }
 
-    final db = await dbHelper.database;
+    try {
+      final db = await dbHelper.database;
 
-    await db.transaction((txn) async {
-      final batch = txn.batch();
+      await db.transaction((txn) async {
+        final batch = txn.batch();
 
-      batch.delete(tableTT);
-      batch.delete(tableT);
-      batch.delete(tableTg);
-      batch.delete(tableC);
+        batch.delete(tableTT);
+        batch.delete(tableT);
+        batch.delete(tableTg);
+        batch.delete(tableC);
 
-      for (final category in backup.categories) {
-        batch.insert(tableC, category.toMap());
-      }
-
-      for (final tag in backup.tags) {
-        batch.insert(tableTg, tag.toMap());
-      }
-
-      for (final transaction in backup.transactions) {
-        batch.insert(
-          tableT,
-          transaction.toMap(),
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-
-        for (final tag in transaction.tags) {
-          batch.insert(tableTT, {
-            columnRelTransactionId: transaction.id,
-            columnRelTagId: tag.id,
-          });
+        for (final category in backup.categories) {
+          batch.insert(tableC, category.toMap());
         }
-      }
+        for (final tag in backup.tags) {
+          batch.insert(tableTg, tag.toMap());
+        }
+        for (final transaction in backup.transactions) {
+          batch.insert(
+            tableT,
+            transaction.toMap(),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+          for (final tag in transaction.tags) {
+            batch.insert(tableTT, {
+              columnRelTransactionId: transaction.id,
+              columnRelTagId: tag.id,
+            });
+          }
+        }
 
-      await batch.commit(noResult: true, continueOnError: false);
-      await _fixSequences(txn);
-    });
+        await batch.commit(noResult: true, continueOnError: false);
+        await _fixSequences(txn);
+      });
+    } catch (_) {
+      throw const BackupRestoreException();
+    }
   }
 
   Future<void> _fixSequences(DatabaseExecutor db) async {

@@ -1,5 +1,6 @@
 import 'package:pocket_vault/data/database_helper.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:pocket_vault/exceptions/database_exception.dart';
+import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class TransactionTagsRepository {
   final DatabaseHelper _dbHelper;
@@ -13,69 +14,90 @@ class TransactionTagsRepository {
   static final columnTagId = DatabaseHelper.columnTagId;
   static final columnTransactionId = DatabaseHelper.columnTransactionId;
 
+  static const _entity = 'Vínculo transação-tag';
+
   TransactionTagsRepository(this._dbHelper);
 
-  Future<int> insert(
+  Future<void> insert(
     int transactionId,
     int tagId, {
     DatabaseExecutor? executor,
   }) async {
-    final db = executor ?? await _dbHelper.database;
-
-    final row = {columnRelTransactionId: transactionId, columnRelTagId: tagId};
-
-    return await db.insert(table, row);
+    try {
+      final db = executor ?? await _dbHelper.database;
+      await db.insert(table, {
+        columnRelTransactionId: transactionId,
+        columnRelTagId: tagId,
+      });
+    } catch (_) {
+      throw const RecordInsertException(_entity);
+    }
   }
 
-  Future<int> delete(int transactionId, int tagId) async {
-    final db = await _dbHelper.database;
-
-    return await db.delete(
-      table,
-      where: '$columnRelTransactionId = ? AND $columnRelTagId = ?',
-      whereArgs: [transactionId, tagId],
-    );
+  Future<void> delete(int transactionId, int tagId) async {
+    try {
+      final db = await _dbHelper.database;
+      final count = await db.delete(
+        table,
+        where: '$columnRelTransactionId = ? AND $columnRelTagId = ?',
+        whereArgs: [transactionId, tagId],
+      );
+      if (count == 0) throw const RecordNotFoundException(_entity);
+    } on DatabaseException {
+      rethrow;
+    } catch (_) {
+      throw const RecordDeleteException(_entity);
+    }
   }
 
-  Future<int> deleteAllByTransaction(
+  Future<void> deleteAllByTransaction(
     int transactionId, {
     DatabaseExecutor? executor,
   }) async {
-    final db = executor ?? await _dbHelper.database;
-
-    return await db.delete(
-      table,
-      where: '$columnRelTransactionId = ?',
-      whereArgs: [transactionId],
-    );
+    try {
+      final db = executor ?? await _dbHelper.database;
+      await db.delete(
+        table,
+        where: '$columnRelTransactionId = ?',
+        whereArgs: [transactionId],
+      );
+    } catch (_) {
+      throw const RecordDeleteException(_entity);
+    }
   }
 
   Future<List<Map<String, dynamic>>> findTagsByTransactionId(
     int transactionId, {
     DatabaseExecutor? executor,
   }) async {
-    final db = executor ?? await _dbHelper.database;
-
-    return await db.rawQuery(
-      '''
+    try {
+      final db = executor ?? await _dbHelper.database;
+      return await db.rawQuery(
+        '''
         SELECT t.* FROM $tableTag t
         INNER JOIN $table tt ON t.$columnTagId = tt.$columnRelTagId
         WHERE tt.$columnRelTransactionId = ?
       ''',
-      [transactionId],
-    );
+        [transactionId],
+      );
+    } catch (_) {
+      throw const RecordQueryException(_entity);
+    }
   }
 
   Future<List<Map<String, dynamic>>> findTransactionsByTagId(int tagId) async {
-    final db = await _dbHelper.database;
-
-    return await db.rawQuery(
-      '''
+    try {
+      final db = await _dbHelper.database;
+      return await db.rawQuery(
+        '''
         SELECT t.* FROM $tableTransaction t
         INNER JOIN $table tt ON t.$columnTransactionId = tt.$columnRelTransactionId
         WHERE tt.$columnRelTagId = ?
       ''',
-      [tagId],
-    );
+        [tagId],
+      );
+    } catch (_) {
+      throw const RecordQueryException(_entity);
+    }
   }
 }

@@ -1,4 +1,3 @@
-import 'package:alert_info/alert_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -8,6 +7,7 @@ import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_dialog.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_list_builder.dart';
+import 'package:pocket_vault/utils/app_alerts.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 
 class BudgetTab extends ConsumerStatefulWidget {
@@ -20,11 +20,7 @@ class BudgetTab extends ConsumerStatefulWidget {
 class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
   void _budgetLimitDialog(bool noBudgetLimit) {
     if (noBudgetLimit) {
-      AlertInfo.show(
-        context: context,
-        text: 'Todas as categorias já possuem limite',
-        typeInfo: TypeInfo.warning,
-      );
+      AppAlerts.warning(context, 'Todas as categorias já possuem limite');
       return;
     }
 

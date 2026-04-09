@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:pocket_vault/exceptions/auth_exception.dart';
 import 'package:pocket_vault/providers/auth_provider.dart';
 import 'package:pocket_vault/services/auth_service.dart';
+import 'package:pocket_vault/utils/app_alerts.dart';
 
 class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
@@ -15,9 +17,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final AuthService authService = AuthService();
 
   Future<void> _canAuthenticate() async {
-    final success = await authService.authenticate();
+    try {
+      await authService.authenticate();
 
-    if (success) _autheticated();
+      _autheticated();
+    } on AuthException catch (e) {
+      if (!mounted) return;
+      switch (e) {
+        case AuthCancelledException():
+          return;
+        case AuthFailedException():
+        case AuthUnavailableException():
+          AppAlerts.error(context, e.message);
+      }
+    }
   }
 
   Future<void> _checkAutoAuthenticate() async {

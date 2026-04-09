@@ -3,21 +3,42 @@ import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth_android/local_auth_android.dart';
 import 'package:local_auth_darwin/types/auth_messages_ios.dart';
+import 'package:pocket_vault/exceptions/auth_exception.dart';
 
 class AuthService {
   static final _auth = LocalAuthentication();
   static bool _isAuthenticating = false;
 
   Future<bool> checkBiometrics() async {
-    bool canCheckBiometrics = false;
     try {
-      final bool canAuthenticateWithBiometrics = await _auth.canCheckBiometrics;
-      canCheckBiometrics =
-          canAuthenticateWithBiometrics || await _auth.isDeviceSupported();
-    } on PlatformException catch (e) {
-      debugPrint(e.toString());
+      return await _auth.isDeviceSupported();
+    } on PlatformException catch (_) {
+      throw const AuthUnavailableException();
     }
-    return canCheckBiometrics;
+  }
+
+  Future<void> authenticate() async {
+    if (_isAuthenticating) throw const AuthCancelledException();
+    _isAuthenticating = true;
+
+    try {
+      final result = await _auth.authenticate(
+        authMessages: [
+          AndroidAuthMessages(signInTitle: 'PocketVault', signInHint: ''),
+          IOSAuthMessages(localizedFallbackTitle: 'PocketVault'),
+        ],
+        localizedReason: 'Sua soberania financeira começa aqui.',
+        persistAcrossBackgrounding: true,
+      );
+
+      if (!result) throw const AuthFailedException();
+    } on AuthException {
+      rethrow;
+    } on PlatformException catch (_) {
+      throw const AuthFailedException();
+    } finally {
+      _isAuthenticating = false;
+    }
   }
 
   Future<List<BiometricType>> getAvailableBiometrics() async {
@@ -29,32 +50,6 @@ class AuthService {
       debugPrint(e.toString());
     }
     return availableBiometrics;
-  }
-
-  Future<bool> authenticate() async {
-    if (_isAuthenticating) return false;
-    _isAuthenticating = true;
-
-    try {
-      final result = await _auth.authenticate(
-        authMessages: <AuthMessages>[
-          AndroidAuthMessages(signInTitle: 'PocketVault', signInHint: ''),
-          IOSAuthMessages(localizedFallbackTitle: 'PocketVault'),
-        ],
-        localizedReason: 'Sua soberania financeira começa aqui.',
-        persistAcrossBackgrounding: true,
-      );
-
-      _isAuthenticating = false;
-      return result;
-    } on LocalAuthException catch (e) {
-      debugPrint(e.toString());
-    } on PlatformException catch (e) {
-      debugPrint(e.toString());
-    }
-
-    _isAuthenticating = false;
-    return false;
   }
 
   Future<bool> authenticateWithBiometrics() async {

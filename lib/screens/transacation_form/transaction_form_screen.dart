@@ -5,6 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
+import 'package:pocket_vault/exceptions/category_exception.dart';
+import 'package:pocket_vault/exceptions/tag_exception.dart';
+import 'package:pocket_vault/exceptions/transaction_exception.dart';
 import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/models/tag.dart';
 import 'package:pocket_vault/models/transaction.dart';
@@ -14,6 +17,7 @@ import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/transacation_form/widgets/build_input_field.dart';
 import 'package:pocket_vault/theme/app_theme.dart';
+import 'package:pocket_vault/utils/app_alerts.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -168,19 +172,27 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
             tags: tags,
           );
 
-    try {
-      final notifier = ref.read(transactionListProvider.notifier);
+    final notifier = ref.read(transactionListProvider.notifier);
 
-      await notifier.saveTransaction(transactionToSave, creating: !edit);
+    await notifier.saveTransaction(transactionToSave, creating: !edit);
 
+    final transactionState = ref.read(transactionListProvider);
+    if (transactionState.hasError) {
       if (!mounted) return;
-
-      Navigator.of(context).pop();
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erro ao salvar: $e')));
+      final error = transactionState.error;
+      if (error is TransactionException) {
+        AppAlerts.error(context, error.message);
+      } else if (error is CategoryException) {
+        AppAlerts.error(context, error.message);
+      } else if (error is TagException) {
+        AppAlerts.error(context, error.message);
+      }
+      return;
     }
+
+    if (!mounted) return;
+
+    Navigator.of(context).pop();
   }
 
   Iterable<Category> _optionsBuilderCategory(
