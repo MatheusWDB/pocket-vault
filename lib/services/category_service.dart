@@ -17,8 +17,12 @@ class CategoryService {
   }
 
   Future<Category> getCategoryById(int id) async {
-    final result = await _repo.findById(id);
-    return Category.fromMap(result);
+    try {
+      final result = await _repo.findById(id);
+      return Category.fromMap(result);
+    } on RecordNotFoundException {
+      throw const CategoryNotFoundException();
+    }
   }
 
   Future<Category?> getCategoryByName(String name) async {
@@ -46,19 +50,19 @@ class CategoryService {
   Future<void> saveCategory(Category category) async {
     try {
       final categoryMap = category.toMap();
-      
       category.id == null
           ? await _repo.insert(categoryMap)
           : await _repo.update(categoryMap);
-    } on DatabaseException catch (e) {
-      throw CategorySaveException(e.message);
+    } on RecordNotFoundException {
+      throw const CategoryNotFoundException();
+    } on DatabaseException {
+      throw const CategorySaveException();
     }
   }
 
   Future<void> deleteCategory(int id) async {
     try {
       final db = await _dbHelper.database;
-
       await db.transaction((txn) async {
         final result = await _repoTransaction.findWithFilters(
           [],
@@ -68,15 +72,15 @@ class CategoryService {
           null,
           executor: txn,
         );
-
         if (result.isNotEmpty) throw const CategoryDeleteException();
-
         await _repo.delete(id, executor: txn);
       });
     } on CategoryException {
       rethrow;
-    } on DatabaseException catch (e) {
-      throw CategorySaveException(e.message);
+    } on RecordNotFoundException {
+      throw const CategoryNotFoundException();
+    } on DatabaseException {
+      throw const CategorySaveException();
     }
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
 import 'package:pocket_vault/exceptions/category_exception.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
@@ -27,11 +28,12 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
 
   late final CurrencySymbolEnum _currency;
 
-  void _saveBudget() async {
+  void _saveBudget(AppLocalizations t) async {
     if (!_formKey.currentState!.validate()) return;
+    if (_budgetLimitError != null) return;
     if (_selectedCategory == null) {
       setState(() {
-        _categoryError = 'Selecione uma categoria';
+        _categoryError = t.selectCategory;
       });
       return;
     }
@@ -44,13 +46,12 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
       ),
     );
 
-    
     final categoryState = ref.read(categoryListProvider);
     if (categoryState.hasError) {
       if (!mounted) return;
       final error = categoryState.error;
       if (error is CategoryException) {
-        AppAlerts.error(context, error.message);
+        AppAlerts.error(context, e: error);
       }
       return;
     }
@@ -75,10 +76,10 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
     }
   }
 
-  Null _validatorBudgetLimit() {
+  Null _validatorBudgetLimit(AppLocalizations t) {
     setState(() {
       _budgetLimitError = (_budgetLimitController.doubleValue <= 0)
-          ? 'O valor deve ser maior que zero'
+          ? t.valueGreaterThanZero
           : null;
     });
 
@@ -122,19 +123,14 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final categories = ref.watch(categoriesAvailableForBudgetProvider);
 
     return AlertDialog(
-      title: const Text('Definir Limite', textAlign: TextAlign.center),
+      title: Text(t.defineLimit, textAlign: TextAlign.center),
       actions: [
-        TextButton(
-          onPressed: () => _cancelDialog(),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: () => _saveBudget(),
-          child: const Text('Salvar'),
-        ),
+        TextButton(onPressed: () => _cancelDialog(), child: Text(t.cancel)),
+        ElevatedButton(onPressed: () => _saveBudget(t), child: Text(t.save)),
       ],
       content: Form(
         key: _formKey,
@@ -166,13 +162,13 @@ class _BudgetDialogState extends ConsumerState<BudgetDialog> {
               ),
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               onChanged: (_) => _onChangedBudgetLimit(),
-              validator: (_) => _validatorBudgetLimit(),
+              validator: (_) => _validatorBudgetLimit(t),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Selecione a Categoria',
+                Text(
+                  t.selectCategory,
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 LayoutBuilder(

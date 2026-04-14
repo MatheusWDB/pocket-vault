@@ -1,23 +1,27 @@
 sealed class TransactionException implements Exception {
-  final String message;
-  const TransactionException(this.message);
-
-  @override
-  String toString() => message;
+  const TransactionException();
 }
 
 class TransactionNotFoundException extends TransactionException {
-  const TransactionNotFoundException() : super('Transação não encontrada');
+  const TransactionNotFoundException();
 }
 
 class TransactionSaveException extends TransactionException {
-  const TransactionSaveException(String message) : super('Erro ao salvar a transação');
+  const TransactionSaveException();
 }
 
 class TransactionDeleteException extends TransactionException {
-  const TransactionDeleteException(String message) : super('Erro ao excluir a transação');
+  const TransactionDeleteException();
 }
 
-class TransactionInvalidException extends TransactionException {
-  const TransactionInvalidException(super.message);
+class TransactionInvalidValueException extends TransactionException {
+  const TransactionInvalidValueException();
+}
+
+class TransactionInvalidTitleException extends TransactionException {
+  const TransactionInvalidTitleException();
+}
+
+class TransactionInvalidCategoryException extends TransactionException {
+  const TransactionInvalidCategoryException();
 }

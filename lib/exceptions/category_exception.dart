@@ -1,20 +1,15 @@
 sealed class CategoryException implements Exception {
-  final String message;
-  const CategoryException(this.message);
-
-  @override
-  String toString() => message;
+  const CategoryException();
 }
 
 class CategoryNotFoundException extends CategoryException {
-  const CategoryNotFoundException() : super('Categoria não encontrada');
+  const CategoryNotFoundException();
 }
 
 class CategorySaveException extends CategoryException {
-  const CategorySaveException(String message) : super('Erro ao salvar a categoria');
+  const CategorySaveException();
 }
 
 class CategoryDeleteException extends CategoryException {
-  const CategoryDeleteException()
-    : super('Não é possível excluir uma categoria com transações vinculadas');
+  const CategoryDeleteException();
 }

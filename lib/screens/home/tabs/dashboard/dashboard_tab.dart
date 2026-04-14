@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
@@ -19,6 +20,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final myLocale = Localizations.localeOf(context);
+    final t = AppLocalizations.of(context)!;
     final appColors = Theme.of(context).extension<AppColors>()!;
     final currencySymbol = ref.watch(preferencesProvider).currencySymbol;
     final summary = ref.watch(transactionSummaryProvider);
@@ -40,7 +42,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Saldo Total'),
+                Text(t.totalBalance),
                 Text(
                   summary.balance.toCurrency(
                     code: currencySymbol.code,
@@ -58,14 +60,14 @@ class DashboardTab extends ConsumerWidget with FilterActions {
         Row(
           children: [
             BuildSummaryCard(
-              label: 'Entradas',
+              label: t.entries,
               value: summary.totalIncomes,
               color: appColors.income,
               icon: LucideIcons.circleArrowUp,
               currencySymbol: currencySymbol,
             ),
             BuildSummaryCard(
-              label: 'Saídas',
+              label: t.outputs,
               value: summary.totalExpenses,
               color: appColors.expense,
               icon: LucideIcons.circleArrowDown,
@@ -80,7 +82,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Histórico', style: style),
+                  Text(t.history, style: style),
                   Text(displayYear, style: style),
                 ],
               ),
@@ -88,9 +90,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                 child: transactionsAsync.when(
                   data: (transactions) {
                     if (transactions.isEmpty) {
-                      return const Center(
-                        child: Text('Nenhuma transação no período'),
-                      );
+                      return Center(child: Text(t.noTransactionsInPeriod));
                     }
 
                     final groupedByYear = transactions.groupByYearAndDate();
@@ -122,7 +122,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                                 horizontal: 16.0,
                               ),
                               child: Text(
-                                date.toShortDate(myLocale),
+                                date.toShortDate(myLocale, t),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,

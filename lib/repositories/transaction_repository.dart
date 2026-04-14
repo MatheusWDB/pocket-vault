@@ -30,8 +30,6 @@ class TransactionRepository {
   static final columnRelTagId = DatabaseHelper.columnRelTagId;
   static final columnRelTransactionId = DatabaseHelper.columnRelTransactionId;
 
-  static const _entity = 'Transação';
-
   TransactionRepository(this._dbHelper);
 
   Future<int> insert(
@@ -42,7 +40,7 @@ class TransactionRepository {
       final db = executor ?? await _dbHelper.database;
       return await db.insert(table, row);
     } catch (_) {
-      throw const RecordInsertException(_entity);
+      throw const RecordInsertException();
     }
   }
 
@@ -51,7 +49,7 @@ class TransactionRepository {
       final db = await _dbHelper.database;
       return await db.rawQuery(_sql('WHERE t.$columnIsTemplate = 0'));
     } catch (_) {
-      throw const RecordQueryException(_entity);
+      throw const RecordQueryException();
     }
   }
 
@@ -62,12 +60,12 @@ class TransactionRepository {
     try {
       final db = executor ?? await _dbHelper.database;
       final result = await db.rawQuery(_sql('WHERE t.$columnId = ?'), [id]);
-      if (result.isEmpty) throw const RecordNotFoundException(_entity);
+      if (result.isEmpty) throw const RecordNotFoundException();
       return result;
     } on DatabaseException {
       rethrow;
     } catch (_) {
-      throw const RecordQueryException(_entity);
+      throw const RecordQueryException();
     }
   }
 
@@ -81,7 +79,7 @@ class TransactionRepository {
         orderBy: '$columnTitle ASC',
       );
     } catch (_) {
-      throw const RecordQueryException(_entity);
+      throw const RecordQueryException();
     }
   }
 
@@ -160,7 +158,7 @@ class TransactionRepository {
 
       return await db.rawQuery(sql, args);
     } catch (e) {
-      throw const RecordQueryException(_entity);
+      throw const RecordQueryException();
     }
   }
 
@@ -176,11 +174,11 @@ class TransactionRepository {
         where: '$columnId = ?',
         whereArgs: [row['id']],
       );
-      if (count == 0) throw const RecordNotFoundException(_entity);
+      if (count == 0) throw const RecordNotFoundException();
     } on DatabaseException {
       rethrow;
     } catch (_) {
-      throw const RecordUpdateException(_entity);
+      throw const RecordUpdateException();
     }
   }
 
@@ -192,11 +190,11 @@ class TransactionRepository {
         where: '$columnId = ?',
         whereArgs: [id],
       );
-      if (count == 0) throw const RecordNotFoundException(_entity);
+      if (count == 0) throw const RecordNotFoundException();
     } on DatabaseException {
       rethrow;
     } catch (_) {
-      throw const RecordDeleteException(_entity);
+      throw const RecordDeleteException();
     }
   }
 
@@ -214,7 +212,7 @@ class TransactionRepository {
           'OR t.$columnLastGeneratedMonth != ?)';
       return await db.rawQuery(_sql(whereClause), [currentMonth]);
     } catch (_) {
-      throw const RecordQueryException(_entity);
+      throw const RecordQueryException();
     }
   }
 

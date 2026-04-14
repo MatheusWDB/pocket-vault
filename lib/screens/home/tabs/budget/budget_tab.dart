@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
@@ -18,9 +19,9 @@ class BudgetTab extends ConsumerStatefulWidget {
 }
 
 class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
-  void _budgetLimitDialog(bool noBudgetLimit) {
+  void _budgetLimitDialog(bool noBudgetLimit, AppLocalizations t) {
     if (noBudgetLimit) {
-      AppAlerts.warning(context, 'Todas as categorias já possuem limite');
+      AppAlerts.warning(context, message: t.allCategoriesHaveLimit);
       return;
     }
 
@@ -33,6 +34,7 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final myLocale = Localizations.localeOf(context);
     final filter = ref.watch(transactionFilterProvider);
     final currency = ref.watch(preferencesProvider).currencySymbol;
@@ -70,11 +72,12 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
 
         OutlinedButton(
           style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(15)),
-          onPressed: () => _budgetLimitDialog(categoriesNoBudgetLimit.isEmpty),
-          child: const Row(
+          onPressed: () =>
+              _budgetLimitDialog(categoriesNoBudgetLimit.isEmpty, t),
+          child: Row(
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [Icon(LucideIcons.circlePlus), Text('Novo Limite')],
+            children: [Icon(LucideIcons.circlePlus), Text(t.newLimit)],
           ),
         ),
         const SizedBox(height: 18),

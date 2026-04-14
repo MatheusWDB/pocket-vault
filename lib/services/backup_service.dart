@@ -147,10 +147,10 @@ class BackupService {
 
   Future<void> replaceAll(BackupData backup) async {
     if (backup.categories.isEmpty) {
-      throw const BackupInvalidException('Backup inválido: sem categorias');
+      throw const BackupInvalidNoCategoriesException();
     }
     if (backup.transactions.isEmpty) {
-      throw const BackupInvalidException('Backup inválido: sem transações');
+      throw const BackupInvalidNoTransactionsException();
     }
 
     try {

@@ -1,20 +1,15 @@
 sealed class AuthException implements Exception {
-  final String message;
-  const AuthException(this.message);
-
-  @override
-  String toString() => message;
+  const AuthException();
 }
 
 class AuthFailedException extends AuthException {
-  const AuthFailedException() : super('Autenticação falhou');
+  const AuthFailedException();
 }
 
 class AuthCancelledException extends AuthException {
-  const AuthCancelledException() : super('Autenticação cancelada pelo usuário');
+  const AuthCancelledException();
 }
 
 class AuthUnavailableException extends AuthException {
-  const AuthUnavailableException()
-      : super('Biometria não disponível neste dispositivo');
+  const AuthUnavailableException();
 }

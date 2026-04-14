@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/utils/string_extensions.dart';
 
@@ -100,6 +101,7 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
   @override
   Widget build(BuildContext context) {
     final myLocale = Localizations.localeOf(context);
+    final t = AppLocalizations.of(context)!;
 
     final now = DateTime.now();
     final int initialYearIndex = (widget.showAllYearsOption)
@@ -140,20 +142,17 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          const Text(
-            'Selecionar Período',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+          Text(t.selectPeriod, style: TextStyle(fontWeight: FontWeight.bold)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton(
                 onPressed: () => _onPressedClear(),
-                child: const Text('Limpar Filtro'),
+                child: Text(t.clearFilter),
               ),
               TextButton(
                 onPressed: () => _onPressedConfirm(),
-                child: const Text('Confirmar'),
+                child: Text(t.confirm),
               ),
             ],
           ),
@@ -183,8 +182,7 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
                     onSelectedItemChanged: (index) =>
                         _onSelectedItemChangedYear(index, now),
                     children: [
-                      if (widget.showAllYearsOption)
-                        const Center(child: Text('Todos')),
+                      if (widget.showAllYearsOption) Center(child: Text(t.all)),
                       ...List.generate(
                         10,
                         // Aqui vai mudar para (now.year - ano da primeira transação)

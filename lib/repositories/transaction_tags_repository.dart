@@ -14,8 +14,6 @@ class TransactionTagsRepository {
   static final columnTagId = DatabaseHelper.columnTagId;
   static final columnTransactionId = DatabaseHelper.columnTransactionId;
 
-  static const _entity = 'Vínculo transação-tag';
-
   TransactionTagsRepository(this._dbHelper);
 
   Future<void> insert(
@@ -30,7 +28,7 @@ class TransactionTagsRepository {
         columnRelTagId: tagId,
       });
     } catch (_) {
-      throw const RecordInsertException(_entity);
+      throw const RecordInsertException();
     }
   }
 
@@ -42,11 +40,11 @@ class TransactionTagsRepository {
         where: '$columnRelTransactionId = ? AND $columnRelTagId = ?',
         whereArgs: [transactionId, tagId],
       );
-      if (count == 0) throw const RecordNotFoundException(_entity);
+      if (count == 0) throw const RecordNotFoundException();
     } on DatabaseException {
       rethrow;
     } catch (_) {
-      throw const RecordDeleteException(_entity);
+      throw const RecordDeleteException();
     }
   }
 
@@ -62,7 +60,7 @@ class TransactionTagsRepository {
         whereArgs: [transactionId],
       );
     } catch (_) {
-      throw const RecordDeleteException(_entity);
+      throw const RecordDeleteException();
     }
   }
 
@@ -81,7 +79,7 @@ class TransactionTagsRepository {
         [transactionId],
       );
     } catch (_) {
-      throw const RecordQueryException(_entity);
+      throw const RecordQueryException();
     }
   }
 
@@ -97,7 +95,7 @@ class TransactionTagsRepository {
         [tagId],
       );
     } catch (_) {
-      throw const RecordQueryException(_entity);
+      throw const RecordQueryException();
     }
   }
 }

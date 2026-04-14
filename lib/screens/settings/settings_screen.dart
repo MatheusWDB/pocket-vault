@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/enums/theme_mode_enum.dart';
 import 'package:pocket_vault/exceptions/backup_exception.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/navigation/route_observer.dart';
 import 'package:pocket_vault/providers/backup_provider.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
@@ -16,7 +16,9 @@ import 'package:pocket_vault/screens/settings/widgets/settings_dropdown_tile.dar
 import 'package:pocket_vault/screens/settings/widgets/settings_section.dart';
 import 'package:pocket_vault/screens/settings/widgets/settings_switch_tile.dart';
 import 'package:pocket_vault/services/backup_service.dart';
+import 'package:pocket_vault/theme/app_theme.dart';
 import 'package:pocket_vault/utils/app_alerts.dart';
+import 'package:pocket_vault/utils/date_time_extension.dart';
 
 class BottomSheetAction {
   final IconData icon;
@@ -43,25 +45,26 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     with RouteAware {
   Future<bool?> _showConfirmImportDialog(
     BuildContext context,
-  ) => showDialog<bool>(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Confirmar importação'),
-      content: const Text(
-        'Isso substituirá todos os dados atuais pelo backup selecionado. Essa ação não pode ser desfeita.',
+    AppLocalizations t,
+  ) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(t.confirmImport),
+        content: Text(t.importWarning),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(t.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(t.confirm),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('Confirmar'),
-        ),
-      ],
-    ),
-  );
+    );
+  }
 
   void _closeBottomSheet() {
     if (mounted) Navigator.of(context).maybePop();
@@ -71,6 +74,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     BuildContext context,
     WidgetRef ref,
     BackupService backupService,
+    AppLocalizations t,
   ) async {
     _closeBottomSheet();
 
@@ -79,20 +83,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
       if (!context.mounted) return;
       ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
-      AppAlerts.success(context, 'Backup salvo com sucesso');
+      AppAlerts.success(context, message: t.backupSaveSuccess);
     } on BackupException catch (e) {
       if (!context.mounted) return;
       switch (e) {
         case BackupCancelledException():
           return;
         case BackupSaveException():
-          AppAlerts.error(context, e.message);
+          AppAlerts.error(context, e: e);
         case BackupGenerationException():
-          AppAlerts.error(context, e.message);
+          AppAlerts.error(context, e: e);
         case BackupShareException():
-        case BackupInvalidException():
         case BackupImportException():
         case BackupRestoreException():
+        case BackupInvalidNoCategoriesException():
+        case BackupInvalidNoTransactionsException():
       }
     }
   }
@@ -101,6 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     BuildContext context,
     WidgetRef ref,
     BackupService backupService,
+    AppLocalizations t,
   ) async {
     _closeBottomSheet();
 
@@ -109,7 +115,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
       if (!context.mounted) return;
       ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
-      AppAlerts.success(context, 'Backup compartilhado com sucesso');
+      AppAlerts.success(context, message: t.backupShareSuccess);
     } on BackupException catch (e) {
       if (!context.mounted) return;
       switch (e) {
@@ -117,12 +123,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
           return;
         case BackupSaveException():
         case BackupGenerationException():
-          AppAlerts.error(context, e.message);
+          AppAlerts.error(context, e: e);
         case BackupShareException():
-          AppAlerts.error(context, e.message);
-        case BackupInvalidException():
+          AppAlerts.error(context, e: e);
         case BackupImportException():
         case BackupRestoreException():
+        case BackupInvalidNoCategoriesException():
+        case BackupInvalidNoTransactionsException():
       }
     }
   }
@@ -131,6 +138,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     BuildContext context,
     WidgetRef ref,
     BackupService backupService,
+    AppLocalizations t,
   ) async {
     _closeBottomSheet();
 
@@ -138,7 +146,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       final backup = await backupService.importBackup();
 
       if (!context.mounted) return;
-      final confirm = await _showConfirmImportDialog(context);
+      final confirm = await _showConfirmImportDialog(context, t);
       if (confirm != true) return;
 
       if (!context.mounted) return;
@@ -149,7 +157,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
       ref.invalidate(tagListProvider);
 
       if (!context.mounted) return;
-      AppAlerts.success(context, 'Backup importado com sucesso');
+      AppAlerts.success(context, message: t.backupImportSuccess);
     } on BackupException catch (e) {
       if (!context.mounted) return;
       switch (e) {
@@ -158,10 +166,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
         case BackupSaveException():
         case BackupGenerationException():
         case BackupShareException():
-        case BackupInvalidException():
         case BackupImportException():
-          AppAlerts.error(context, e.message);
+          AppAlerts.error(context, e: e);
         case BackupRestoreException():
+        case BackupInvalidNoCategoriesException():
+        case BackupInvalidNoTransactionsException():
       }
     }
   }
@@ -196,17 +205,18 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     BuildContext context,
     WidgetRef ref,
     BackupService backupService,
+    AppLocalizations t,
   ) {
     _modalBottomSheet(context, [
       BottomSheetAction(
         icon: LucideIcons.folderDown,
-        title: 'Baixar',
-        onTap: () => _save(context, ref, backupService),
+        title: t.download,
+        onTap: () => _save(context, ref, backupService, t),
       ),
       BottomSheetAction(
         icon: LucideIcons.share2,
-        title: 'Compartilhar',
-        onTap: () => _share(context, ref, backupService),
+        title: t.share,
+        onTap: () => _share(context, ref, backupService, t),
       ),
     ]);
   }
@@ -215,19 +225,54 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     BuildContext context,
     WidgetRef ref,
     BackupService backupService,
+    AppLocalizations t,
   ) {
     _modalBottomSheet(context, [
       BottomSheetAction(
         icon: LucideIcons.search,
-        title: 'Escolher arquivo',
-        subtitle: 'Pesquisar pasta',
-        onTap: () => _searchFolder(context, ref, backupService),
+        title: t.chooseFile,
+        subtitle: t.searchFolder,
+        onTap: () => _searchFolder(context, ref, backupService, t),
       ),
     ]);
   }
 
   void _return(BuildContext context) {
     Navigator.pop(context);
+  }
+
+  void _onPressedDeleteForever(AppLocalizations t) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.resetDatabaseQuestion),
+        content: Text(t.resetWarning),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(t.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(t.confirm, style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final service = ref.read(transactionServiceProvider);
+      // DEPOIS
+      try {
+        await service.resetDatabase();
+        ref.invalidate(transactionListProvider);
+        if (!mounted) return;
+        AppAlerts.success(context, message: t.dbResetSuccess);
+      } catch (_) {
+        if (!mounted) return;
+        AppAlerts.error(context, message: t.dbResetError);
+      }
+    }
   }
 
   @override
@@ -263,13 +308,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final myLocale = Localizations.localeOf(context);
+    final t = AppLocalizations.of(context)!;
+    final appColors = Theme.of(context).extension<AppColors>()!;
     final prefs = ref.watch(preferencesProvider);
     final prefsNotifier = ref.read(preferencesProvider.notifier);
     final backupService = ref.read(backupServiceProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Configurações'),
+        title: Text(t.settings),
         centerTitle: true,
         leading: IconButton(
           onPressed: () => _return(context),
@@ -287,15 +335,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                   spacing: 15,
                   children: [
                     SettingsDropdownTile<AppThemeModeEnum>(
-                      title: 'Tema',
+                      title: t.theme,
                       value: prefs.themeMode,
                       values: AppThemeModeEnum.values,
-                      label: (t) => t.displayName,
+                      label: (theme) => theme.displayName(t),
                       onChanged: prefsNotifier.setTheme,
                     ),
 
                     SettingsDropdownTile<CurrencySymbolEnum>(
-                      title: 'Moeda',
+                      title: t.currency,
                       value: prefs.currencySymbol,
                       values: CurrencySymbolEnum.values,
                       label: (c) => c.code,
@@ -303,19 +351,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                     ),
 
                     SettingsSwitchTile(
-                      title: 'Biometria',
+                      title: t.biometry,
                       value: prefs.isBiometricEnabled,
                       onChanged: prefsNotifier.setBiometricEnabled,
                     ),
                   ],
                 ),
                 SettingsSection(
-                  title: 'Segurança dos Dados',
+                  title: t.dataSecurity,
                   children: [
-                    const Text(
-                      'O "PocketVault" guarda tudo localmente. '
-                      'Use as opções abaixo para não perder seus dados.',
-                    ),
+                    Text(t.storageInfo),
 
                     Card(
                       child: Column(
@@ -323,19 +368,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
                           ListTile(
                             dense: true,
                             leading: const Icon(LucideIcons.download),
-                            title: const Text('Baixar backup'),
-                            subtitle: const Text('Exportar seus dados'),
-                            onTap: () =>
-                                _showBackupActions(context, ref, backupService),
+                            title: Text(t.downloadBackup),
+                            subtitle: Text(t.exportData),
+                            onTap: () => _showBackupActions(
+                              context,
+                              ref,
+                              backupService,
+                              t,
+                            ),
                           ),
                           const Divider(),
                           ListTile(
                             dense: true,
                             leading: const Icon(LucideIcons.upload),
-                            title: const Text('Carregar backup'),
-                            subtitle: const Text('Substituir dados atuais'),
-                            onTap: () =>
-                                _showImportActions(context, ref, backupService),
+                            title: Text(t.loadBackup),
+                            subtitle: Text(t.replaceCurrentData),
+                            onTap: () => _showImportActions(
+                              context,
+                              ref,
+                              backupService,
+                              t,
+                            ),
                           ),
                         ],
                       ),
@@ -343,11 +396,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
 
                     Text(
                       prefs.lastBackupAt == null
-                          ? 'Nenhum backup realizado'
-                          : 'Último backup: ${DateFormat('dd/MM/yyyy HH:mm').format(prefs.lastBackupAt!)}',
+                          ? t.noBackupPerformed
+                          : t.lastBackup(
+                              prefs.lastBackupAt!.toDateTime(myLocale),
+                            ),
                       textAlign: TextAlign.center,
                     ),
                   ],
+                ),
+                ListTile(
+                  leading: Icon(Icons.delete_forever, color: appColors.warning),
+                  title: Text(t.clearDatabase),
+                  subtitle: Text(t.eraseAllData),
+                  trailing: Icon(LucideIcons.chevronRight),
+                  onTap: () => _onPressedDeleteForever(t),
                 ),
               ],
             ),

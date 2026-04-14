@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
@@ -16,6 +17,7 @@ class ReportPdfService {
   final Map<Category, double> totalExpenses;
   final CurrencySymbolEnum currency;
   final Locale locale;
+  final AppLocalizations t;
 
   // ── Paleta ────────────────────────────────────────────────
   static const _primary = PdfColor.fromInt(0xFF1E3A5F);
@@ -28,6 +30,7 @@ class ReportPdfService {
   static const _white = PdfColors.white;
 
   ReportPdfService({
+    required this.t,
     required this.transactions,
     required this.totalExpenses,
     required this.locale,
@@ -61,7 +64,7 @@ class ReportPdfService {
         header: (context) => _buildHeader(
           context,
           ReportPageType.charts,
-          'Análise Visual de Orçamentos',
+          t.visualBudgetAnalysis,
         ),
         footer: (context) => _buildFooter(context),
         build: (context) => _buildChartsContent(context),
@@ -76,7 +79,7 @@ class ReportPdfService {
         header: (context) => _buildHeader(
           context,
           ReportPageType.statement,
-          'Histórico de Transações',
+          t.transactionHistory,
         ),
         footer: (context) => _buildFooter(context),
         build: (context) => _buildStatementContent(context),
@@ -116,7 +119,7 @@ class ReportPdfService {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Text(
-                      'PocketVault',
+                      t.pocketVault,
                       style: pw.TextStyle(
                         fontWeight: fontWeitgh,
                         fontSize: type == ReportPageType.summary ? 22 : 16,
@@ -124,7 +127,7 @@ class ReportPdfService {
                       ),
                     ),
                     pw.Text(
-                      'Soberania Financeira Pessoal',
+                      t.personalFinancialSovereignty,
                       style: pw.TextStyle(fontSize: 9, color: _textMuted),
                     ),
                   ],
@@ -136,7 +139,7 @@ class ReportPdfService {
               children: [
                 pw.Text(
                   type == ReportPageType.summary
-                      ? 'RELATÓRIO MENSAL'
+                      ? t.monthlyReport
                       : title!.toUpperCase(),
                   style: pw.TextStyle(
                     fontSize: 9,
@@ -186,11 +189,15 @@ class ReportPdfService {
                   ),
                 ),
                 pw.SizedBox(width: 4),
-                pw.Text('Dados processados 100% offline', style: style),
+                pw.Text(t.offlineDataProcessing, style: style),
               ],
             ),
             pw.Text(
-              'Página ${context.pageNumber} de ${context.pagesCount}  •  PocketVault  •  ${DateTime.now().toFullDateNumeric(locale)}',
+              t.pdfFooter(
+                context.pageNumber,
+                context.pagesCount,
+                DateTime.now().toFullDateNumeric(locale),
+              ),
               style: style,
             ),
           ],
@@ -224,7 +231,7 @@ class ReportPdfService {
         children: [
           pw.Expanded(
             child: _summaryCard(
-              'ENTRADAS',
+              t.entries.toUpperCase(),
               fmt(income),
               _income,
               isIncome: true,
@@ -233,7 +240,7 @@ class ReportPdfService {
           pw.SizedBox(width: 12),
           pw.Expanded(
             child: _summaryCard(
-              'SAÍDAS',
+              t.outputs.toUpperCase(),
               fmt(expense),
               _expense,
               isIncome: false,
@@ -255,7 +262,7 @@ class ReportPdfService {
         child: pw.Column(
           children: [
             pw.Text(
-              'SALDO DO MÊS',
+              t.monthlyBalance,
               style: pw.TextStyle(fontSize: 10, color: color, letterSpacing: 1),
             ),
             pw.SizedBox(height: 6),
@@ -275,7 +282,7 @@ class ReportPdfService {
 
       // Destaques
       if (budgetCategories.isNotEmpty) ...[
-        _sectionTitle('Alertas de Orçamento'),
+        _sectionTitle(t.budgetAlerts),
         pw.SizedBox(height: 8),
         ...budgetCategories.map((category) {
           final spent = totalExpenses[category] ?? 0.0;
@@ -287,10 +294,10 @@ class ReportPdfService {
               : '${(progress * 100).toStringAsFixed(2)}%';
 
           final alertText = isOver
-              ? 'Limite excedido em $pct'
+              ? t.limitExceededBy(pct)
               : progress == 1.0
-              ? 'Limite atingido'
-              : '$pct do limite atingido';
+              ? t.limitReached
+              : t.limitPercentageReached(pct);
 
           final color = _getStatusColor(progress);
 
@@ -334,7 +341,7 @@ class ReportPdfService {
                             ),
                           ),
                           pw.Text(
-                            '${fmt(spent)} / ${fmt(limit)}',
+                            t.spentOverLimit(fmt(spent), fmt(limit)),
                             style: pw.TextStyle(
                               fontSize: 11,
                               color: color,
@@ -364,13 +371,13 @@ class ReportPdfService {
         v.toCurrency(code: currency.code, locale: currency.locale);
 
     return [
-      _sectionTitle('Controle de Orçamentos'),
+      _sectionTitle(t.budgetControl),
       pw.SizedBox(height: 12),
 
       if (budgetCategories.isEmpty)
         pw.Center(
           child: pw.Text(
-            'Nenhum orçamento configurado.',
+            t.noBudgetsConfigured,
             style: pw.TextStyle(color: _textMuted),
           ),
         )
@@ -412,7 +419,7 @@ class ReportPdfService {
                         ),
                       ),
                       pw.Text(
-                        '${fmt(spent)} de ${fmt(limit)}',
+                        t.spentOfLimit(fmt(spent), fmt(limit)),
                         style: pw.TextStyle(fontSize: 11, color: color),
                       ),
                     ],
@@ -427,9 +434,7 @@ class ReportPdfService {
                   if (progress >= 0.8) ...[
                     pw.SizedBox(height: 6),
                     pw.Text(
-                      isOver
-                          ? 'Teto estourado em $pct%.'
-                          : 'Atenção: $pct% do teto atingido.',
+                      isOver ? t.budgetExceeded(pct) : t.budgetWarning(pct),
                       style: pw.TextStyle(
                         fontSize: 10,
                         color: color,
@@ -455,7 +460,7 @@ class ReportPdfService {
     );
 
     return [
-      _sectionTitle('Extrato Detalhado'),
+      _sectionTitle(t.detailedStatement),
       pw.SizedBox(height: 12),
 
       // Cabeçalho da tabela
@@ -467,19 +472,25 @@ class ReportPdfService {
         ),
         child: pw.Row(
           children: [
-            pw.SizedBox(width: 55, child: pw.Text('DATA', style: style)),
-            pw.Expanded(flex: 3, child: pw.Text('TÍTULO', style: style)),
+            pw.SizedBox(
+              width: 55,
+              child: pw.Text(t.date.toUpperCase(), style: style),
+            ),
+            pw.Expanded(
+              flex: 3,
+              child: pw.Text(t.title.toUpperCase(), style: style),
+            ),
             pw.Expanded(
               flex: 2,
               child: pw.Text(
-                'CATEGORIA',
+                t.category.toUpperCase(),
                 textAlign: pw.TextAlign.center,
                 style: style,
               ),
             ),
             pw.Expanded(
               child: pw.Text(
-                'VALOR',
+                t.value.toUpperCase(),
                 textAlign: pw.TextAlign.right,
                 style: style,
               ),
@@ -493,8 +504,8 @@ class ReportPdfService {
       pw.ListView.builder(
         itemCount: transactions.length,
         itemBuilder: (context, index) {
-          final t = transactions[index];
-          final isIncome = t.amount > 0;
+          final transaction = transactions[index];
+          final isIncome = transaction.amount > 0;
           final isEven = index % 2 == 0;
           final style = pw.TextStyle(fontSize: 10, color: _textMuted);
           final fontWeight = pw.FontWeight.bold;
@@ -512,14 +523,14 @@ class ReportPdfService {
                 pw.SizedBox(
                   width: 55,
                   child: pw.Text(
-                    t.date.toShortDate(locale, false),
+                    transaction.date.toShortDate(locale, null, false),
                     style: style,
                   ),
                 ),
                 pw.Expanded(
                   flex: 3,
                   child: pw.Text(
-                    t.title,
+                    transaction.title,
                     style: pw.TextStyle(
                       fontSize: 10,
                       color: _textPrimary,
@@ -531,14 +542,14 @@ class ReportPdfService {
                 pw.Expanded(
                   flex: 2,
                   child: pw.Text(
-                    t.category.name,
+                    transaction.category.name,
                     textAlign: pw.TextAlign.center,
                     style: style,
                   ),
                 ),
                 pw.Expanded(
                   child: pw.Text(
-                    t.amount.toCurrency(
+                    transaction.amount.toCurrency(
                       code: currency.code,
                       locale: currency.locale,
                     ),
@@ -591,7 +602,7 @@ class ReportPdfService {
                     ),
                     pw.SizedBox(height: 4),
                     pw.Text(
-                      '${isIncome ? '+' : '-'} $value',
+                      t.transactionValue(isIncome ? '+' : '-', value),
                       style: pw.TextStyle(
                         fontSize: 15,
                         fontWeight: pw.FontWeight.bold,

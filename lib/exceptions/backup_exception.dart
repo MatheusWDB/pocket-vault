@@ -1,35 +1,35 @@
 sealed class BackupException implements Exception {
-  final String message;
-  const BackupException(this.message);
-
-  @override
-  String toString() => message;
+  const BackupException();
 }
 
 class BackupCancelledException extends BackupException {
-  const BackupCancelledException() : super('Operação cancelada pelo usuário');
+  const BackupCancelledException();
 }
 
 class BackupGenerationException extends BackupException {
-  const BackupGenerationException() : super('Erro ao gerar arquivo de backup');
+  const BackupGenerationException();
 }
 
 class BackupSaveException extends BackupException {
-  const BackupSaveException() : super('Erro ao salvar o backup no dispositivo');
+  const BackupSaveException();
 }
 
 class BackupShareException extends BackupException {
-  const BackupShareException() : super('Erro ao compartilhar o backup');
+  const BackupShareException();
 }
 
-class BackupInvalidException extends BackupException {
-  const BackupInvalidException(super.message);
+class BackupInvalidNoCategoriesException extends BackupException {
+  const BackupInvalidNoCategoriesException();
+}
+
+class BackupInvalidNoTransactionsException extends BackupException {
+  const BackupInvalidNoTransactionsException();
 }
 
 class BackupImportException extends BackupException {
-  const BackupImportException() : super('Erro ao importar o arquivo de backup');
+  const BackupImportException();
 }
 
 class BackupRestoreException extends BackupException {
-  const BackupRestoreException() : super('Erro ao restaurar o backup');
+  const BackupRestoreException();
 }

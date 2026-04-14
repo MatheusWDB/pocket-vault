@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/models/tag.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/tag_provider.dart';
@@ -44,33 +45,32 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
 
     final allSuggestions = [...allTitles, ...allTags];
 
-    return allSuggestions
-        .where((element) {
-          if (element is Tag) {
-            return element.name.toLowerCase().contains(
-                  controller.text.toLowerCase(),
-                ) &&
-                !filter.tags.contains(element);
-          }
+    final filtered = allSuggestions.where((element) {
+      if (element is Tag) {
+        return element.name.toLowerCase().contains(
+              controller.text.toLowerCase(),
+            ) &&
+            !filter.tags.contains(element);
+      }
+      return (element as String).toLowerCase().contains(
+            controller.text.toLowerCase(),
+          ) &&
+          !filter.titles.contains(element);
+    }).toList();
 
-          return (element as String).toLowerCase().contains(
-                controller.text.toLowerCase(),
-              ) &&
-              !filter.titles.contains(element);
-        })
-        .map(
-          (element) => ListTile(
-            title: BuildMarqueeText(
-              text: element is Tag ? '#${element.name}' : (element as String),
-            ),
-
-            onTap: () => _onTapTitleOrTag(element, controller),
-          ),
-        );
+    return filtered.map(
+      (element) => ListTile(
+        title: BuildMarqueeText(
+          text: element is Tag ? '#${element.name}' : (element as String),
+        ),
+        onTap: () => _onTapTitleOrTag(element, controller),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final myLocale = Localizations.localeOf(context);
     final appColors = Theme.of(context).extension<AppColors>()!;
     final transactionsAsync = ref.watch(transactionListProvider);
@@ -85,7 +85,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
           children: [
             Expanded(
               child: SearchAnchor(
-                isFullScreen: false,
+                isFullScreen: true,
                 builder: (context, controller) {
                   return Container(
                     decoration: BoxDecoration(
@@ -101,9 +101,9 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                           Row(
                             spacing: 6,
                             crossAxisAlignment: CrossAxisAlignment.end,
-                            children: const [
+                            children: [
                               Icon(LucideIcons.search, size: 20),
-                              Text('Filtrar por nome ou tag...'),
+                              Text(t.filterByNameOrTag),
                             ],
                           ),
                         ],
@@ -230,7 +230,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                                 horizontal: 16.0,
                               ),
                               child: Text(
-                                date.toShortDate(myLocale),
+                                date.toShortDate(myLocale, t),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,

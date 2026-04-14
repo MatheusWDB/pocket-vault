@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 
 class BudgetProgressBar extends StatelessWidget {
   final double progress;
@@ -14,6 +15,8 @@ class BudgetProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return TweenAnimationBuilder(
       tween: Tween<double>(begin: 0.0, end: progress),
       duration: const Duration(milliseconds: 1500),
@@ -34,7 +37,7 @@ class BudgetProgressBar extends StatelessWidget {
             LinearProgressIndicator(
               minHeight: 12,
               borderRadius: BorderRadius.circular(12),
-              semanticsLabel: 'Progresso do orçamento',
+              semanticsLabel: t.budgetProgress,
               semanticsValue: '${(value * 100).toStringAsFixed(1)}%',
               color: color,
               value: displayValue,
@@ -43,8 +46,8 @@ class BudgetProgressBar extends StatelessWidget {
             if (progress >= 0.8)
               Text(
                 !isOverBudget
-                    ? 'Atenção: $percentage% do teto atingido.'
-                    : 'Atenção: Teto estourado em $percentage%.',
+                    ? t.budgetWarning(percentage)
+                    : t.budgetExceeded(percentage),
                 style: TextStyle(
                   fontSize: 12,
                   color: color,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:pocket_vault/exceptions/auth_exception.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/providers/auth_provider.dart';
 import 'package:pocket_vault/services/auth_service.dart';
 import 'package:pocket_vault/utils/app_alerts.dart';
@@ -21,15 +21,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       await authService.authenticate();
 
       _autheticated();
-    } on AuthException catch (e) {
+    } on Exception catch (e) {
       if (!mounted) return;
-      switch (e) {
-        case AuthCancelledException():
-          return;
-        case AuthFailedException():
-        case AuthUnavailableException():
-          AppAlerts.error(context, e.message);
-      }
+      AppAlerts.error(context, e: e);
     }
   }
 
@@ -66,6 +60,8 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
+
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -82,11 +78,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       Icon(LucideIcons.shieldCheck, size: 80),
                       const SizedBox(height: 16),
                       Text(
-                        'PocketVault',
+                        t.pocketVault,
                         style: Theme.of(context).textTheme.headlineMedium
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
-                      const Text('Soberania Financeira'),
+                      Text(t.appTitle),
                     ],
                   ),
                 ),
@@ -94,7 +90,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 ElevatedButton.icon(
                   onPressed: _canAuthenticate,
                   icon: const Icon(LucideIcons.fingerprintPattern),
-                  label: const Text('Desbloquear aplicativo'),
+                  label: Text(t.unlockApp),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(

@@ -8,6 +8,7 @@ import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/exceptions/category_exception.dart';
 import 'package:pocket_vault/exceptions/tag_exception.dart';
 import 'package:pocket_vault/exceptions/transaction_exception.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/models/tag.dart';
 import 'package:pocket_vault/models/transaction.dart';
@@ -58,10 +59,10 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
     }
   }
 
-  Null _validatorAmount() {
+  Null _validatorAmount(AppLocalizations t) {
     setState(() {
       _amountError = (_amountController.doubleValue <= 0)
-          ? 'O valor deve ser maior que zero'
+          ? t.valueGreaterThanZero
           : null;
     });
 
@@ -181,11 +182,11 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
       if (!mounted) return;
       final error = transactionState.error;
       if (error is TransactionException) {
-        AppAlerts.error(context, error.message);
+        AppAlerts.error(context, e: error);
       } else if (error is CategoryException) {
-        AppAlerts.error(context, error.message);
+        AppAlerts.error(context, e: error);
       } else if (error is TagException) {
-        AppAlerts.error(context, error.message);
+        AppAlerts.error(context, e: error);
       }
       return;
     }
@@ -348,13 +349,14 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
   @override
   Widget build(BuildContext context) {
     final myLocale = Localizations.localeOf(context);
+    final t = AppLocalizations.of(context)!;
     final appColors = Theme.of(context).extension<AppColors>()!;
     final now = DateTime.now();
     final categoriesAsync = ref.watch(categoryListProvider);
 
     final bool edit = widget.transaction != null;
 
-    final String title = edit ? 'Editar Transação' : 'Nova Transação';
+    final String title = edit ? t.editTransaction : t.newTransaction;
 
     final iconThemeColor = Theme.of(context).iconTheme.color;
     final style = TextStyle(fontWeight: FontWeight.bold);
@@ -384,7 +386,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
                 children: [
                   Column(
                     children: [
-                      Text('Valor', style: style),
+                      Text(t.value, style: style),
                       TextFormField(
                         controller: _amountController,
                         keyboardType: TextInputType.number,
@@ -412,7 +414,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
                           fontWeight: FontWeight.bold,
                         ),
                         onChanged: (_) => _onChangedAmount(),
-                        validator: (_) => _validatorAmount(),
+                        validator: (_) => _validatorAmount(t),
                       ),
                       SegmentedButton<bool>(
                         showSelectedIcon: false,
@@ -428,9 +430,9 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
                         selected: {_isRevenue},
                         onSelectionChanged: (newSelection) =>
                             setState(() => _isRevenue = newSelection.first),
-                        segments: const [
-                          ButtonSegment(value: false, label: Text('Despesa')),
-                          ButtonSegment(value: true, label: Text('Receita')),
+                        segments: [
+                          ButtonSegment(value: false, label: Text(t.expense)),
+                          ButtonSegment(value: true, label: Text(t.income)),
                         ],
                       ),
                     ],
@@ -442,15 +444,15 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
                     spacing: 8,
                     children: [
                       BuildInputField(
-                        label: 'Título',
+                        label: t.title,
                         controller: _titleController,
-                        hint: 'Ex: Compras 01/01/2026',
+                        hint: t.examplePurchase,
                         validator: (value) => _validatorTitle(value),
                       ),
 
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Data da Transação'),
+                        title: Text(t.transactionDate),
                         subtitle: Text(
                           DateFormat.yMd(
                             myLocale.toString(),
@@ -460,9 +462,9 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
                         onTap: () => _onTapSelectedDate(now, myLocale),
                       ),
                       BuildInputField(
-                        label: 'Descrição',
+                        label: t.description,
                         controller: _descriptionController,
-                        hint: 'Ex: Compras do mês pago no cartão',
+                        hint: t.exampleDescription,
                       ),
 
                       Autocomplete<Category>(
@@ -483,10 +485,8 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
                               child: categoriesAsync.when(
                                 data: (_) {
                                   if (options.isEmpty) {
-                                    return const ListTile(
-                                      title: Text(
-                                        'Nenhuma categoria encontrada',
-                                      ),
+                                    return ListTile(
+                                      title: Text(t.categoryNotFound),
                                     );
                                   }
                                   return ListView.builder(
@@ -524,8 +524,8 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
                               return BuildInputField(
                                 controller: controller,
                                 focusNode: focusNode,
-                                label: 'Categoria',
-                                hint: 'Ex: Mercado',
+                                label: t.category,
+                                hint: t.exampleMarket,
                                 onFieldSubmitted: (value) =>
                                     focusNode.unfocus(),
                                 validator: (value) => _validatorCategory(value),
@@ -535,7 +535,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
 
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Cor de Categoria'),
+                        title: Text(t.categoryColor),
                         subtitle: _selectedColor != null
                             ? Text(_selectedColor!.toHexString())
                             : null,
@@ -548,8 +548,8 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
 
                       BuildInputField(
                         controller: _installmentController,
-                        label: 'Parcelas',
-                        hint: 'Ex: 12',
+                        label: t.installments,
+                        hint: t.exampleInstallments,
                         keyboardType: TextInputType.numberWithOptions(),
                         onChanged: (value) => setState(() {}),
                         sufixIcon: Text('x'),
@@ -559,7 +559,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Tags', style: style),
+                          Text(t.tags, style: style),
                           TextButton.icon(
                             onPressed: () => setState(
                               () =>
@@ -571,7 +571,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
                               color: iconThemeColor,
                             ),
                             label: Text(
-                              'Add',
+                              t.add,
                               style: TextStyle(color: iconThemeColor),
                             ),
                           ),
@@ -588,7 +588,9 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
                             itemBuilder: (context, index) => BuildInputField(
                               controller: _tagsControllers[index],
                               prefix: true,
-                              hint: 'Tag${index > 0 ? index + 1 : ''}...',
+                              hint: t.tagPlaceholder(
+                                index > 0 ? index + 1 : '',
+                              ),
                               sufixIcon: IconButton(
                                 icon: Icon(
                                   LucideIcons.circleMinus,
@@ -610,7 +612,7 @@ class _TransactionformscreenState extends ConsumerState<TransactionFormScreen>
 
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Transação Recorrente'),
+                    title: Text(t.recurrentTransaction),
                     secondary: const Icon(LucideIcons.refreshCw),
                     value: _isRecurring,
                     onChanged: (value) => _onChangedRecurring(value),

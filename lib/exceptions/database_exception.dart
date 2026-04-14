@@ -1,29 +1,23 @@
 sealed class DatabaseException implements Exception {
-  final String message;
-  const DatabaseException(this.message);
-
-  @override
-  String toString() => message;
+  const DatabaseException();
 }
 
 class RecordNotFoundException extends DatabaseException {
-  const RecordNotFoundException(String entity)
-    : super('$entity não encontrado');
+  const RecordNotFoundException();
 }
 
 class RecordInsertException extends DatabaseException {
-  const RecordInsertException(String entity) : super('Erro ao inserir $entity');
+  const RecordInsertException();
 }
 
 class RecordUpdateException extends DatabaseException {
-  const RecordUpdateException(String entity)
-    : super('Erro ao atualizar $entity');
+  const RecordUpdateException();
 }
 
 class RecordDeleteException extends DatabaseException {
-  const RecordDeleteException(String entity) : super('Erro ao excluir $entity');
+  const RecordDeleteException();
 }
 
 class RecordQueryException extends DatabaseException {
-  const RecordQueryException(String entity) : super('Erro ao buscar $entity');
+  const RecordQueryException();
 }

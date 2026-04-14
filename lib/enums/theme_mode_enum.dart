@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 
 enum AppThemeModeEnum {
-  system('Sistema'),
-  light('Claro'),
-  dark('Escuro');
+  system,
+  light,
+  dark;
 
-  final String displayName;
-  
-  const AppThemeModeEnum(this.displayName);
+  String displayName(AppLocalizations t) {
+    return switch (this) {
+      AppThemeModeEnum.system => t.system,
+      AppThemeModeEnum.light => t.light,
+      AppThemeModeEnum.dark => t.dark,
+    };
+  }
+
+  const AppThemeModeEnum();
 }
 
 extension AppThemeModeEnumX on AppThemeModeEnum {

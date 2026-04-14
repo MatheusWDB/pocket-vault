@@ -55,8 +55,8 @@ class TransactionService {
       });
     } on TransactionException {
       rethrow;
-    } on DatabaseException catch (e) {
-      throw TransactionSaveException(e.message);
+    } on DatabaseException catch (_) {
+      throw TransactionSaveException();
     }
   }
 
@@ -82,16 +82,16 @@ class TransactionService {
       });
     } on TransactionException {
       rethrow;
-    } on DatabaseException catch (e) {
-      throw TransactionSaveException(e.message);
+    } on DatabaseException catch (_) {
+      throw TransactionSaveException();
     }
   }
 
   Future<void> deleteTransaction(int id) async {
     try {
       await _repo.delete(id);
-    } on DatabaseException catch (e) {
-      throw TransactionDeleteException(e.message);
+    } on DatabaseException catch (_) {
+      throw TransactionDeleteException();
     }
   }
 
@@ -111,8 +111,8 @@ class TransactionService {
         end?.toIso8601String(),
       );
       return _mapRowsToTransactions(result);
-    } on DatabaseException catch (e) {
-      throw TransactionInvalidException(e.message);
+    } on DatabaseException catch (_) {
+      throw TransactionSaveException();
     }
   }
 

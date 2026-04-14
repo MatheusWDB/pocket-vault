@@ -6,9 +6,9 @@ extension DoubleExtensions on double {
     required String locale,
     bool showSymbol = true,
   }) {
-   final formatter = showSymbol 
-      ? NumberFormat.simpleCurrency(locale: locale, name: code)
-      : NumberFormat.currency(locale: locale, symbol: '', name: code);
+    final formatter = showSymbol
+        ? NumberFormat.simpleCurrency(locale: locale, name: code)
+        : NumberFormat.currency(locale: locale, symbol: '', name: code);
 
     return formatter.format(this).trim();
   }

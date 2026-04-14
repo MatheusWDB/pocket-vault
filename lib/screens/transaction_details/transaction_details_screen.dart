@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/exceptions/transaction_exception.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/navigation/route_observer.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
@@ -54,11 +55,13 @@ class _TransactionDetailsScreenState
       if (!context.mounted) return;
       switch (e) {
         case TransactionNotFoundException():
-          AppAlerts.error(context, e.message);
+          AppAlerts.error(context, e: e);
         case TransactionSaveException():
         case TransactionDeleteException():
-          AppAlerts.error(context, e.message);
-        case TransactionInvalidException():
+          AppAlerts.error(context, e: e);
+        case TransactionInvalidValueException():
+        case TransactionInvalidTitleException():
+        case TransactionInvalidCategoryException():
       }
     }
   }
@@ -108,6 +111,7 @@ class _TransactionDetailsScreenState
   @override
   Widget build(BuildContext context) {
     final myLocale = Localizations.localeOf(context);
+    final t = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
     final themePrimaryContainer = theme.colorScheme.primaryContainer;
     final currencySymbol = ref.watch(preferencesProvider).currencySymbol;
@@ -132,7 +136,7 @@ class _TransactionDetailsScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Detalhes'),
+        title: Text(t.details),
         centerTitle: true,
         leading: IconButton(
           onPressed: () => _return(context, ref),
@@ -192,7 +196,7 @@ class _TransactionDetailsScreenState
                   Icon(LucideIcons.clock),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [Text('Data'), Text(dateText)],
+                    children: [Text(t.date), Text(dateText)],
                   ),
                 ],
               ),
@@ -208,7 +212,7 @@ class _TransactionDetailsScreenState
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(tags.length > 1 ? 'Tags' : 'Tag'),
+                          Text(tags.length > 1 ? t.tags : t.tag),
                           SizedBox(
                             height: 50,
                             child: ListView.separated(
@@ -247,7 +251,7 @@ class _TransactionDetailsScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Descrição',
+                        t.description,
                         style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                       Text(
@@ -271,10 +275,7 @@ class _TransactionDetailsScreenState
                     child: Row(
                       spacing: 8,
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(LucideIcons.pencil),
-                        Text('Editar'),
-                      ],
+                      children: [Icon(LucideIcons.pencil), Text(t.edit)],
                     ),
                   ),
 
@@ -284,10 +285,7 @@ class _TransactionDetailsScreenState
                     child: Row(
                       spacing: 8,
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(LucideIcons.trash2),
-                        Text('Excluir'),
-                      ],
+                      children: [Icon(LucideIcons.trash2), Text(t.delete)],
                     ),
                   ),
                 ],

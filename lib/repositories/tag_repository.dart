@@ -8,8 +8,6 @@ class TagRepository {
   static final columnId = DatabaseHelper.columnTagId;
   static final columnName = DatabaseHelper.columnTagName;
 
-  static const _entity = 'Tag';
-
   TagRepository(this._dbHelper);
 
   Future<int> insert(
@@ -20,7 +18,7 @@ class TagRepository {
       final db = executor ?? await _dbHelper.database;
       return await db.insert(table, row);
     } catch (_) {
-      throw const RecordInsertException(_entity);
+      throw const RecordInsertException();
     }
   }
 
@@ -29,7 +27,7 @@ class TagRepository {
       final db = await _dbHelper.database;
       return await db.query(table);
     } catch (_) {
-      throw const RecordQueryException(_entity);
+      throw const RecordQueryException();
     }
   }
 
@@ -41,12 +39,12 @@ class TagRepository {
         where: '$columnId = ?',
         whereArgs: [id],
       );
-      if (result.isEmpty) throw const RecordNotFoundException(_entity);
+      if (result.isEmpty) throw const RecordNotFoundException();
       return result.first;
     } on DatabaseException {
       rethrow;
     } catch (_) {
-      throw const RecordQueryException(_entity);
+      throw const RecordQueryException();
     }
   }
 
@@ -63,7 +61,7 @@ class TagRepository {
       );
       return result.isNotEmpty ? result.first : null;
     } catch (_) {
-      throw const RecordQueryException(_entity);
+      throw const RecordQueryException();
     }
   }
 
@@ -76,11 +74,11 @@ class TagRepository {
         where: '$columnId = ?',
         whereArgs: [row['id']],
       );
-      if (count == 0) throw const RecordNotFoundException(_entity);
+      if (count == 0) throw const RecordNotFoundException();
     } on DatabaseException {
       rethrow;
     } catch (_) {
-      throw const RecordUpdateException(_entity);
+      throw const RecordUpdateException();
     }
   }
 
@@ -92,11 +90,11 @@ class TagRepository {
         where: '$columnId = ?',
         whereArgs: [id],
       );
-      if (count == 0) throw const RecordNotFoundException(_entity);
+      if (count == 0) throw const RecordNotFoundException();
     } on DatabaseException {
       rethrow;
     } catch (_) {
-      throw const RecordDeleteException(_entity);
+      throw const RecordDeleteException();
     }
   }
 }

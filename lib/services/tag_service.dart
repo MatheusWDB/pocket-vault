@@ -36,8 +36,8 @@ class TagService {
       }
 
       return Tag.fromMap(result);
-    } on DatabaseException catch (e) {
-      throw TagSaveException(e.message);
+    } on DatabaseException catch (_) {
+      throw TagSaveException();
     }
   }
 
@@ -57,8 +57,8 @@ class TagService {
 
         await _repoTransactionTags.insert(transactionId, tagId, executor: db);
       }
-    } on DatabaseException catch (e) {
-      throw TagSaveException(e.message);
+    } on DatabaseException catch (_) {
+      throw TagSaveException();
     }
   }
 }

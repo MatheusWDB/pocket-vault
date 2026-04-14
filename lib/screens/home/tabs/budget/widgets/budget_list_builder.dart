@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
+import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/screens/components/build_marquee_text.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_dialog.dart';
@@ -23,6 +24,7 @@ class BudgetListBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context)!;
     final budgetCategories = categories
         .where((c) => (c.budgetLimit ?? 0.0) > 0.0)
         .toList();
@@ -54,7 +56,7 @@ class BudgetListBuilder extends StatelessWidget {
               children: [
                 BuildMarqueeText(text: category.name),
                 Text(
-                  '$spentText de $limitText',
+                  t.spentOfLimit(spentText, limitText),
                   style: const TextStyle(fontSize: 14),
                 ),
               ],
