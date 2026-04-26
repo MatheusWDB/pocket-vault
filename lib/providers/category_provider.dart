@@ -1,4 +1,5 @@
 import 'package:pocket_vault/models/category.dart';
+import 'package:pocket_vault/providers/database_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/services/category_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -6,11 +7,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'category_provider.g.dart';
 
 @riverpod
-CategoryService categoryService(Ref _) {
-  return CategoryService();
-}
+CategoryService categoryService(Ref ref) =>
+    CategoryService(dbHelper: ref.watch(databaseHelperProvider));
 
-@riverpod
+@Riverpod(keepAlive: true)
 class CategoryList extends _$CategoryList {
   @override
   Future<List<Category>> build() async {
@@ -23,7 +23,7 @@ class CategoryList extends _$CategoryList {
     final service = ref.read(categoryServiceProvider);
 
     state = await AsyncValue.guard(() async {
-      await service.saveCategory(category);
+      await service.upsertCategory(category);
 
       ref.invalidate(transactionListProvider);
 
@@ -48,7 +48,7 @@ class CategoryList extends _$CategoryList {
 }
 
 @riverpod
-Map<Category, double> categoriesTotalSpent(Ref ref) {
+Map<Category, double> totalSpentByCategory(Ref ref) {
   final transactions = ref.watch(transactionListProvider).value ?? [];
 
   final Map<Category, double> totals = {};
@@ -64,7 +64,7 @@ Map<Category, double> categoriesTotalSpent(Ref ref) {
 }
 
 @riverpod
-List<Category> categoriesAvailableForBudget(Ref ref) {
+List<Category> categoriesWithoutBudget(Ref ref) {
   final categoriesAsync = ref.watch(categoryListProvider);
 
   return categoriesAsync.maybeWhen(

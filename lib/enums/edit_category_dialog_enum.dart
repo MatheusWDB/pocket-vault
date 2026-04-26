@@ -1,0 +1,1 @@
+enum EditCategoryDialogEnum { budget, color }

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:local_auth_android/local_auth_android.dart';
@@ -6,9 +5,13 @@ import 'package:local_auth_darwin/types/auth_messages_ios.dart';
 import 'package:pocket_vault/exceptions/auth_exception.dart';
 
 class AuthService {
-  static final _auth = LocalAuthentication();
-  static bool _isAuthenticating = false;
+  final LocalAuthentication _auth;
+  static const String appName = 'PocketVault';
 
+  AuthService({LocalAuthentication? auth})
+    : _auth = auth ?? LocalAuthentication();
+
+  static bool _isAuthenticating = false;
   Future<bool> checkBiometrics() async {
     try {
       return await _auth.isDeviceSupported();
@@ -17,17 +20,17 @@ class AuthService {
     }
   }
 
-  Future<void> authenticate() async {
+  Future<void> authenticate({required String localizedReason}) async {
     if (_isAuthenticating) throw const AuthCancelledException();
     _isAuthenticating = true;
 
     try {
       final result = await _auth.authenticate(
         authMessages: [
-          AndroidAuthMessages(signInTitle: 'PocketVault', signInHint: ''),
-          IOSAuthMessages(localizedFallbackTitle: 'PocketVault'),
+          AndroidAuthMessages(signInTitle: appName, signInHint: ''),
+          IOSAuthMessages(localizedFallbackTitle: appName),
         ],
-        localizedReason: 'Sua soberania financeira começa aqui.',
+        localizedReason: localizedReason,
         persistAcrossBackgrounding: true,
       );
 
@@ -39,34 +42,6 @@ class AuthService {
     } finally {
       _isAuthenticating = false;
     }
-  }
-
-  Future<List<BiometricType>> getAvailableBiometrics() async {
-    final availableBiometrics = <BiometricType>[];
-    try {
-      final biometrics = await _auth.getAvailableBiometrics();
-      availableBiometrics.addAll(biometrics);
-    } on PlatformException catch (e) {
-      debugPrint(e.toString());
-    }
-    return availableBiometrics;
-  }
-
-  Future<bool> authenticateWithBiometrics() async {
-    var authenticated = false;
-    try {
-      authenticated = await _auth.authenticate(
-        localizedReason:
-            'Scan your fingerdebugPrint (or face or whatever) to authenticate',
-        persistAcrossBackgrounding: true,
-        biometricOnly: true,
-      );
-    } on LocalAuthException catch (e) {
-      debugPrint(e.toString());
-    } on PlatformException catch (e) {
-      debugPrint(e.toString());
-    }
-    return authenticated;
   }
 
   Future<void> cancelAuthentication() async {

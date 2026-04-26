@@ -8,7 +8,7 @@ import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
 import 'package:pocket_vault/screens/components/transaction_tile.dart';
-import 'package:pocket_vault/screens/home/tabs/dashboard/widgets/build_summary_card.dart';
+import 'package:pocket_vault/screens/home/tabs/dashboard/widgets/summary_card.dart';
 import 'package:pocket_vault/theme/app_theme.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
@@ -59,14 +59,14 @@ class DashboardTab extends ConsumerWidget with FilterActions {
         ),
         Row(
           children: [
-            BuildSummaryCard(
+            SummaryCard(
               label: t.entries,
               value: summary.totalIncomes,
               color: appColors.income,
               icon: LucideIcons.circleArrowUp,
               currencySymbol: currencySymbol,
             ),
-            BuildSummaryCard(
+            SummaryCard(
               label: t.outputs,
               value: summary.totalExpenses,
               color: appColors.expense,
@@ -130,7 +130,10 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                               ),
                             ),
                             ...dayTransactions.map(
-                              (t) => TransactionTile(transaction: t),
+                              (t) => TransactionTile(
+                                transaction: t,
+                                showLeading: true,
+                              ),
                             ),
                             const Divider(height: 1),
                           ],
@@ -141,7 +144,7 @@ class DashboardTab extends ConsumerWidget with FilterActions {
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
                   error: (error, stackTrace) =>
-                      Center(child: Text('Erro: $error')),
+                      Center(child: Text(error.toString())),
                 ),
               ),
             ],

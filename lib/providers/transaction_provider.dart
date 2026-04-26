@@ -1,5 +1,6 @@
 import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
+import 'package:pocket_vault/providers/database_provider.dart';
 import 'package:pocket_vault/providers/tag_provider.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/services/transaction_service.dart';
@@ -8,9 +9,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'transaction_provider.g.dart';
 
 @riverpod
-TransactionService transactionService(Ref _) {
-  return TransactionService();
-}
+TransactionService transactionService(Ref ref) =>
+    TransactionService(dbHelper: ref.watch(databaseHelperProvider));
 
 @Riverpod(keepAlive: true)
 class TransactionList extends _$TransactionList {
@@ -31,20 +31,38 @@ class TransactionList extends _$TransactionList {
     );
   }
 
-  Future<void> saveTransaction(Transaction t, {bool creating = true}) async {
+  Future<void> saveTransaction(Transaction t) async {
     final service = ref.read(transactionServiceProvider);
-
     state = await AsyncValue.guard(() async {
-      creating
-          ? await service.createTransaction(t)
-          : await service.updateTransaction(t);
-
+      await service.createTransaction(t);
       ref.invalidate(categoryListProvider);
-
       ref.invalidate(tagListProvider);
-
       ref.invalidateSelf();
+      return await future;
+    });
+  }
 
+  Future<void> updateTransactionOnly(Transaction transaction) async {
+    final service = ref.read(transactionServiceProvider);
+    state = await AsyncValue.guard(() async {
+      await service.updateTransactionOnly(transaction);
+      ref.invalidate(categoryListProvider);
+      ref.invalidate(tagListProvider);
+      ref.invalidateSelf();
+      return await future;
+    });
+  }
+
+  Future<void> updateTransactionAndFuture(
+    Transaction transaction,
+    Transaction template,
+  ) async {
+    final service = ref.read(transactionServiceProvider);
+    state = await AsyncValue.guard(() async {
+      await service.updateTransactionAndFuture(transaction, template);
+      ref.invalidate(categoryListProvider);
+      ref.invalidate(tagListProvider);
+      ref.invalidateSelf();
       return await future;
     });
   }
@@ -115,14 +133,20 @@ Future<List<String>> transactionTitles(Ref ref) async {
 }
 
 @riverpod
-Future<Transaction?> transactionById(Ref ref, {int? id}) async {
+Future<Transaction?> transactionById(Ref ref, int? id) async {
   if (id == null) return null;
-  
-  final list = ref.read(transactionListProvider).value;
+
+  final list = ref.watch(transactionListProvider).value;
   final memoized = list?.where((t) => t.id == id).firstOrNull;
 
   if (memoized != null) return memoized;
 
-  final service = ref.watch(transactionServiceProvider);
+  final service = ref.read(transactionServiceProvider);
   return await service.getTransactionById(id);
+}
+
+@riverpod
+Future<int?> minYear(Ref ref) async {
+  final service = ref.watch(transactionServiceProvider);
+  return await service.getMinYear();
 }

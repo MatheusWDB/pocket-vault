@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:pocket_vault/screens/home/widgets/build_item.dart';
+import 'package:pocket_vault/screens/home/widgets/navbar_item.dart';
 
-class MyCustomBottomAppBar extends StatelessWidget {
+class CustomBottomAppBar extends StatelessWidget {
   final int activeIndex;
   final Function(int) onDestinationSelected;
 
-  const MyCustomBottomAppBar({
+  const CustomBottomAppBar({
     required this.activeIndex,
     required this.onDestinationSelected,
     super.key,
@@ -25,19 +25,17 @@ class MyCustomBottomAppBar extends StatelessWidget {
           Row(
             spacing: 20.0,
             children: [
-              BuildItem(
+              NavBarItem(
                 activeIndex: activeIndex,
                 onDestinationSelected: onDestinationSelected,
                 icon: LucideIcons.layoutDashboard,
                 index: 0,
-                context: context,
               ),
-              BuildItem(
+              NavBarItem(
                 activeIndex: activeIndex,
                 onDestinationSelected: onDestinationSelected,
                 icon: LucideIcons.receiptText,
                 index: 1,
-                context: context,
               ),
             ],
           ),
@@ -45,19 +43,17 @@ class MyCustomBottomAppBar extends StatelessWidget {
           Row(
             spacing: 20.0,
             children: [
-              BuildItem(
+              NavBarItem(
                 activeIndex: activeIndex,
                 onDestinationSelected: onDestinationSelected,
                 icon: LucideIcons.target,
                 index: 2,
-                context: context,
               ),
-              BuildItem(
+              NavBarItem(
                 activeIndex: activeIndex,
                 onDestinationSelected: onDestinationSelected,
                 icon: LucideIcons.chartPie,
                 index: 3,
-                context: context,
               ),
             ],
           ),

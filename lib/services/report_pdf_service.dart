@@ -10,7 +10,7 @@ import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 import 'package:printing/printing.dart';
 
-enum ReportPageType { summary, charts, statement }
+enum _ReportPageType { summary, charts, statement }
 
 class ReportPdfService {
   final List<Transaction> transactions;
@@ -50,7 +50,7 @@ class ReportPdfService {
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         theme: theme,
-        header: (context) => _buildHeader(context, ReportPageType.summary),
+        header: (context) => _buildHeader(context, _ReportPageType.summary),
         footer: (context) => _buildFooter(context),
         build: (context) => _buildSummaryContent(context),
       ),
@@ -63,7 +63,7 @@ class ReportPdfService {
         theme: theme,
         header: (context) => _buildHeader(
           context,
-          ReportPageType.charts,
+          _ReportPageType.charts,
           t.visualBudgetAnalysis,
         ),
         footer: (context) => _buildFooter(context),
@@ -78,7 +78,7 @@ class ReportPdfService {
         theme: theme,
         header: (context) => _buildHeader(
           context,
-          ReportPageType.statement,
+          _ReportPageType.statement,
           t.transactionHistory,
         ),
         footer: (context) => _buildFooter(context),
@@ -92,7 +92,7 @@ class ReportPdfService {
   }
 
   // ── Header ────────────────────────────────────────────────
-  pw.Widget _buildHeader(pw.Context _, ReportPageType type, [String? title]) {
+  pw.Widget _buildHeader(pw.Context _, _ReportPageType type, [String? title]) {
     final now = DateTime.now();
     final monthYear = now.toMonthYear(locale).toUpperCase();
 
@@ -122,7 +122,7 @@ class ReportPdfService {
                       t.pocketVault,
                       style: pw.TextStyle(
                         fontWeight: fontWeitgh,
-                        fontSize: type == ReportPageType.summary ? 22 : 16,
+                        fontSize: type == _ReportPageType.summary ? 22 : 16,
                         color: _primary,
                       ),
                     ),
@@ -138,7 +138,7 @@ class ReportPdfService {
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
                 pw.Text(
-                  type == ReportPageType.summary
+                  type == _ReportPageType.summary
                       ? t.monthlyReport
                       : title!.toUpperCase(),
                   style: pw.TextStyle(
@@ -151,7 +151,7 @@ class ReportPdfService {
                 pw.Text(
                   monthYear,
                   style: pw.TextStyle(
-                    fontSize: type == ReportPageType.summary ? 18 : 13,
+                    fontSize: type == _ReportPageType.summary ? 18 : 13,
                     fontWeight: fontWeitgh,
                     color: _textPrimary,
                   ),
@@ -223,7 +223,7 @@ class ReportPdfService {
     String fmt(double v) =>
         v.toCurrency(code: currency.code, locale: currency.locale);
 
-    final color = _white.flatten();
+    final color = _white;
 
     return [
       // Cards de entradas / saídas
@@ -455,7 +455,7 @@ class ReportPdfService {
     final style = pw.TextStyle(
       fontSize: 9,
       fontWeight: pw.FontWeight.bold,
-      color: _white.flatten(),
+      color: _white,
       letterSpacing: 0.5,
     );
 
@@ -513,7 +513,7 @@ class ReportPdfService {
           return pw.Container(
             padding: const pw.EdgeInsets.symmetric(vertical: 7, horizontal: 12),
             decoration: pw.BoxDecoration(
-              color: isEven ? _white.flatten() : _surface,
+              color: isEven ? _white : _surface,
               border: pw.Border(
                 bottom: pw.BorderSide(color: _border, width: 0.5),
               ),

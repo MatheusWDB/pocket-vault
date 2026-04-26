@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
+import 'package:pocket_vault/enums/edit_category_dialog_enum.dart';
 import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/models/category.dart';
-import 'package:pocket_vault/screens/components/build_marquee_text.dart';
-import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_dialog.dart';
+import 'package:pocket_vault/screens/components/marquee_text.dart';
+import 'package:pocket_vault/screens/components/edit_category_dialog.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_progress_bar.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
@@ -54,7 +55,7 @@ class BudgetListBuilder extends StatelessWidget {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                BuildMarqueeText(text: category.name),
+                MarqueeText(text: category.name),
                 Text(
                   t.spentOfLimit(spentText, limitText),
                   style: const TextStyle(fontSize: 14),
@@ -65,7 +66,10 @@ class BudgetListBuilder extends StatelessWidget {
             onTap: () => showDialog(
               context: context,
               barrierDismissible: false,
-              builder: (context) => BudgetDialog(category: category),
+              builder: (context) => EditCategoryDialog(
+                category: category,
+                lastTab: EditCategoryDialogEnum.budget,
+              ),
             ),
           );
         },

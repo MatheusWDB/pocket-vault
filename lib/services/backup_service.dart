@@ -14,7 +14,6 @@ import 'package:sqflite/sqflite.dart';
 
 class BackupService {
   final DatabaseHelper dbHelper;
-
   final CategoryService categoryService;
   final TagService tagService;
   final TransactionService transactionService;
@@ -26,13 +25,15 @@ class BackupService {
     this.transactionService,
   );
 
-  static final tableT = DatabaseHelper.tableTransaction;
-  static final tableC = DatabaseHelper.tableCategory;
-  static final tableTg = DatabaseHelper.tableTag;
-  static final tableTT = DatabaseHelper.tableTransactionTags;
+  static const tableTransaction = DatabaseHelper.tableTransaction;
+  static const tableCategory = DatabaseHelper.tableCategory;
+  static const tableTag = DatabaseHelper.tableTag;
+  static const tableTransactionTags = DatabaseHelper.tableTransactionTags;
 
-  static final columnRelTransactionId = DatabaseHelper.columnRelTransactionId;
-  static final columnRelTagId = DatabaseHelper.columnRelTagId;
+  static const columnRelTransactionId = DatabaseHelper.columnRelTransactionId;
+  static const columnRelTagId = DatabaseHelper.columnRelTagId;
+
+  static const String backupName = 'pocket_vault_backup';
 
   Future<File> _generateBackupFile(Directory dir) async {
     try {
@@ -47,7 +48,7 @@ class BackupService {
       );
 
       final now = DateTime.now().toIso8601String().replaceAll(':', '-');
-      final file = File('${dir.path}/pocket_vault_backup_$now.dat');
+      final file = File('${dir.path}/${backupName}_$now.dat');
       await file.writeAsString(backup.toJson());
 
       return file;
@@ -84,7 +85,7 @@ class BackupService {
       final now = DateTime.now().toIso8601String().replaceAll(':', '-');
 
       final path = await FileSaver.instance.saveAs(
-        name: 'pocket_vault_backup_$now',
+        name: '${backupName}_$now',
         bytes: bytes,
         fileExtension: 'dat',
         mimeType: MimeType.other,
@@ -122,29 +123,6 @@ class BackupService {
     }
   }
 
-  Future<BackupData?> importFromAppFolder() async {
-    final Directory dir = await getApplicationDocumentsDirectory();
-    final files = dir
-        .listSync()
-        .whereType<File>()
-        .where(
-          (f) =>
-              f.path.endsWith('.dat') &&
-              f.path.contains('pocket_vault_backup_'),
-        )
-        .toList();
-
-    if (files.isEmpty) return null;
-
-    files.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
-
-    final file = files.first;
-
-    final String jsonString = await file.readAsString();
-
-    return BackupData.fromJson(jsonString);
-  }
-
   Future<void> replaceAll(BackupData backup) async {
     if (backup.categories.isEmpty) {
       throw const BackupInvalidNoCategoriesException();
@@ -159,25 +137,25 @@ class BackupService {
       await db.transaction((txn) async {
         final batch = txn.batch();
 
-        batch.delete(tableTT);
-        batch.delete(tableT);
-        batch.delete(tableTg);
-        batch.delete(tableC);
+        batch.delete(tableTransactionTags);
+        batch.delete(tableTransaction);
+        batch.delete(tableTag);
+        batch.delete(tableCategory);
 
         for (final category in backup.categories) {
-          batch.insert(tableC, category.toMap());
+          batch.insert(tableCategory, category.toMap());
         }
         for (final tag in backup.tags) {
-          batch.insert(tableTg, tag.toMap());
+          batch.insert(tableTag, tag.toMap());
         }
         for (final transaction in backup.transactions) {
           batch.insert(
-            tableT,
+            tableTransaction,
             transaction.toMap(),
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
           for (final tag in transaction.tags) {
-            batch.insert(tableTT, {
+            batch.insert(tableTransactionTags, {
               columnRelTransactionId: transaction.id,
               columnRelTagId: tag.id,
             });
@@ -193,7 +171,7 @@ class BackupService {
   }
 
   Future<void> _fixSequences(DatabaseExecutor db) async {
-    final tables = [tableC, tableT, tableTg];
+    final tables = [tableCategory, tableTransaction, tableTag];
 
     for (final table in tables) {
       await db.rawUpdate(

@@ -141,5 +141,26 @@
   "budgetControl": "Control de Presupuestos",
   "noBudgetsConfigured": "Ningún presupuesto configurado.",
   "detailedStatement": "Estado de Cuenta Detallado",
-  "transactionValue": "{sign} {value}"
+  "transactionValue": "{sign} {value}",
+  "editScopeQuestion": "¿Editar solo esta transacción o esta y todas las futuras?",
+  "@editScopeQuestion": {},
+  "editScopeOnlyThis": "Solo esta",
+  "@editScopeOnlyThis": {},
+  "editScopeThisAndFuture": "Esta y las futuras",
+  "@editScopeThisAndFuture": {},
+  "installmentLabel": "Cuota: {current}/{total}",
+  "@installmentLabel": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "defineColor": "Definir Color",
+  "@defineColor": {},
+  "deleteConfirmation": "¿Eliminar \"{title}\"?",
+  "@deleteConfirmation": {
+    "placeholders": {
+      "title": {}
+    }
+  }
 }

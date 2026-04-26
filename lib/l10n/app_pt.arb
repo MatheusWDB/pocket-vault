@@ -328,5 +328,26 @@
       "sign": {},
       "value": {}
     }
+  },
+  "editScopeQuestion": "Deseja editar somente esta transação ou esta e todas as futuras?",
+  "@editScopeQuestion": {},
+  "editScopeOnlyThis": "Somente esta",
+  "@editScopeOnlyThis": {},
+  "editScopeThisAndFuture": "Esta e as futuras",
+  "@editScopeThisAndFuture": {},
+  "installmentLabel": "Parcela: {current}/{total}",
+  "@installmentLabel": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "defineColor": "Definir Cor",
+  "@defineColor": {},
+  "deleteConfirmation": "Deseja excluir \"{title}\"?",
+  "@deleteConfirmation": {
+    "placeholders": {
+      "title": {}
+    }
   }
 }

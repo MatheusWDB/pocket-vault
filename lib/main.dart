@@ -10,6 +10,6 @@ void main() async {
   await initializeDateFormatting();
   await DatabaseHelper.instance.database;
 
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(const ProviderScope(child: PocketVaultApp()));
 }
 

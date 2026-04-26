@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:pocket_vault/enums/edit_category_dialog_enum.dart';
 import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
-import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_dialog.dart';
+import 'package:pocket_vault/screens/components/edit_category_dialog.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/widgets/budget_list_builder.dart';
 import 'package:pocket_vault/utils/app_alerts.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
@@ -19,7 +20,7 @@ class BudgetTab extends ConsumerStatefulWidget {
 }
 
 class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
-  void _budgetLimitDialog(bool noBudgetLimit, AppLocalizations t) {
+  void _showCategoryDialog(bool noBudgetLimit, AppLocalizations t) {
     if (noBudgetLimit) {
       AppAlerts.warning(context, message: t.allCategoriesHaveLimit);
       return;
@@ -28,7 +29,8 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const BudgetDialog(),
+      builder: (_) =>
+          const EditCategoryDialog(lastTab: EditCategoryDialogEnum.budget),
     );
   }
 
@@ -38,10 +40,8 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
     final myLocale = Localizations.localeOf(context);
     final filter = ref.watch(transactionFilterProvider);
     final currency = ref.watch(preferencesProvider).currencySymbol;
-    final totalExpenses = ref.watch(categoriesTotalSpentProvider);
-    final categoriesNoBudgetLimit = ref.watch(
-      categoriesAvailableForBudgetProvider,
-    );
+    final totalExpenses = ref.watch(totalSpentByCategoryProvider);
+    final categoriesNoBudgetLimit = ref.watch(categoriesWithoutBudgetProvider);
 
     final categories = totalExpenses.keys.toList();
 
@@ -73,7 +73,7 @@ class _BudgetsTabState extends ConsumerState<BudgetTab> with FilterActions {
         OutlinedButton(
           style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(15)),
           onPressed: () =>
-              _budgetLimitDialog(categoriesNoBudgetLimit.isEmpty, t),
+              _showCategoryDialog(categoriesNoBudgetLimit.isEmpty, t),
           child: Row(
             spacing: 10,
             mainAxisAlignment: MainAxisAlignment.center,

@@ -8,8 +8,10 @@ import 'package:pocket_vault/models/transaction.dart';
 import 'package:pocket_vault/navigation/route_observer.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
-import 'package:pocket_vault/screens/transacation_form/transaction_form_screen.dart';
+import 'package:pocket_vault/screens/transaction_form/transaction_form_screen.dart';
+import 'package:pocket_vault/theme/app_theme.dart';
 import 'package:pocket_vault/utils/app_alerts.dart';
+import 'package:pocket_vault/utils/app_dialogs.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
@@ -26,15 +28,13 @@ class TransactionDetailsScreen extends ConsumerStatefulWidget {
 class _TransactionDetailsScreenState
     extends ConsumerState<TransactionDetailsScreen>
     with RouteAware {
-  late final Transaction transaction;
-
   void _return(BuildContext context, WidgetRef ref) {
     ref.read(preferencesProvider.notifier).setLastTransactionDetailId(null);
 
     Navigator.pop(context);
   }
 
-  void _onPressedEdit(BuildContext context) {
+  void _onPressedEdit(BuildContext context, Transaction transaction) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -44,10 +44,22 @@ class _TransactionDetailsScreenState
   }
 
   Future<void> _onPressedDelete(BuildContext context, WidgetRef ref) async {
+    final t = AppLocalizations.of(context)!;
+
+    final confirm = await AppDialogs.confirm(
+      context: context,
+      title: t.delete,
+      content: t.deleteConfirmation(widget.transaction.title),
+      confirm: t.delete,
+      confirmColor: Theme.of(context).extension<AppColors>()!.expense,
+    );
+
+    if (confirm != true || !context.mounted) return;
+
     try {
       await ref
           .read(transactionListProvider.notifier)
-          .removeTransaction(transaction.id!);
+          .removeTransaction(widget.transaction.id!);
 
       if (!context.mounted) return;
       Navigator.pop(context);
@@ -67,12 +79,6 @@ class _TransactionDetailsScreenState
   }
 
   @override
-  void initState() {
-    super.initState();
-    transaction = widget.transaction;
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     appRouteObserver.subscribe(this, ModalRoute.of(context)!);
@@ -89,7 +95,7 @@ class _TransactionDetailsScreenState
     final notifier = ref.read(preferencesProvider.notifier);
 
     notifier.setLastScreen(AppScreenEnum.details);
-    notifier.setLastTransactionDetailId(transaction.id!);
+    notifier.setLastTransactionDetailId(widget.transaction.id!);
   }
 
   @override
@@ -97,7 +103,7 @@ class _TransactionDetailsScreenState
     final notifier = ref.read(preferencesProvider.notifier);
 
     notifier.setLastScreen(AppScreenEnum.details);
-    notifier.setLastTransactionDetailId(transaction.id!);
+    notifier.setLastTransactionDetailId(widget.transaction.id!);
   }
 
   @override
@@ -115,6 +121,11 @@ class _TransactionDetailsScreenState
     final theme = Theme.of(context);
     final themePrimaryContainer = theme.colorScheme.primaryContainer;
     final currencySymbol = ref.watch(preferencesProvider).currencySymbol;
+    final transactionAsync = ref.watch(
+      transactionByIdProvider(widget.transaction.id),
+    );
+
+    final transaction = transactionAsync.value ?? widget.transaction;
 
     final String amountText = transaction.amount.toCurrency(
       code: currencySymbol.code,
@@ -132,8 +143,6 @@ class _TransactionDetailsScreenState
 
     final borderRadius = BorderRadius.circular(16);
 
-    final spacing = SizedBox(height: 20);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(t.details),
@@ -147,6 +156,7 @@ class _TransactionDetailsScreenState
         child: Padding(
           padding: EdgeInsetsGeometry.all(8),
           child: Column(
+            spacing: 10,
             children: [
               Column(
                 spacing: 8,
@@ -188,81 +198,100 @@ class _TransactionDetailsScreenState
                 ],
               ),
 
-              spacing,
-
-              Row(
+              Column(
                 spacing: 16,
                 children: [
-                  Icon(LucideIcons.clock),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [Text(t.date), Text(dateText)],
+                  Row(
+                    spacing: 16,
+                    children: [
+                      Icon(LucideIcons.clock),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [Text(t.date), Text(dateText)],
+                      ),
+                    ],
                   ),
-                ],
-              ),
 
-              spacing,
+                  if (transaction.totalInstallments != null &&
+                      transaction.totalInstallments! > 1) ...[
+                    Row(
+                      spacing: 16,
+                      children: [
+                        Icon(LucideIcons.creditCard),
+                        Text(
+                          t.installmentLabel(
+                            transaction.currentInstallment!,
+                            transaction.totalInstallments!,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
 
-              if (tags.isNotEmpty)
-                Row(
-                  spacing: 16,
-                  children: [
-                    Icon(LucideIcons.tag),
-                    Expanded(
+                  if (tags.isNotEmpty) ...[
+                    Row(
+                      spacing: 16,
+                      children: [
+                        Icon(LucideIcons.tag),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(tags.length > 1 ? t.tags : t.tag),
+                              SizedBox(
+                                height: 15,
+                                child: ListView.separated(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: tags.length,
+                                  separatorBuilder: (context, index) =>
+                                      SizedBox(width: 10),
+                                  itemBuilder: (context, index) {
+                                    final tag = tags[index];
+
+                                    return Text(
+                                      '#${tag.name}',
+                                      style: TextStyle(
+                                        color: theme.colorScheme.secondary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+
+                  if (transaction.description != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: borderRadius,
+                      ),
                       child: Column(
+                        spacing: 8,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(tags.length > 1 ? t.tags : t.tag),
-                          SizedBox(
-                            height: 50,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: tags.length,
-                              separatorBuilder: (context, index) =>
-                                  SizedBox(width: 10),
-                              itemBuilder: (context, index) {
-                                final tag = tags[index];
-
-                                return Text(
-                                  '#${tag.name}',
-                                  style: TextStyle(
-                                    color: theme.colorScheme.secondary,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                );
-                              },
-                            ),
+                          Text(
+                            t.description,
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          Text(
+                            '"${transaction.description!}"',
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontStyle: FontStyle.italic),
                           ),
                         ],
                       ),
                     ),
                   ],
-                ),
-
-              if (transaction.description != null)
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    borderRadius: borderRadius,
-                  ),
-                  child: Column(
-                    spacing: 8,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        t.description,
-                        style: TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      Text(
-                        '"${transaction.description!}"',
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontStyle: FontStyle.italic),
-                      ),
-                    ],
-                  ),
-                ),
+                ],
+              ),
 
               Expanded(child: SizedBox.shrink()),
 
@@ -271,7 +300,7 @@ class _TransactionDetailsScreenState
                 children: [
                   ElevatedButton(
                     style: buttonStyle,
-                    onPressed: () => _onPressedEdit(context),
+                    onPressed: () => _onPressedEdit(context, transaction),
                     child: Row(
                       spacing: 8,
                       mainAxisAlignment: MainAxisAlignment.center,

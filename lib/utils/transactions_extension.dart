@@ -14,16 +14,4 @@ extension TransactionGrouping on List<Transaction> {
     }
     return yearGrouped;
   }
-
-  Map<DateTime, List<Transaction>> groupByDate() {
-    final Map<DateTime, List<Transaction>> grouped = {};
-
-    for (final t in this) {
-      final date = DateTime(t.date.year, t.date.month, t.date.day);
-
-      grouped.putIfAbsent(date, () => []).add(t);
-    }
-
-    return grouped;
-  }
 }

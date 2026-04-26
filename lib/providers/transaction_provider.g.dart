@@ -55,7 +55,7 @@ final class TransactionServiceProvider
 }
 
 String _$transactionServiceHash() =>
-    r'c2999d591e45b3535b77b48d1e22175dd24a49fd';
+    r'7a9788e70aaf181aebc912728165dcad3b345e6c';
 
 @ProviderFor(TransactionList)
 final transactionListProvider = TransactionListProvider._();
@@ -81,7 +81,7 @@ final class TransactionListProvider
   TransactionList create() => TransactionList();
 }
 
-String _$transactionListHash() => r'28d2a2ac897f19bbdf8123763cb0c491bc067808';
+String _$transactionListHash() => r'cf96b1490504d9109712f2fd0667d8ddbcad1ef4';
 
 abstract class _$TransactionList extends $AsyncNotifier<List<Transaction>> {
   FutureOr<List<Transaction>> build();
@@ -230,7 +230,7 @@ final class TransactionByIdProvider
   @override
   FutureOr<Transaction?> create(Ref ref) {
     final argument = this.argument as int?;
-    return transactionById(ref, id: argument);
+    return transactionById(ref, argument);
   }
 
   @override
@@ -244,7 +244,7 @@ final class TransactionByIdProvider
   }
 }
 
-String _$transactionByIdHash() => r'efc0036c4fd17b38cc4de88978c4234afd9e5127';
+String _$transactionByIdHash() => r'c2b0bd046a120d911bfe5c58d9ce0c03c378956e';
 
 final class TransactionByIdFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<Transaction?>, int?> {
@@ -257,9 +257,42 @@ final class TransactionByIdFamily extends $Family
         isAutoDispose: true,
       );
 
-  TransactionByIdProvider call({int? id}) =>
+  TransactionByIdProvider call(int? id) =>
       TransactionByIdProvider._(argument: id, from: this);
 
   @override
   String toString() => r'transactionByIdProvider';
 }
+
+@ProviderFor(minYear)
+final minYearProvider = MinYearProvider._();
+
+final class MinYearProvider
+    extends $FunctionalProvider<AsyncValue<int?>, int?, FutureOr<int?>>
+    with $FutureModifier<int?>, $FutureProvider<int?> {
+  MinYearProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'minYearProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$minYearHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<int?> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<int?> create(Ref ref) {
+    return minYear(ref);
+  }
+}
+
+String _$minYearHash() => r'1d0974c70a3a10b5d59a47288a98f35ffacc59b6';

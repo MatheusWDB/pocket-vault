@@ -141,5 +141,26 @@
   "budgetControl": "Budget Control",
   "noBudgetsConfigured": "No budgets configured.",
   "detailedStatement": "Detailed Statement",
-  "transactionValue": "{sign} {value}"
+  "transactionValue": "{sign} {value}",
+  "editScopeQuestion": "Edit only this transaction or this and all future ones?",
+  "@editScopeQuestion": {},
+  "editScopeOnlyThis": "Only this",
+  "@editScopeOnlyThis": {},
+  "editScopeThisAndFuture": "This and future",
+  "@editScopeThisAndFuture": {},
+  "installmentLabel": "Installment: {current}/{total}",
+  "@installmentLabel": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "defineColor": "Define Color",
+  "@defineColor": {},
+  "deleteConfirmation": "Delete \"{title}\"?",
+  "@deleteConfirmation": {
+    "placeholders": {
+      "title": {}
+    }
+  }
 }

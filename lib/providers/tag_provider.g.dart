@@ -48,7 +48,7 @@ final class TagServiceProvider
   }
 }
 
-String _$tagServiceHash() => r'993799c5ed639d5f7b28480351c1d58721c17735';
+String _$tagServiceHash() => r'5e68e90b853e44b60b3ffe3209c070bf88a1615e';
 
 @ProviderFor(TagList)
 final tagListProvider = TagListProvider._();
@@ -60,7 +60,7 @@ final class TagListProvider extends $AsyncNotifierProvider<TagList, List<Tag>> {
         argument: null,
         retry: null,
         name: r'tagListProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -73,7 +73,7 @@ final class TagListProvider extends $AsyncNotifierProvider<TagList, List<Tag>> {
   TagList create() => TagList();
 }
 
-String _$tagListHash() => r'b767a4ad2c6f55c7c17253f3be30a8302baeaaa9';
+String _$tagListHash() => r'a117e6b639f65133626a209b74f5325699c1c9d1';
 
 abstract class _$TagList extends $AsyncNotifier<List<Tag>> {
   FutureOr<List<Tag>> build();

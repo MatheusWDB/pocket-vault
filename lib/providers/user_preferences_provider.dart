@@ -12,14 +12,14 @@ class Preferences extends _$Preferences {
   Future<SharedPreferences> get _prefs async =>
       await SharedPreferences.getInstance();
 
-  static const _userNamekey = 'user_name';
+  static const _userNameKey  = 'user_name';
   static const _currencySymbolKey = 'currency_symbol';
   static const _biometricEnabledKey = 'biometric_enabled';
   static const _themeModeKey = 'theme_mode';
   static const _lastBackupKey = 'last_backup_at';
-  static const _lastScreen = 'last_screen';
-  static const _lastTab = 'last_tab';
-  static const _lastTransactionId = 'last_transaction_id';
+  static const _lastScreenKey  = 'last_screen';
+  static const _lastTabKey  = 'last_tab';
+  static const _lastTransactionIdKey  = 'last_transaction_id';
 
   @override
   UserPreferences build() {
@@ -31,14 +31,14 @@ class Preferences extends _$Preferences {
   Future<void> _loadFromStorage() async {
     final prefs = await _prefs;
 
-    final userName = prefs.getString(_userNamekey);
+    final userName = prefs.getString(_userNameKey );
     final currencySymbolIndex = prefs.getInt(_currencySymbolKey);
     final biometricEnabled = prefs.getBool(_biometricEnabledKey);
     final themeIndex = prefs.getInt(_themeModeKey);
     final lastBackupMillis = prefs.getInt(_lastBackupKey);
-    final lastScreenIndex = prefs.getInt(_lastScreen);
-    final lastTabIndex = prefs.getInt(_lastTab);
-    final lastTransactionId = prefs.getInt(_lastTransactionId);
+    final lastScreenIndex = prefs.getInt(_lastScreenKey );
+    final lastTabIndex = prefs.getInt(_lastTabKey );
+    final lastTransactionId = prefs.getInt(_lastTransactionIdKey );
 
     state = state.copyWith(
       userName: userName ?? state.userName,
@@ -68,7 +68,7 @@ class Preferences extends _$Preferences {
     final prefs = await _prefs;
 
     state = state.copyWith(userName: name);
-    await prefs.setString(_userNamekey, name);
+    await prefs.setString(_userNameKey , name);
   }
 
   Future<void> setCurrencySymbol(CurrencySymbolEnum symbol) async {
@@ -105,9 +105,9 @@ class Preferences extends _$Preferences {
     state = state.copyWith(lastScreen: screen);
 
     if (screen != null) {
-      await prefs.setInt(_lastScreen, screen.index);
+      await prefs.setInt(_lastScreenKey , screen.index);
     } else {
-      await prefs.remove(_lastScreen);
+      await prefs.remove(_lastScreenKey );
     }
   }
 
@@ -117,9 +117,9 @@ class Preferences extends _$Preferences {
     state = state.copyWith(lastTab: tab);
 
     if (tab != null) {
-      await prefs.setInt(_lastTab, tab.index);
+      await prefs.setInt(_lastTabKey , tab.index);
     } else {
-      await prefs.remove(_lastTab);
+      await prefs.remove(_lastTabKey );
     }
   }
 
@@ -129,9 +129,9 @@ class Preferences extends _$Preferences {
     state = state.copyWith(lastTransactionDetailId: id);
 
     if (id != null) {
-      await prefs.setInt(_lastTransactionId, id);
+      await prefs.setInt(_lastTransactionIdKey , id);
     } else {
-      await prefs.remove(_lastTransactionId);
+      await prefs.remove(_lastTransactionIdKey );
     }
   }
 }

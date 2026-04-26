@@ -4,33 +4,38 @@ import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class TransactionRepository {
   final DatabaseHelper _dbHelper;
-  static final table = DatabaseHelper.tableTransaction;
-  static final tableC = DatabaseHelper.tableCategory;
-  static final tableTg = DatabaseHelper.tableTag;
-  static final tableTT = DatabaseHelper.tableTransactionTags;
-
-  static final columnId = DatabaseHelper.columnTransactionId;
-  static final columnTitle = DatabaseHelper.columnTransactionTitle;
-  static final columnCategoryId = DatabaseHelper.columnTransactionCategoryId;
-  static final columnDate = DatabaseHelper.columnTransactionDate;
-  static final columnIsRecurring = DatabaseHelper.columnTransactionIsRecurring;
-  static final columnIsTemplate = DatabaseHelper.columnTransactionIsTemplate;
-  static final columnLastGeneratedMonth =
-      DatabaseHelper.columnTransactionLastGeneratedMonth;
-
-  static final columnCatId = DatabaseHelper.columnCategoryId;
-  static final columnCatName = DatabaseHelper.columnCategoryName;
-  static final columnCatBudgetLimit = DatabaseHelper.columnCategoryBudgetLimit;
-  static final columnCatColor = DatabaseHelper.columnCategoryColor;
-  static final columnCatCreatedAt = DatabaseHelper.columnCategoryCreatedAt;
-
-  static final columnTagName = DatabaseHelper.columnTagName;
-  static final columnTagId = DatabaseHelper.columnTagId;
-
-  static final columnRelTagId = DatabaseHelper.columnRelTagId;
-  static final columnRelTransactionId = DatabaseHelper.columnRelTransactionId;
 
   TransactionRepository(this._dbHelper);
+
+  static const table = DatabaseHelper.tableTransaction;
+  static const tableCategory = DatabaseHelper.tableCategory;
+  static const tableTag = DatabaseHelper.tableTag;
+  static const tableTransactionTags = DatabaseHelper.tableTransactionTags;
+
+  static const columnTransactionId = DatabaseHelper.columnTransactionId;
+  static const columnTransactionTitle = DatabaseHelper.columnTransactionTitle;
+  static const columnTransactionCategoryId =
+      DatabaseHelper.columnTransactionCategoryId;
+  static const columnTransactionDate = DatabaseHelper.columnTransactionDate;
+  static const columnTransactionIsRecurring =
+      DatabaseHelper.columnTransactionIsRecurring;
+  static const columnTransactionIsTemplate =
+      DatabaseHelper.columnTransactionIsTemplate;
+  static const columnTransactionLastGeneratedMonth =
+      DatabaseHelper.columnTransactionLastGeneratedMonth;
+
+  static const columnCategoryId = DatabaseHelper.columnCategoryId;
+  static const columnCategoryName = DatabaseHelper.columnCategoryName;
+  static const columnCategoryBudgetLimit =
+      DatabaseHelper.columnCategoryBudgetLimit;
+  static const columnCategoryColor = DatabaseHelper.columnCategoryColor;
+  static const columnCategoryCreatedAt = DatabaseHelper.columnCategoryCreatedAt;
+
+  static const columnTagName = DatabaseHelper.columnTagName;
+  static const columnTagId = DatabaseHelper.columnTagId;
+
+  static const columnRelTagId = DatabaseHelper.columnRelTagId;
+  static const columnRelTransactionId = DatabaseHelper.columnRelTransactionId;
 
   Future<int> insert(
     Map<String, dynamic> row, {
@@ -47,7 +52,9 @@ class TransactionRepository {
   Future<List<Map<String, dynamic>>> findAll() async {
     try {
       final db = await _dbHelper.database;
-      return await db.rawQuery(_sql('WHERE t.$columnIsTemplate = 0'));
+      return await db.rawQuery(
+        _sql('WHERE t.$columnTransactionIsTemplate = 0'),
+      );
     } catch (_) {
       throw const RecordQueryException();
     }
@@ -59,7 +66,10 @@ class TransactionRepository {
   }) async {
     try {
       final db = executor ?? await _dbHelper.database;
-      final result = await db.rawQuery(_sql('WHERE t.$columnId = ?'), [id]);
+      final result = await db.rawQuery(
+        _sql('WHERE t.$columnTransactionId = ?'),
+        [id],
+      );
       if (result.isEmpty) throw const RecordNotFoundException();
       return result;
     } on DatabaseException {
@@ -75,8 +85,8 @@ class TransactionRepository {
       return await db.query(
         table,
         distinct: true,
-        columns: [columnTitle],
-        orderBy: '$columnTitle ASC',
+        columns: [columnTransactionTitle],
+        orderBy: '$columnTransactionTitle ASC',
       );
     } catch (_) {
       throw const RecordQueryException();
@@ -102,7 +112,7 @@ class TransactionRepository {
         return await findAll();
       }
 
-      final List<String> conditions = ['t.$columnIsTemplate = ?'];
+      final List<String> conditions = ['t.$columnTransactionIsTemplate = ?'];
       final List<Object?> args = [0];
 
       if (tagIds.isNotEmpty) {
@@ -110,8 +120,8 @@ class TransactionRepository {
 
         conditions.add('''
           EXISTS (
-            SELECT 1 FROM $tableTT tt 
-            WHERE tt.$columnRelTransactionId = t.$columnId 
+            SELECT 1 FROM $tableTransactionTags tt 
+            WHERE tt.$columnRelTransactionId = t.$columnTransactionId 
             AND tt.$columnRelTagId IN ($placeholders)
           )
       ''');
@@ -123,7 +133,7 @@ class TransactionRepository {
         final List<String> titleConditions = [];
 
         for (var title in titles) {
-          titleConditions.add('t.$columnTitle LIKE ?');
+          titleConditions.add('t.$columnTransactionTitle LIKE ?');
 
           args.add('%$title%');
         }
@@ -137,18 +147,18 @@ class TransactionRepository {
           '?',
         ).join(', ');
 
-        conditions.add('t.$columnCategoryId IN ($placeholders)');
+        conditions.add('t.$columnTransactionCategoryId IN ($placeholders)');
 
         args.addAll(categoryIds);
       }
 
       if (start != null) {
-        conditions.add('t.$columnDate >= ?');
+        conditions.add('t.$columnTransactionDate >= ?');
         args.add(start);
       }
 
       if (end != null) {
-        conditions.add('t.$columnDate <= ?');
+        conditions.add('t.$columnTransactionDate <= ?');
         args.add(end);
       }
 
@@ -162,6 +172,15 @@ class TransactionRepository {
     }
   }
 
+  Future<int?> findMinYear({DatabaseExecutor? executor}) async {
+    final db = executor ?? await _dbHelper.database;
+    final result = await db.rawQuery(
+      'SELECT MIN(strftime(\'%Y\', $columnTransactionDate)) as min_year FROM $table WHERE $columnTransactionIsTemplate = 0',
+    );
+    final raw = result.first['min_year'];
+    return raw != null ? int.tryParse(raw as String) : null;
+  }
+
   Future<void> update(
     Map<String, dynamic> row, {
     DatabaseExecutor? executor,
@@ -171,7 +190,7 @@ class TransactionRepository {
       final count = await db.update(
         table,
         row,
-        where: '$columnId = ?',
+        where: '$columnTransactionId = ?',
         whereArgs: [row['id']],
       );
       if (count == 0) throw const RecordNotFoundException();
@@ -182,12 +201,12 @@ class TransactionRepository {
     }
   }
 
-  Future<void> delete(int id) async {
+  Future<void> delete(int id, {DatabaseExecutor? executor}) async {
     try {
-      final db = await _dbHelper.database;
+      final db = executor ?? await _dbHelper.database;
       final count = await db.delete(
         table,
-        where: '$columnId = ?',
+        where: '$columnTransactionId = ?',
         whereArgs: [id],
       );
       if (count == 0) throw const RecordNotFoundException();
@@ -195,6 +214,26 @@ class TransactionRepository {
       rethrow;
     } catch (_) {
       throw const RecordDeleteException();
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> findByTemplateId(
+    int templateId, {
+    DatabaseExecutor? executor,
+  }) async {
+    try {
+      final db = executor ?? await _dbHelper.database;
+      return await db.rawQuery(
+        '''
+        SELECT $_selectColumns
+        $_fromAndJoins
+        WHERE t.templateId = ? AND t.$columnTransactionIsTemplate = 0
+        ORDER BY t.$columnTransactionDate ASC
+        ''',
+        [templateId],
+      );
+    } catch (_) {
+      throw const RecordQueryException();
     }
   }
 
@@ -207,14 +246,36 @@ class TransactionRepository {
       final currentMonth =
           '${now.year}-${now.month.toString().padLeft(2, '0')}';
       final whereClause =
-          'WHERE t.$columnIsRecurring = 1 AND t.$columnIsTemplate = 1 '
-          'AND (t.$columnLastGeneratedMonth IS NULL '
-          'OR t.$columnLastGeneratedMonth != ?)';
+          'WHERE t.$columnTransactionIsRecurring = 1 AND t.$columnTransactionIsTemplate = 1 '
+          'AND (t.$columnTransactionLastGeneratedMonth IS NULL '
+          'OR t.$columnTransactionLastGeneratedMonth != ?)';
       return await db.rawQuery(_sql(whereClause), [currentMonth]);
     } catch (_) {
       throw const RecordQueryException();
     }
   }
+
+  static final _selectColumns =
+      '''
+        t.*,
+        c.$columnCategoryName as category_name,
+        c.$columnCategoryBudgetLimit as category_budgetLimit,
+        c.$columnCategoryColor as category_color,
+        c.$columnCategoryCreatedAt as category_created_at,
+        tg.$columnTagId as tag_id,
+        tg.$columnTagName as tag_name
+      ''';
+
+  static final _fromAndJoins =
+      '''
+        FROM $table t
+        INNER JOIN $tableCategory c
+          ON t.$columnTransactionCategoryId = c.$columnCategoryId
+        LEFT JOIN $tableTransactionTags tt
+          ON t.$columnTransactionId = tt.$columnRelTransactionId
+        LEFT JOIN $tableTag tg
+          ON tt.$columnRelTagId = tg.$columnTagId
+      ''';
 
   String _sql(String whereClause) {
     final finalWhere =
@@ -224,20 +285,10 @@ class TransactionRepository {
         : whereClause;
 
     return '''
-        SELECT
-          t.*,
-          c.$columnCatName as category_name,
-          c.$columnCatBudgetLimit as category_budgetLimit,
-          c.$columnCatColor as category_color,
-          c.$columnCatCreatedAt as category_created_at,
-          tg.$columnTagId as tag_id,
-          tg.$columnTagName as tag_name
-        FROM $table t
-        INNER JOIN $tableC c ON t.$columnCategoryId = c.$columnCatId
-        LEFT JOIN $tableTT tt ON t.$columnId = tt.$columnRelTransactionId
-        LEFT JOIN $tableTg tg ON tt.$columnRelTagId = tg.$columnTagId
-        $finalWhere
-        ORDER BY t.$columnDate DESC
-      ''';
+            SELECT $_selectColumns
+            $_fromAndJoins
+            $finalWhere
+            ORDER BY t.$columnTransactionDate DESC
+          ''';
   }
 }

@@ -18,21 +18,15 @@ import 'package:pocket_vault/screens/settings/widgets/settings_switch_tile.dart'
 import 'package:pocket_vault/services/backup_service.dart';
 import 'package:pocket_vault/theme/app_theme.dart';
 import 'package:pocket_vault/utils/app_alerts.dart';
+import 'package:pocket_vault/utils/app_dialogs.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 
-class BottomSheetAction {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
-
-  const BottomSheetAction({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-    this.subtitle,
-  });
-}
+typedef BottomSheetAction = ({
+  IconData icon,
+  String title,
+  String? subtitle,
+  VoidCallback onTap,
+});
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -43,29 +37,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen>
     with RouteAware {
-  Future<bool?> _showConfirmImportDialog(
-    BuildContext context,
-    AppLocalizations t,
-  ) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(t.confirmImport),
-        content: Text(t.importWarning),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(t.cancel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: Text(t.confirm),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _closeBottomSheet() {
     if (mounted) Navigator.of(context).maybePop();
   }
@@ -78,28 +49,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   ) async {
     _closeBottomSheet();
 
-    try {
-      await backupService.saveBackup();
+    await _runBackupAction(
+      () async {
+        await backupService.saveBackup();
 
-      if (!context.mounted) return;
-      ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
-      AppAlerts.success(context, message: t.backupSaveSuccess);
-    } on BackupException catch (e) {
-      if (!context.mounted) return;
-      switch (e) {
-        case BackupCancelledException():
-          return;
-        case BackupSaveException():
-          AppAlerts.error(context, e: e);
-        case BackupGenerationException():
-          AppAlerts.error(context, e: e);
-        case BackupShareException():
-        case BackupImportException():
-        case BackupRestoreException():
-        case BackupInvalidNoCategoriesException():
-        case BackupInvalidNoTransactionsException():
-      }
-    }
+        if (!context.mounted) return false;
+        ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
+
+        return true;
+      },
+      t.backupSaveSuccess,
+      (e) {
+        switch (e) {
+          case BackupCancelledException():
+            return;
+          case BackupSaveException():
+            AppAlerts.error(context, e: e);
+          case BackupGenerationException():
+            AppAlerts.error(context, e: e);
+          case BackupShareException():
+          case BackupImportException():
+          case BackupRestoreException():
+          case BackupInvalidNoCategoriesException():
+          case BackupInvalidNoTransactionsException():
+        }
+      },
+    );
   }
 
   void _share(
@@ -110,28 +85,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   ) async {
     _closeBottomSheet();
 
-    try {
-      await backupService.shareBackup();
+    await _runBackupAction(
+      () async {
+        await backupService.shareBackup();
 
-      if (!context.mounted) return;
-      ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
-      AppAlerts.success(context, message: t.backupShareSuccess);
-    } on BackupException catch (e) {
-      if (!context.mounted) return;
-      switch (e) {
-        case BackupCancelledException():
-          return;
-        case BackupSaveException():
-        case BackupGenerationException():
-          AppAlerts.error(context, e: e);
-        case BackupShareException():
-          AppAlerts.error(context, e: e);
-        case BackupImportException():
-        case BackupRestoreException():
-        case BackupInvalidNoCategoriesException():
-        case BackupInvalidNoTransactionsException():
-      }
-    }
+        if (!context.mounted) return false;
+        ref.read(preferencesProvider.notifier).setLastBackup(DateTime.now());
+
+        return true;
+      },
+      t.backupShareSuccess,
+      (e) {
+        switch (e) {
+          case BackupCancelledException():
+            return;
+          case BackupSaveException():
+          case BackupGenerationException():
+            AppAlerts.error(context, e: e);
+          case BackupShareException():
+            AppAlerts.error(context, e: e);
+          case BackupImportException():
+          case BackupRestoreException():
+          case BackupInvalidNoCategoriesException():
+          case BackupInvalidNoTransactionsException():
+        }
+      },
+    );
   }
 
   void _searchFolder(
@@ -142,36 +121,59 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   ) async {
     _closeBottomSheet();
 
+    await _runBackupAction(
+      () async {
+        final backup = await backupService.importBackup();
+
+        if (!context.mounted) return false;
+        final confirm = await AppDialogs.confirm(
+          context: context,
+          title: t.confirmImport,
+          content: t.importWarning,
+          confirm: t.confirm,
+        );
+
+        if (confirm != true) return false;
+
+        if (!context.mounted) return false;
+        await backupService.replaceAll(backup);
+
+        ref.invalidate(categoryListProvider);
+        ref.invalidate(transactionListProvider);
+        ref.invalidate(tagListProvider);
+
+        return true;
+      },
+      t.backupImportSuccess,
+      (e) {
+        switch (e) {
+          case BackupCancelledException():
+            return;
+          case BackupSaveException():
+          case BackupGenerationException():
+          case BackupShareException():
+          case BackupImportException():
+            AppAlerts.error(context, e: e);
+          case BackupRestoreException():
+          case BackupInvalidNoCategoriesException():
+          case BackupInvalidNoTransactionsException():
+        }
+      },
+    );
+  }
+
+  Future<void> _runBackupAction(
+    Future<bool> Function() action,
+    String successMessage,
+    void Function(BackupException) onError,
+  ) async {
     try {
-      final backup = await backupService.importBackup();
-
-      if (!context.mounted) return;
-      final confirm = await _showConfirmImportDialog(context, t);
-      if (confirm != true) return;
-
-      if (!context.mounted) return;
-      await backupService.replaceAll(backup);
-
-      ref.invalidate(categoryListProvider);
-      ref.invalidate(transactionListProvider);
-      ref.invalidate(tagListProvider);
-
-      if (!context.mounted) return;
-      AppAlerts.success(context, message: t.backupImportSuccess);
-    } on BackupException catch (e) {
-      if (!context.mounted) return;
-      switch (e) {
-        case BackupCancelledException():
-          return;
-        case BackupSaveException():
-        case BackupGenerationException():
-        case BackupShareException():
-        case BackupImportException():
-          AppAlerts.error(context, e: e);
-        case BackupRestoreException():
-        case BackupInvalidNoCategoriesException():
-        case BackupInvalidNoTransactionsException():
+      final success = await action();
+      if (success && mounted) {
+        AppAlerts.success(context, message: successMessage);
       }
+    } on BackupException catch (e) {
+      if (mounted) onError(e);
     }
   }
 
@@ -208,14 +210,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     AppLocalizations t,
   ) {
     _modalBottomSheet(context, [
-      BottomSheetAction(
+      (
         icon: LucideIcons.folderDown,
         title: t.download,
+        subtitle: null,
         onTap: () => _save(context, ref, backupService, t),
       ),
-      BottomSheetAction(
+      (
         icon: LucideIcons.share2,
         title: t.share,
+        subtitle: null,
         onTap: () => _share(context, ref, backupService, t),
       ),
     ]);
@@ -228,7 +232,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
     AppLocalizations t,
   ) {
     _modalBottomSheet(context, [
-      BottomSheetAction(
+      (
         icon: LucideIcons.search,
         title: t.chooseFile,
         subtitle: t.searchFolder,
@@ -242,27 +246,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen>
   }
 
   void _onPressedDeleteForever(AppLocalizations t) async {
-    final confirm = await showDialog<bool>(
+    final confirm = await AppDialogs.confirm(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(t.resetDatabaseQuestion),
-        content: Text(t.resetWarning),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(t.cancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(t.confirm, style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+      title: t.resetDatabaseQuestion,
+      content: t.resetWarning,
+      confirm: t.confirm,
+      confirmColor: Theme.of(context).extension<AppColors>()!.expense,
     );
 
     if (confirm == true) {
       final service = ref.read(transactionServiceProvider);
-      // DEPOIS
+
       try {
         await service.resetDatabase();
         ref.invalidate(transactionListProvider);

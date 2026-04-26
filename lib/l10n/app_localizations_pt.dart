@@ -458,4 +458,27 @@ class AppLocalizationsPt extends AppLocalizations {
   String transactionValue(Object sign, Object value) {
     return '$sign $value';
   }
+
+  @override
+  String get editScopeQuestion =>
+      'Deseja editar somente esta transação ou esta e todas as futuras?';
+
+  @override
+  String get editScopeOnlyThis => 'Somente esta';
+
+  @override
+  String get editScopeThisAndFuture => 'Esta e as futuras';
+
+  @override
+  String installmentLabel(Object current, Object total) {
+    return 'Parcela: $current/$total';
+  }
+
+  @override
+  String get defineColor => 'Definir Cor';
+
+  @override
+  String deleteConfirmation(Object title) {
+    return 'Deseja excluir \"$title\"?';
+  }
 }

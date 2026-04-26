@@ -951,6 +951,42 @@ abstract class AppLocalizations {
   /// In pt, this message translates to:
   /// **'{sign} {value}'**
   String transactionValue(Object sign, Object value);
+
+  /// No description provided for @editScopeQuestion.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja editar somente esta transação ou esta e todas as futuras?'**
+  String get editScopeQuestion;
+
+  /// No description provided for @editScopeOnlyThis.
+  ///
+  /// In pt, this message translates to:
+  /// **'Somente esta'**
+  String get editScopeOnlyThis;
+
+  /// No description provided for @editScopeThisAndFuture.
+  ///
+  /// In pt, this message translates to:
+  /// **'Esta e as futuras'**
+  String get editScopeThisAndFuture;
+
+  /// No description provided for @installmentLabel.
+  ///
+  /// In pt, this message translates to:
+  /// **'Parcela: {current}/{total}'**
+  String installmentLabel(Object current, Object total);
+
+  /// No description provided for @defineColor.
+  ///
+  /// In pt, this message translates to:
+  /// **'Definir Cor'**
+  String get defineColor;
+
+  /// No description provided for @deleteConfirmation.
+  ///
+  /// In pt, this message translates to:
+  /// **'Deseja excluir \"{title}\"?'**
+  String deleteConfirmation(Object title);
 }
 
 class _AppLocalizationsDelegate

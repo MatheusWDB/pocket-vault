@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:pocket_vault/models/category.dart';
+import 'package:pocket_vault/models/nullable.dart';
 import 'package:pocket_vault/models/tag.dart';
 
 class Transaction {
@@ -132,9 +133,4 @@ class Transaction {
   String toString() {
     return 'Transaction(id: $id, title: $title, amount: $amount, date: $date, description: $description, category: $category, tags: $tags, totalInstallments: $totalInstallments, currentInstallment: $currentInstallment, isRecurring: $isRecurring, isTemplate: $isTemplate, lastGeneratedMonth: $lastGeneratedMonth, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
-}
-
-class Nullable<T> {
-  final T? value;
-  const Nullable(this.value);
 }

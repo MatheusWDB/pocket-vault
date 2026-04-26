@@ -12,14 +12,15 @@ import 'package:pocket_vault/screens/auth/auth_screen.dart';
 import 'package:pocket_vault/services/auth_service.dart';
 import 'package:pocket_vault/theme/app_theme.dart';
 
-class MyApp extends ConsumerStatefulWidget {
-  const MyApp({super.key});
+class PocketVaultApp extends ConsumerStatefulWidget {
+  const PocketVaultApp({super.key});
 
   @override
-  ConsumerState<MyApp> createState() => _MyAppState();
+  ConsumerState<PocketVaultApp> createState() => _PocketVaultAppState();
 }
 
-class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
+class _PocketVaultAppState extends ConsumerState<PocketVaultApp>
+    with WidgetsBindingObserver {
   DateTime? _pausedAt;
   static const _lockTimeout = Duration(minutes: 1);
 
@@ -65,6 +66,8 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    const String appTitle = 'PocketVault Personal Finance';
+
     final themeMode = ref.watch(preferencesProvider).themeMode;
     final isAuthenticated = ref.watch(authStateProvider);
     final readPreferences = ref.read(preferencesProvider);
@@ -77,14 +80,14 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
       final lastTransactionId = readPreferences.lastTransactionDetailId;
 
       final transactionDetails = ref
-          .read(transactionByIdProvider(id: lastTransactionId))
+          .watch(transactionByIdProvider(lastTransactionId))
           .value;
 
       home = lastScreen.toScreen(transactionDetails);
     }
 
     return MaterialApp(
-      title: 'PocketVault Personal Finance',
+      title: appTitle,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: L10n.all,
       themeMode: themeMode.toThemeMode(),

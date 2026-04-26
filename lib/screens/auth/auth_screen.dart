@@ -16,36 +16,36 @@ class AuthScreen extends ConsumerStatefulWidget {
 class _AuthScreenState extends ConsumerState<AuthScreen> {
   final AuthService authService = AuthService();
 
-  Future<void> _canAuthenticate() async {
+  Future<void> _tryAuthenticate(AppLocalizations t) async {
     try {
-      await authService.authenticate();
+      await authService.authenticate(localizedReason: t.onboardingSubtitle);
 
-      _autheticated();
+      _authenticated();
     } on Exception catch (e) {
       if (!mounted) return;
       AppAlerts.error(context, e: e);
     }
   }
 
-  Future<void> _checkAutoAuthenticate() async {
+  Future<void> _checkAutoAuthenticate(AppLocalizations t) async {
     final isAuthenticated = ref.read(authStateProvider);
 
     if (isAuthenticated) {
-      _autheticated();
+      _authenticated();
       return;
     }
 
     final canAuthenticate = await authService.checkBiometrics();
 
     if (!canAuthenticate) {
-      _autheticated();
+      _authenticated();
     } else {
       if (!mounted) return;
-      _canAuthenticate();
+      _tryAuthenticate(t);
     }
   }
 
-  void _autheticated() {
+  void _authenticated() {
     if (!mounted) return;
     ref.read(authStateProvider.notifier).setAuthenticated(true);
   }
@@ -54,7 +54,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAutoAuthenticate();
+      if (!mounted) return;
+      _checkAutoAuthenticate(
+        AppLocalizations.of(context)!,
+      ); // ← aqui já é seguro
     });
   }
 
@@ -88,7 +91,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 ),
 
                 ElevatedButton.icon(
-                  onPressed: _canAuthenticate,
+                  onPressed: () => _tryAuthenticate(t),
                   icon: const Icon(LucideIcons.fingerprintPattern),
                   label: Text(t.unlockApp),
                   style: ElevatedButton.styleFrom(

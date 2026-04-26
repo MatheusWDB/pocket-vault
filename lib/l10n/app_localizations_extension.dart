@@ -30,6 +30,7 @@ extension AppLocalizationsX on AppLocalizations {
       CategoryDeleteException() => errorDeleteCategoryLinked,
 
       // Database
+      RecordNotFoundException() => notFound,
       RecordInsertException() => errorInsert,
       RecordUpdateException() => errorUpdate,
       RecordDeleteException() => errorDelete,

@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:pocket_vault/enums/currency_symbol_enum.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
-class BuildSummaryCard extends StatelessWidget {
+class SummaryCard extends StatelessWidget {
   final String label;
   final double value;
   final Color color;
   final IconData icon;
   final CurrencySymbolEnum currencySymbol;
 
-  const BuildSummaryCard({
+  const SummaryCard({
     required this.label,
     required this.value,
     required this.color,

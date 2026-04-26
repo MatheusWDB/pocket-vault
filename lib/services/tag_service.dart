@@ -7,11 +7,19 @@ import 'package:pocket_vault/repositories/transaction_tags_repository.dart';
 import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class TagService {
-  final _dbHelper = DatabaseHelper.instance;
-  final _repo = TagRepository(DatabaseHelper.instance);
-  final _repoTransactionTags = TransactionTagsRepository(
-    DatabaseHelper.instance,
-  );
+  final DatabaseHelper _dbHelper;
+  final TagRepository _repo;
+  final TransactionTagsRepository _transactionTagsRepo;
+
+  TagService({
+    DatabaseHelper? dbHelper,
+    TagRepository? repo,
+    TransactionTagsRepository? repoTransactionTags,
+  }) : _dbHelper = dbHelper ?? DatabaseHelper.instance,
+       _repo = repo ?? TagRepository(dbHelper ?? DatabaseHelper.instance),
+       _transactionTagsRepo =
+           repoTransactionTags ??
+           TransactionTagsRepository(dbHelper ?? DatabaseHelper.instance);
 
   Future<List<Tag>> getAllTags() async {
     final result = await _repo.findAll();
@@ -55,7 +63,30 @@ class TagService {
             ? existing['id'] as int
             : await _repo.insert(tag.toMap(), executor: db);
 
-        await _repoTransactionTags.insert(transactionId, tagId, executor: db);
+        await _transactionTagsRepo.insert(transactionId, tagId, executor: db);
+      }
+    } on DatabaseException catch (_) {
+      throw TagSaveException();
+    }
+  }
+
+  Future<void> syncTagsForTransaction(
+    int transactionId,
+    List<Tag> tags, {
+    DatabaseExecutor? executor,
+  }) async {
+    try {
+      final db = executor ?? await _dbHelper.database;
+      await _transactionTagsRepo.deleteAllByTransaction(
+        transactionId,
+        executor: db,
+      );
+      for (final tag in tags) {
+        final existing = await _repo.findByName(tag.name, executor: db);
+        final tagId = existing != null
+            ? existing['id'] as int
+            : await _repo.insert(tag.toMap(), executor: db);
+        await _transactionTagsRepo.insert(transactionId, tagId, executor: db);
       }
     } on DatabaseException catch (_) {
       throw TagSaveException();

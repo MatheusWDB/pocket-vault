@@ -4,9 +4,9 @@ import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class CategoryRepository {
   final DatabaseHelper _dbHelper;
-  static final table = DatabaseHelper.tableCategory;
-  static final columnId = DatabaseHelper.columnCategoryId;
-  static final columnName = DatabaseHelper.columnCategoryName;
+  static const table = DatabaseHelper.tableCategory;
+  static const columnId = DatabaseHelper.columnCategoryId;
+  static const columnName = DatabaseHelper.columnCategoryName;
 
   CategoryRepository(this._dbHelper);
 
@@ -65,9 +65,12 @@ class CategoryRepository {
     }
   }
 
-  Future<void> update(Map<String, dynamic> row) async {
+  Future<void> update(
+    Map<String, dynamic> row, {
+    DatabaseExecutor? executor,
+  }) async {
     try {
-      final db = await _dbHelper.database;
+      final db = executor ?? await _dbHelper.database;
       final count = await db.update(
         table,
         row,

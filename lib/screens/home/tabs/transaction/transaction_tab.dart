@@ -7,7 +7,7 @@ import 'package:pocket_vault/providers/category_provider.dart';
 import 'package:pocket_vault/providers/tag_provider.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
-import 'package:pocket_vault/screens/components/build_marquee_text.dart';
+import 'package:pocket_vault/screens/components/marquee_text.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
 import 'package:pocket_vault/screens/components/transaction_tile.dart';
 import 'package:pocket_vault/screens/home/tabs/transaction/widgets/filter_chip_item.dart';
@@ -24,8 +24,6 @@ class TransactionTab extends ConsumerStatefulWidget {
 
 class _TransactionTabState extends ConsumerState<TransactionTab>
     with FilterActions {
-  final TextEditingController searchController = TextEditingController();
-
   void _onTapTitleOrTag(Object element, SearchController controller) {
     final filterNotifier = ref.read(transactionFilterProvider.notifier);
 
@@ -60,7 +58,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
 
     return filtered.map(
       (element) => ListTile(
-        title: BuildMarqueeText(
+        title: MarqueeText(
           text: element is Tag ? '#${element.name}' : (element as String),
         ),
         onTap: () => _onTapTitleOrTag(element, controller),
@@ -172,7 +170,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
               );
             },
             error: (error, stackTrace) {
-              return Center(child: Text('Erro: $error'));
+              return Center(child: Text(error.toString()));
             },
             loading: () {
               return const Center(child: CircularProgressIndicator());
@@ -183,9 +181,8 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
           child: transactionsAsync.when(
             data: (transactions) {
               if (transactions.isEmpty) {
-                return const Center(
-                  child: Text('Nenhuma transação no período'),
-                );
+                final t = AppLocalizations.of(context)!;
+                return Center(child: Text(t.noTransactionsInPeriod));
               }
 
               final groupedByYear = transactions.groupByYearAndDate();
@@ -239,7 +236,10 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
                             ),
 
                             ...dayTransactions.map(
-                              (t) => TransactionTile(transaction: t),
+                              (t) => TransactionTile(
+                                transaction: t,
+                                showLeading: false,
+                              ),
                             ),
                             const Divider(height: 1),
                           ],
@@ -251,7 +251,7 @@ class _TransactionTabState extends ConsumerState<TransactionTab>
               );
             },
             error: (error, _) {
-              return Center(child: Text('Erro: $error'));
+              return Center(child: Text(error.toString()));
             },
             loading: () {
               return const Center(child: CircularProgressIndicator());

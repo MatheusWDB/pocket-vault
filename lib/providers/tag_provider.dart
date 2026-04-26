@@ -1,15 +1,15 @@
 import 'package:pocket_vault/models/tag.dart';
+import 'package:pocket_vault/providers/database_provider.dart';
 import 'package:pocket_vault/services/tag_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'tag_provider.g.dart';
 
 @riverpod
-TagService tagService(Ref _) {
-  return TagService();
-}
+TagService tagService(Ref ref) =>
+    TagService(dbHelper: ref.watch(databaseHelperProvider));
 
-@riverpod
+@Riverpod(keepAlive: true)
 class TagList extends _$TagList {
   @override
   Future<List<Tag>> build() async {

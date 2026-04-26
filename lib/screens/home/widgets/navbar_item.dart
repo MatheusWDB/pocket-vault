@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 
-class BuildItem extends StatelessWidget {
+class NavBarItem extends StatelessWidget {
   final IconData icon;
   final int index;
-  final BuildContext context;
   final int activeIndex;
   final Function(int) onDestinationSelected;
 
-  const BuildItem({
+  const NavBarItem({
     required this.activeIndex,
     required this.onDestinationSelected,
     required this.icon,
     required this.index,
-    required this.context,
     super.key,
   });
 

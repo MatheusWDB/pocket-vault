@@ -18,14 +18,9 @@ enum AppThemeModeEnum {
 }
 
 extension AppThemeModeEnumX on AppThemeModeEnum {
-  ThemeMode toThemeMode() {
-    switch (this) {
-      case AppThemeModeEnum.light:
-        return ThemeMode.light;
-      case AppThemeModeEnum.dark:
-        return ThemeMode.dark;
-      case AppThemeModeEnum.system:
-        return ThemeMode.system;
-    }
-  }
+  ThemeMode toThemeMode() => switch (this) {
+    AppThemeModeEnum.light => ThemeMode.light,
+    AppThemeModeEnum.dark => ThemeMode.dark,
+    AppThemeModeEnum.system => ThemeMode.system,
+  };
 }

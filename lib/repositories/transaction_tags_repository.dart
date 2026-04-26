@@ -4,15 +4,15 @@ import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class TransactionTagsRepository {
   final DatabaseHelper _dbHelper;
-  static final table = DatabaseHelper.tableTransactionTags;
-  static final tableTag = DatabaseHelper.tableTag;
-  static final tableTransaction = DatabaseHelper.tableTransaction;
+  static const table = DatabaseHelper.tableTransactionTags;
+  static const tableTag = DatabaseHelper.tableTag;
+  static const tableTransaction = DatabaseHelper.tableTransaction;
 
-  static final columnRelTagId = DatabaseHelper.columnRelTagId;
-  static final columnRelTransactionId = DatabaseHelper.columnRelTransactionId;
+  static const columnRelTagId = DatabaseHelper.columnRelTagId;
+  static const columnRelTransactionId = DatabaseHelper.columnRelTransactionId;
 
-  static final columnTagId = DatabaseHelper.columnTagId;
-  static final columnTransactionId = DatabaseHelper.columnTransactionId;
+  static const columnTagId = DatabaseHelper.columnTagId;
+  static const columnTransactionId = DatabaseHelper.columnTransactionId;
 
   TransactionTagsRepository(this._dbHelper);
 
@@ -77,22 +77,6 @@ class TransactionTagsRepository {
         WHERE tt.$columnRelTransactionId = ?
       ''',
         [transactionId],
-      );
-    } catch (_) {
-      throw const RecordQueryException();
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> findTransactionsByTagId(int tagId) async {
-    try {
-      final db = await _dbHelper.database;
-      return await db.rawQuery(
-        '''
-        SELECT t.* FROM $tableTransaction t
-        INNER JOIN $table tt ON t.$columnTransactionId = tt.$columnRelTransactionId
-        WHERE tt.$columnRelTagId = ?
-      ''',
-        [tagId],
       );
     } catch (_) {
       throw const RecordQueryException();

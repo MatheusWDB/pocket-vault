@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 
-class BuildMarqueeText extends StatelessWidget {
+class MarqueeText extends StatelessWidget {
   final String text;
   final TextStyle? style;
   final double velocity;
 
-  const BuildMarqueeText({
+  const MarqueeText({
     required this.text,
     this.style,
     this.velocity = 50.0,

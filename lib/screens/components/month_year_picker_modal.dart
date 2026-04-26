@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
+import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/utils/string_extensions.dart';
 
 class MonthYearPickerModal extends ConsumerStatefulWidget {
@@ -102,8 +103,10 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
   Widget build(BuildContext context) {
     final myLocale = Localizations.localeOf(context);
     final t = AppLocalizations.of(context)!;
-
     final now = DateTime.now();
+    final minYear = ref.watch(minYearProvider).value ?? now.year;
+    final totalYears = now.year - minYear + 1;
+
     final int initialYearIndex = (widget.showAllYearsOption)
         ? selectedYear == null
               ? 0
@@ -116,7 +119,7 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
 
     final List<Widget> monthWidgets = [];
     if (widget.showAllMonthsOption) {
-      monthWidgets.add(const Center(child: Text('Todos')));
+      monthWidgets.add(Center(child: Text(t.all)));
     }
 
     if (selectedYear != null) {
@@ -182,10 +185,10 @@ class _FilterPickerState extends ConsumerState<MonthYearPickerModal> {
                     onSelectedItemChanged: (index) =>
                         _onSelectedItemChangedYear(index, now),
                     children: [
-                      if (widget.showAllYearsOption) Center(child: Text(t.all)),
+                      if (widget.showAllYearsOption && totalYears > 1)
+                        Center(child: Text(t.all)),
                       ...List.generate(
-                        10,
-                        // Aqui vai mudar para (now.year - ano da primeira transação)
+                        totalYears,
                         (i) => Center(child: Text('${now.year - i}')),
                       ),
                     ],

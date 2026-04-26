@@ -2,14 +2,25 @@ import 'package:pocket_vault/data/database_helper.dart';
 import 'package:pocket_vault/exceptions/category_exception.dart';
 import 'package:pocket_vault/exceptions/database_exception.dart';
 import 'package:pocket_vault/models/category.dart';
+import 'package:pocket_vault/models/nullable.dart';
 import 'package:pocket_vault/repositories/category_repository.dart';
 import 'package:pocket_vault/repositories/transaction_repository.dart';
 import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class CategoryService {
-  final _dbHelper = DatabaseHelper.instance;
-  final _repo = CategoryRepository(DatabaseHelper.instance);
-  final _repoTransaction = TransactionRepository(DatabaseHelper.instance);
+  final DatabaseHelper _dbHelper;
+  final CategoryRepository _repo;
+  final TransactionRepository _transactionRepo;
+
+  CategoryService({
+    DatabaseHelper? dbHelper,
+    CategoryRepository? repo,
+    TransactionRepository? repoTransaction,
+  }) : _dbHelper = dbHelper ?? DatabaseHelper.instance,
+       _repo = repo ?? CategoryRepository(dbHelper ?? DatabaseHelper.instance),
+       _transactionRepo =
+           repoTransaction ??
+           TransactionRepository(dbHelper ?? DatabaseHelper.instance);
 
   Future<List<Category>> getAllCategories() async {
     final result = await _repo.findAll();
@@ -44,10 +55,17 @@ class CategoryService {
       return newCategory.copyWith(id: id);
     }
 
+    final existing = Category.fromMap(result);
+    if (existing.color != category.color) {
+      final updated = existing.copyWith(color: Nullable(category.color));
+      await _repo.update(updated.toMap(), executor: db);
+      return updated;
+    }
+
     return Category.fromMap(result);
   }
 
-  Future<void> saveCategory(Category category) async {
+  Future<void> upsertCategory(Category category) async {
     try {
       final categoryMap = category.toMap();
       category.id == null
@@ -64,7 +82,7 @@ class CategoryService {
     try {
       final db = await _dbHelper.database;
       await db.transaction((txn) async {
-        final result = await _repoTransaction.findWithFilters(
+        final result = await _transactionRepo.findWithFilters(
           [],
           [id],
           [],

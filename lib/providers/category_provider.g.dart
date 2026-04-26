@@ -49,7 +49,7 @@ final class CategoryServiceProvider
   }
 }
 
-String _$categoryServiceHash() => r'dace3b52687a9eaa81c29b09845b3d07465168b4';
+String _$categoryServiceHash() => r'1b40a60d62f07f1e6dc53e9ec533964035b1e63e';
 
 @ProviderFor(CategoryList)
 final categoryListProvider = CategoryListProvider._();
@@ -62,7 +62,7 @@ final class CategoryListProvider
         argument: null,
         retry: null,
         name: r'categoryListProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -75,7 +75,7 @@ final class CategoryListProvider
   CategoryList create() => CategoryList();
 }
 
-String _$categoryListHash() => r'db695a0e1b026a084feca6515fa688b7f3f44666';
+String _$categoryListHash() => r'c9f9f757f237ea6967ad7eaa970c69093da02ad7';
 
 abstract class _$CategoryList extends $AsyncNotifier<List<Category>> {
   FutureOr<List<Category>> build();
@@ -95,10 +95,10 @@ abstract class _$CategoryList extends $AsyncNotifier<List<Category>> {
   }
 }
 
-@ProviderFor(categoriesTotalSpent)
-final categoriesTotalSpentProvider = CategoriesTotalSpentProvider._();
+@ProviderFor(totalSpentByCategory)
+final totalSpentByCategoryProvider = TotalSpentByCategoryProvider._();
 
-final class CategoriesTotalSpentProvider
+final class TotalSpentByCategoryProvider
     extends
         $FunctionalProvider<
           Map<Category, double>,
@@ -106,19 +106,19 @@ final class CategoriesTotalSpentProvider
           Map<Category, double>
         >
     with $Provider<Map<Category, double>> {
-  CategoriesTotalSpentProvider._()
+  TotalSpentByCategoryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'categoriesTotalSpentProvider',
+        name: r'totalSpentByCategoryProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$categoriesTotalSpentHash();
+  String debugGetCreateSourceHash() => _$totalSpentByCategoryHash();
 
   @$internal
   @override
@@ -128,7 +128,7 @@ final class CategoriesTotalSpentProvider
 
   @override
   Map<Category, double> create(Ref ref) {
-    return categoriesTotalSpent(ref);
+    return totalSpentByCategory(ref);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -140,29 +140,28 @@ final class CategoriesTotalSpentProvider
   }
 }
 
-String _$categoriesTotalSpentHash() =>
-    r'56f307a71f869c580c81cbc20ec20dd1233a7efc';
+String _$totalSpentByCategoryHash() =>
+    r'58e2d77e905b92a320042c4d7d778e4e9fc67942';
 
-@ProviderFor(categoriesAvailableForBudget)
-final categoriesAvailableForBudgetProvider =
-    CategoriesAvailableForBudgetProvider._();
+@ProviderFor(categoriesWithoutBudget)
+final categoriesWithoutBudgetProvider = CategoriesWithoutBudgetProvider._();
 
-final class CategoriesAvailableForBudgetProvider
+final class CategoriesWithoutBudgetProvider
     extends $FunctionalProvider<List<Category>, List<Category>, List<Category>>
     with $Provider<List<Category>> {
-  CategoriesAvailableForBudgetProvider._()
+  CategoriesWithoutBudgetProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'categoriesAvailableForBudgetProvider',
+        name: r'categoriesWithoutBudgetProvider',
         isAutoDispose: true,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$categoriesAvailableForBudgetHash();
+  String debugGetCreateSourceHash() => _$categoriesWithoutBudgetHash();
 
   @$internal
   @override
@@ -171,7 +170,7 @@ final class CategoriesAvailableForBudgetProvider
 
   @override
   List<Category> create(Ref ref) {
-    return categoriesAvailableForBudget(ref);
+    return categoriesWithoutBudget(ref);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -183,5 +182,5 @@ final class CategoriesAvailableForBudgetProvider
   }
 }
 
-String _$categoriesAvailableForBudgetHash() =>
-    r'fc9788b29c68d89e59dc138a34f71e1e898b75d2';
+String _$categoriesWithoutBudgetHash() =>
+    r'c0fc9253f0b6e229de9429a5deb35eb4be3784a8';

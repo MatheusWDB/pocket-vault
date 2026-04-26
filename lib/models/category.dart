@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:pocket_vault/models/nullable.dart';
+
 class Category {
   final int? id;
   final String name;
@@ -19,14 +21,14 @@ class Category {
     int? id,
     String? name,
     double? budgetLimit,
-    String? color,
+    Nullable<String>? color,
     DateTime? createdAt,
   }) {
     return Category(
       id: id ?? this.id,
       name: name ?? this.name,
       budgetLimit: budgetLimit ?? this.budgetLimit,
-      color: color ?? this.color,
+      color: color != null ? color.value : this.color,
       createdAt: createdAt ?? this.createdAt,
     );
   }

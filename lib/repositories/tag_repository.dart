@@ -4,9 +4,9 @@ import 'package:sqflite/sqflite.dart' hide DatabaseException;
 
 class TagRepository {
   final DatabaseHelper _dbHelper;
-  static final table = DatabaseHelper.tableTag;
-  static final columnId = DatabaseHelper.columnTagId;
-  static final columnName = DatabaseHelper.columnTagName;
+  static const table = DatabaseHelper.tableTag;
+  static const columnId = DatabaseHelper.columnTagId;
+  static const columnName = DatabaseHelper.columnTagName;
 
   TagRepository(this._dbHelper);
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-class BuildInputField extends StatelessWidget {
+class InputTextField extends StatelessWidget {
   final TextEditingController controller;
   final String? label;
   final String? hint;
@@ -15,7 +15,7 @@ class BuildInputField extends StatelessWidget {
   final FocusNode? focusNode;
   final Function(String)? onFieldSubmitted;
 
-  const BuildInputField({
+  const InputTextField({
     required this.controller,
     this.label,
     this.hint,

@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:pocket_vault/enums/screen_enum.dart';
 import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/navigation/route_observer.dart';
+import 'package:pocket_vault/providers/loading_provider.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/home/tabs/budget/budget_tab.dart';
@@ -12,7 +13,7 @@ import 'package:pocket_vault/screens/home/tabs/report/report_tab.dart';
 import 'package:pocket_vault/screens/home/tabs/transaction/transaction_tab.dart';
 import 'package:pocket_vault/screens/home/widgets/custom_bottom_app_bar.dart';
 import 'package:pocket_vault/screens/settings/settings_screen.dart';
-import 'package:pocket_vault/screens/transacation_form/transaction_form_screen.dart';
+import 'package:pocket_vault/screens/transaction_form/transaction_form_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -90,6 +91,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
   @override
   Widget build(BuildContext context) {
     final t = AppLocalizations.of(context)!;
+    final loading = ref.watch(loadingStateProvider);
+
     final tabs = [
       (t.summary, DashboardTab()),
       (t.transactions, TransactionTab()),
@@ -99,30 +102,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
 
     final (title, tab) = tabs[_activeMenu];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: [
-          IconButton(
-            onPressed: () => _onPressedSettings(),
-            icon: const Icon(LucideIcons.settings),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: Text(title),
+            actions: [
+              IconButton(
+                onPressed: () => _onPressedSettings(),
+                icon: const Icon(LucideIcons.settings),
+              ),
+            ],
+            actionsPadding: const EdgeInsets.all(8.0),
           ),
+          bottomNavigationBar: CustomBottomAppBar(
+            activeIndex: _activeMenu,
+            onDestinationSelected: _onChangeMenu,
+          ),
+          floatingActionButton: FloatingActionButton(
+            onPressed: () => _onPressedTransactionForm(),
+            shape: const CircleBorder(),
+            child: const Icon(LucideIcons.circlePlus, size: 35.0),
+          ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+          body: SafeArea(
+            child: Padding(padding: const EdgeInsets.all(8.0), child: tab),
+          ),
+        ),
+        if (loading) ...[
+          ModalBarrier(dismissible: false, color: Colors.black45),
+          const Center(child: CircularProgressIndicator()),
         ],
-        actionsPadding: const EdgeInsets.all(8.0),
-      ),
-      bottomNavigationBar: MyCustomBottomAppBar(
-        activeIndex: _activeMenu,
-        onDestinationSelected: _onChangeMenu,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _onPressedTransactionForm(),
-        shape: const CircleBorder(),
-        child: const Icon(LucideIcons.circlePlus, size: 35.0),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      body: SafeArea(
-        child: Padding(padding: const EdgeInsets.all(8.0), child: tab),
-      ),
+      ],
     );
   }
 }

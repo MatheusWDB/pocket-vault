@@ -6,12 +6,15 @@ import 'package:pocket_vault/enums/currency_symbol_enum.dart';
 import 'package:pocket_vault/l10n/app_localizations.dart';
 import 'package:pocket_vault/models/category.dart';
 import 'package:pocket_vault/providers/category_provider.dart';
+import 'package:pocket_vault/providers/loading_provider.dart';
 import 'package:pocket_vault/providers/transaction_filter_provider.dart';
 import 'package:pocket_vault/providers/transaction_provider.dart';
 import 'package:pocket_vault/providers/user_preferences_provider.dart';
 import 'package:pocket_vault/screens/components/filter_actions_mixin.dart';
-import 'package:pocket_vault/screens/home/tabs/report/Widgets/build_legend_item.dart';
+import 'package:pocket_vault/screens/home/tabs/report/widgets/category_legend_item.dart';
 import 'package:pocket_vault/services/report_pdf_service.dart';
+import 'package:pocket_vault/utils/app_alerts.dart';
+import 'package:pocket_vault/utils/category_color_utils.dart';
 import 'package:pocket_vault/utils/date_time_extension.dart';
 import 'package:pocket_vault/utils/double_extensions.dart';
 
@@ -23,70 +26,36 @@ class ReportTab extends ConsumerStatefulWidget {
 }
 
 class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
-  // Remover para deixar um cor definida para cada categoria
-  Color _getCategoryColor(int? id) {
-    final colors = [
-      Colors.blue,
-      Colors.red,
-      Colors.green,
-      Colors.amber,
-      Colors.purple,
-      Colors.cyan,
-      Colors.orange,
-      Colors.indigo,
-      Colors.teal,
-      Colors.pink,
-      Colors.lime,
-      Colors.deepPurple,
-      Colors.lightBlue,
-      Colors.lightGreen,
-      Colors.deepOrange,
-
-      Colors.blueAccent,
-      Colors.redAccent,
-      Colors.greenAccent,
-      Colors.amberAccent,
-      Colors.purpleAccent,
-      Colors.cyanAccent,
-      Colors.orangeAccent,
-      Colors.indigoAccent,
-      Colors.tealAccent,
-      Colors.pinkAccent,
-      Colors.limeAccent,
-      Colors.deepPurpleAccent,
-      Colors.lightBlueAccent,
-      Colors.lightGreenAccent,
-      Colors.deepOrangeAccent,
-
-      Colors.blueGrey,
-      Colors.brown,
-      Colors.grey,
-      Colors.black,
-      Colors.yellow,
-      Colors.blue[900]!,
-      Colors.red[900]!,
-      Colors.green[900]!,
-      Colors.brown[300]!,
-      Colors.grey[400]!,
-    ];
-    return colors[(id ?? 0) % colors.length];
-  }
-
   Future<void> _onPressedExportPDF(
     Map<Category, double> totalExpenses,
     CurrencySymbolEnum currency,
     Locale myLocale,
     AppLocalizations t,
   ) async {
-    final transactions = ref.watch(transactionListProvider).value ?? [];
+    final loadingNotifier = ref.read(loadingStateProvider.notifier);
+    loadingNotifier.setLoading(true);
 
-    return await ReportPdfService(
-      transactions: transactions,
-      totalExpenses: totalExpenses,
-      currency: currency,
-      locale: myLocale,
-      t: t,
-    ).generatePdf();
+    try {
+      final transactionState = ref.read(transactionListProvider);
+
+      await transactionState.when(
+        data: (data) async {
+          await ReportPdfService(
+            transactions: data,
+            totalExpenses: totalExpenses,
+            currency: currency,
+            locale: myLocale,
+            t: t,
+          ).generatePdf();
+        },
+        error: (error, _) {
+          if (mounted) AppAlerts.error(context, message: error.toString());
+        },
+        loading: () {},
+      );
+    } finally {
+      loadingNotifier.setLoading(false);
+    }
   }
 
   @override
@@ -95,7 +64,7 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
     final myLocale = Localizations.localeOf(context);
     final currency = ref.watch(preferencesProvider).currencySymbol;
     final filter = ref.watch(transactionFilterProvider);
-    final totalExpenses = ref.watch(categoriesTotalSpentProvider);
+    final totalExpenses = ref.watch(totalSpentByCategoryProvider);
 
     final total = totalExpenses.values.fold(0.0, (sum, item) => sum + item);
 
@@ -150,7 +119,9 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
                                 value: value,
                                 showTitle: false,
                                 color: categoryColor == null
-                                    ? _getCategoryColor(category.id)
+                                    ? CategoryColorUtils.getCategoryColor(
+                                        category.id,
+                                      )
                                     : Color(
                                         int.parse(categoryColor, radix: 16),
                                       ),
@@ -202,18 +173,12 @@ class _ReportTabState extends ConsumerState<ReportTab> with FilterActions {
                           final category = e.key;
                           final value = e.value;
 
-                          final categoryName = category.name;
-                          final categoryColor = category.color;
-                          debugPrint(categoryColor);
                           final percentage =
                               '${(value * 100 / total).toStringAsFixed(2)}%';
 
-                          return BuildLegendItem(
-                            categoryName: categoryName,
+                          return CategoryLegendItem(
+                            category: category,
                             percentage: percentage,
-                            color: categoryColor == null
-                                ? _getCategoryColor(category.id)
-                                : Color(int.parse(categoryColor, radix: 16)),
                             width: itemWidth,
                           );
                         }).toList(),

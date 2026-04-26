@@ -39,6 +39,9 @@ class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._();
   static Database? _database;
 
+  static const String _dbName = 'pocket_vault.db';
+  static const int _dbVersion = 1;
+
   DatabaseHelper._();
 
   Future<Database> get database async {
@@ -48,25 +51,43 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDatabase() async {
-    final String path = join(await getDatabasesPath(), 'pocket_vault.db');
+    final String path = join(await getDatabasesPath(), _dbName);
 
     return await openDatabase(
       path,
-      version: 1,
+      version: _dbVersion,
       onCreate: _onCreate,
       onConfigure: _onConfigure,
+      onUpgrade: _onUpgrade,
     );
   }
 
-  Future _onCreate(Database db, int version) async {
+  Future<void> closeAndReset() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+  }
+
+  Future<void> _onCreate(Database db, int version) async {
     await db.execute(_categoryTable);
     await db.execute(_transactionTable);
     await db.execute(_tagTable);
     await db.execute(_transactionTagsTable);
   }
 
-  Future _onConfigure(Database db) async {
+  Future<void> _onConfigure(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
+  }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    // Sempre adicione um bloco por versão:
+    // if (oldVersion < 2) {
+    //   await db.execute(
+    //     'ALTER TABLE $tableTransaction ADD COLUMN notes TEXT',
+    //   );
+    // }
+    // if (oldVersion < 3) { ... }
   }
 
   String get _categoryTable =>
